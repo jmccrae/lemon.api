@@ -28,6 +28,7 @@ package eu.monnetproject.lemon.impl;
 
 import eu.monnetproject.lemon.ElementVisitor;
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.URIElement;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
 import eu.monnetproject.lemon.model.LemonElement;
@@ -523,22 +524,43 @@ public abstract class SimpleLemonElement<Elem extends LemonElement> extends URIE
         strText.clear();
     }
 
-    protected ReaderAccepter defaultAccept(URI pred, URI value) {
-        if (!pred.toString().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-            //log.warning(pred + " " + value);
+    protected ReaderAccepter defaultAccept(URI pred, URI value, LinguisticOntology lingOnto) {
+        if (pred.toString().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+            if(!value.toString().startsWith(LemonModel.LEMON_URI)) {
+                addType(value);
+                return null;
+            } else {
+                return null;
+            }
+        }
+        if(!acceptProperties(pred, value, lingOnto)) {
+            System.err.println("Skipped triple: " + pred + " " + value);
         }
         return null;
     }
 
     protected ReaderAccepter defaultAccept(URI pred, String value) {
-        // log.warning(pred + " " + value);
+        System.err.println("Skipped triple: " + pred + " " + value);
         return null;
     }
 
     protected void defaultAccept(URI pred, String val, String lang) {
-        //log.warning(pred + " " + val + "@" + lang);
+        System.err.println("Skipped triple: " + pred + " " + val + "@" + lang);
     }
 
+    protected boolean acceptProperties(URI pred, URI value, LinguisticOntology lingOnto) {
+        try {
+            if(pred.getFragment() != null && lingOnto.getProperty(pred.getFragment()) != null &&
+                    value.getFragment() != null && lingOnto.getPropertyValue(value.getFragment()) != null) {
+                addProperty(lingOnto.getProperty(pred.getFragment()), lingOnto.getPropertyValue(value.getFragment()));
+                return true;
+            }  
+        } catch(Exception x) {
+            
+        }
+        return false;
+    }
+    
     @Override
     public Map<URI, Collection<Object>> getElements() {
         Map<URI, Collection<Object>> rval = new HashMap<URI, Collection<Object>>();

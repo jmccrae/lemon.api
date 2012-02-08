@@ -26,7 +26,6 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
@@ -61,138 +60,172 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
         super(id, "LexicalSense");
     }
 
+    @Override
     public URI getReference() {
         return reference;
     }
 
+    @Override
     public void setReference(final URI reference) {
         this.reference = reference;
     }
 
+    @Override
     public ReferencePreference getRefPref() {
         return refPref;
     }
 
+    @Override
     public void setRefPref(final ReferencePreference refPref) {
         this.refPref = refPref;
     }
 
+    @Override
     public boolean addContext(final SenseContext context) {
         return addStrElem("context", context);
     }
 
+    @Override
     public boolean removeContext(final SenseContext context) {
         return removeStrElem("context", context);
     }
 
+    @Override
     public Collection<SenseContext> getContexts() {
         return (Collection<SenseContext>) getStrElems("context");
     }
 
+    @Override
     public Map<Condition, Collection<SenseCondition>> getConditions() {
         return (Map<Condition, Collection<SenseCondition>>) getPredElems(Condition.class);
     }
 
+    @Override
     public Collection<SenseCondition> getCondition(Condition predicate) {
         return (Collection<SenseCondition>) getPredElem(predicate);
     }
 
+    @Override
     public boolean addCondition(final Condition predicate, final SenseCondition condition) {
         return addPredElem(predicate, condition);
     }
 
+    @Override
     public boolean removeCondition(final Condition predicate, final SenseCondition condition) {
         return removePredElem(predicate, condition);
     }
 
+    @Override
     public Collection<Example> getExamples() {
         return (Collection<Example>) getStrElems("example");
     }
 
+    @Override
     public boolean addExample(final Example example) {
         return addStrElem("example", example);
     }
 
+    @Override
     public boolean removeExample(final Example example) {
         return removeStrElem("example", example);
     }
 
+    @Override
     public Map<Definition, Collection<SenseDefinition>> getDefinitions() {
         return (Map<Definition, Collection<SenseDefinition>>) getPredElems(Definition.class);
     }
 
+    @Override
     public Collection<SenseDefinition> getDefinition(Definition predicate) {
         return (Collection<SenseDefinition>) getPredElem(predicate);
     }
 
+    @Override
     public boolean addDefinition(final Definition predicate, final SenseDefinition definition) {
         return addPredElem(predicate, definition);
     }
 
+    @Override
     public boolean removeDefinition(final Definition predicate, final SenseDefinition definition) {
         return addPredElem(predicate, definition);
     }
 
+    @Override
     public Collection<Argument> getSubjOfProps() {
         return (Collection<Argument>) getStrElems("subjOfProp");
     }
 
+    @Override
     public boolean addSubjOfProp(final Argument argument) {
         return addStrElem("subjOfProp", argument);
     }
 
+    @Override
     public boolean removeSubjOfProp(final Argument argument) {
         return removeStrElem("subjOfProp", argument);
     }
 
+    @Override
     public Collection<Argument> getObjOfProps() {
         return (Collection<Argument>) getStrElems("objOfProp");
     }
 
+    @Override
     public boolean addObjOfProp(final Argument argument) {
         return addStrElem("objOfProp", argument);
     }
 
+    @Override
     public boolean removeObjOfProp(final Argument argument) {
         return removeStrElem("objOfProp", argument);
     }
 
+    @Override
     public Collection<Argument> getIsAs() {
         return (Collection<Argument>) getStrElems("isA");
     }
 
+    @Override
     public boolean addIsA(final Argument argument) {
         return addStrElem("isA", argument);
     }
 
+    @Override
     public boolean removeIsA(final Argument argument) {
         return removeStrElem("isA", argument);
     }
 
+    @Override
     public Collection<LexicalSense> getSubsenses() {
         return (Collection<LexicalSense>) getStrElems("subsense");
     }
 
+    @Override
     public boolean addSubsense(final LexicalSense sense) {
         return addStrElem("subsense", sense);
     }
 
+    @Override
     public boolean removeSubsense(final LexicalSense sense) {
         return addStrElem("subsense", sense);
     }
 
+    @Override
     public Map<SenseRelation, Collection<LexicalSense>> getSenseRelations() {
         return (Map<SenseRelation, Collection<LexicalSense>>) getPredElems(SenseRelation.class);
     }
 
+    @Override
     public Collection<LexicalSense> getSenseRelation(final SenseRelation senseRelation) {
         return (Collection<LexicalSense>) getPredElem(senseRelation);
     }
 
+    @Override
     public boolean addSenseRelation(final SenseRelation senseRelation, final LexicalSense senseRelationVal) {
         return addPredElem(senseRelation, senseRelationVal);
     }
 
+    @Override
     public boolean removeSenseRelation(final SenseRelation senseRelation, final LexicalSense senseRelationVal) {
         return addPredElem(senseRelation, senseRelationVal);
     }
@@ -213,6 +246,7 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
         }
     }
 
+    @Override
     public void write(java.io.PrintWriter stream, SerializationState state) {
         super.write(stream, state);
         if (refPref != null && reference != null) {
@@ -238,6 +272,7 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
         return !(predicate instanceof SenseRelation);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"context")) {
             final ContextImpl contextImpl = factory.getContextImpl(value);
@@ -301,9 +336,10 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
                 }
             }
         }
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value, lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"context")) {
             final ContextImpl contextImpl = factory.getContextImpl(value);
@@ -355,6 +391,7 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
         return defaultAccept(pred, value);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }

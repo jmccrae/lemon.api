@@ -47,22 +47,27 @@ public class DefinitionImpl extends SimpleLemonElement implements SenseDefinitio
         super(id, "Definition");
     }
 
+    @Override
     public Text getValue() {
         return getStrText("value");
     }
 
+    @Override
     public void setValue(final Text value) {
         setStrText("value", value);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value,lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         return defaultAccept(pred, bNode);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
             setValue(new Text(value, lang));

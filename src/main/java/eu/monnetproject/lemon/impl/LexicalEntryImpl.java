@@ -26,7 +26,6 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.ElementVisitor;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
@@ -70,82 +69,102 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         super(id, type);
     }
 
+    @Override
     public LexicalForm getCanonicalForm() {
         return (LexicalForm) getStrElem("canonicalForm");
     }
 
+    @Override
     public void setCanonicalForm(final LexicalForm canonicalForm) {
         setStrElem("canonicalForm", canonicalForm);
     }
 
+    @Override
     public Collection<LexicalForm> getOtherForms() {
         return (Collection<LexicalForm>) getStrElems("otherForm");
     }
 
+    @Override
     public boolean addOtherForm(final LexicalForm otherForm) {
         return addStrElem("otherForm", otherForm);
     }
 
+    @Override
     public boolean removeOtherForm(final LexicalForm otherForm) {
         return removeStrElem("otherForm", otherForm);
     }
 
+    @Override
     public Collection<LexicalForm> getAbstractForms() {
         return (Collection<LexicalForm>) getStrElems("abstractForm");
     }
 
+    @Override
     public boolean addAbstractForm(final LexicalForm abstractForm) {
         return addStrElem("abstractForm", abstractForm);
     }
 
+    @Override
     public boolean removeAbstractForm(final LexicalForm abstractForm) {
         return removeStrElem("abstractForm", abstractForm);
     }
 
+    @Override
     public Collection<LexicalTopic> getTopics() {
         return (Collection<LexicalTopic>) getStrElems("topic");
     }
 
+    @Override
     public boolean addTopic(final LexicalTopic topic) {
         return addStrElem("topic", topic);
     }
 
+    @Override
     public boolean removeTopic(final LexicalTopic topic) {
         return removeStrElem("topic", topic);
     }
 
+    @Override
     public Map<LexicalVariant, Collection<LexicalEntry>> getLexicalVariants() {
         return (Map<LexicalVariant, Collection<LexicalEntry>>) getPredElems(LexicalVariant.class);
     }
 
+    @Override
     public Collection<LexicalEntry> getLexicalVariant(final LexicalVariant lexicalVariant) {
         return (Collection<LexicalEntry>) getPredElem(lexicalVariant);
     }
 
+    @Override
     public boolean addLexicalVariant(final LexicalVariant lexicalVariant, final LexicalEntry lexicalVariantVal) {
         return addPredElem(lexicalVariant, lexicalVariantVal);
     }
 
+    @Override
     public boolean removeLexicalVariant(final LexicalVariant lexicalVariant, final LexicalEntry lexicalVariantVal) {
         return removePredElem(lexicalVariant, lexicalVariantVal);
     }
 
+    @Override
     public Collection<Frame> getSynBehaviors() {
         return (Collection<Frame>) getStrElems("synBehavior");
     }
 
+    @Override
     public boolean addSynBehavior(final Frame synBehavior) {
         return addStrElem("synBehavior", synBehavior);
     }
 
+    @Override
     public boolean removeSynBehavior(final Frame synBehavior) {
         return removeStrElem("synBehavior", synBehavior);
     }
 
+    @Override
     public Collection<List<Component>> getDecompositions() {
         return Collections.unmodifiableSet(components);
     }
 
+    @Override
     public void addDecomposition(List<Component> comps) {
         for (Component comp : comps) {
             if (comp instanceof SimpleLemonElement) {
@@ -155,6 +174,7 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         components.add(comps);
     }
 
+    @Override
     public boolean removeDecomposition(List<Component> comps) {
         for (Component comp : comps) {
             if (comp instanceof SimpleLemonElement) {
@@ -164,30 +184,37 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         return components.remove(comps);
     }
 
+    @Override
     public Collection<LexicalSense> getSenses() {
         return (Collection<LexicalSense>) getStrElems("sense");
     }
 
+    @Override
     public boolean addSense(final LexicalSense sense) {
         return addStrElem("sense", sense);
     }
 
+    @Override
     public boolean removeSense(final LexicalSense sense) {
         return removeStrElem("sense", sense);
     }
 
+    @Override
     public Collection<Node> getPhraseRoots() {
         return (Collection<Node>) getStrElems("phraseRoot");
     }
 
+    @Override
     public boolean addPhraseRoot(final Node phraseRoot) {
         return addStrElem("phraseRoot", phraseRoot);
     }
 
+    @Override
     public boolean removePhraseRoot(final Node phraseRoot) {
         return addStrElem("phraseRoot", phraseRoot);
     }
 
+    @Override
     public Collection<LexicalForm> getForms() {
         LinkedList<LexicalForm> forms = new LinkedList<LexicalForm>(getStrElems("form"));
         if(getCanonicalForm() != null) {
@@ -198,10 +225,12 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         return Collections.unmodifiableCollection(forms);
     }
 
+    @Override
     public boolean addForm(final LexicalForm form) {
         return addStrElem("form", form);
     }
 
+    @Override
     public boolean removeForm(final LexicalForm form) {
         return removeStrElem("form", form);
     }
@@ -293,6 +322,7 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         super.clearAll();
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "abstractForm")) {
             final FormImpl formImpl = factory.getFormImpl(value);
@@ -340,9 +370,10 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
                 }
             }
         }
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value,lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "abstractForm")) {
             final FormImpl formImpl = factory.getFormImpl(value);
@@ -393,26 +424,32 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         return defaultAccept(pred, value);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }
 
+    @Override
     public Collection<MorphPattern> getPatterns() {
         return (Collection<MorphPattern>)getStrElems("pattern");
     }
 
+    @Override
     public boolean addPattern(MorphPattern mp) {
         return addStrElem("pattern", mp);
     }
 
+    @Override
     public boolean removePattern(MorphPattern mp) {
         return removeStrElem("pattern", mp);
     }
 
+    @Override
     public Component getHead() {
         return (Component)getStrElem("head");
     }
 
+    @Override
     public void setHead(Component cmpnt) {
         setStrElem("head", cmpnt);
     }

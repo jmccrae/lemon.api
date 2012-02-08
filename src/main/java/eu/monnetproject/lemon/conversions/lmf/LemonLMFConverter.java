@@ -31,23 +31,42 @@ package eu.monnetproject.lemon.conversions.lmf;
  * @author John McCrae
  */
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.model.Argument;
+import eu.monnetproject.lemon.model.Component;
+import eu.monnetproject.lemon.model.Edge;
+import eu.monnetproject.lemon.model.Example;
+import eu.monnetproject.lemon.model.Frame;
 import eu.monnetproject.lemon.model.LemonElement;
 import eu.monnetproject.lemon.model.LemonElementOrPredicate;
+import eu.monnetproject.lemon.model.LemonPredicate;
 import eu.monnetproject.lemon.model.LexicalEntry;
+import eu.monnetproject.lemon.model.LexicalForm;
+import eu.monnetproject.lemon.model.LexicalSense;
 import eu.monnetproject.lemon.model.Lexicon;
-import java.net.URI;
+import eu.monnetproject.lemon.model.Representation;
+import eu.monnetproject.lemon.model.SenseDefinition;
+import eu.monnetproject.lemon.model.SynArg;
+import eu.monnetproject.lemon.model.Text;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class LemonLMFConverter {
-}/*
+
     private final String ISOCAT = "http://www.isocat.org/datcat/null#";
     private List<String> ignoredFeats = Arrays.asList(new String[]{"writtenForm", "lexEntryType", "syntacticFunction", "syntacticConstituent", "marker", "separator"});
 
@@ -79,1210 +98,576 @@ public class LemonLMFConverter {
             }
         }
 
-        public Node lemon2lmf(LemonModel model) {
-
-//     header(model) ++ 
-//        (model.lexica map(lexicon => lexicon2lmf(lexicon,model) )) ++
-//          senseRelations2lmf(model) 
-            return root;
+        public Document lemon2lmf(LemonModel model) {
+            append(root, header(model));
+            for (Lexicon lexicon : model.getLexica()) {
+                append(root, lexicon2lmf(lexicon, model));
+            }
+            return document;
         }
 
-        public Node header(LemonModel model) {
+        private Node header(LemonModel model) {
             final Element globalInfo = document.createElement("GlobalInformation");
-            append(globalInfo,getFeat("label", "LMF Lexicon derived from lemon model " + model.getLexica().iterator().next().getURI().toString()));
+            append(globalInfo, getFeat("label", "LMF Lexicon derived from lemon model " + model.getLexica().iterator().next().getURI().toString()));
             return globalInfo;
         }
 
         private void append(Node head, Node to) {
             head.appendChild(to);
         }
-        
+
         private void append(Node head, List<Node> tos) {
-            for(Node to : tos) {
-                head.appendChild(tos);
+            for (Node to : tos) {
+                head.appendChild(to);
             }
         }
-        
-        public Node lexicon2lmf(Lexicon lexicon, LemonModel model) {
+
+        private Node lexicon2lmf(Lexicon lexicon, LemonModel model) {
             final Element lexiconTag = document.createElement("Lexicon");
-            append(lexiconTag,getFeat("language", lexicon.getLanguage()));
+            append(lexiconTag, getFeat("language", lexicon.getLanguage()));
             for (LexicalEntry entry : lexicon.getEntrys()) {
-                append(lexiconTag, lexEntry2lmf(entry,model));
-                append(lexiconTag, senses2spc(lexicon,model));
-                append(lexiconTag, frames2lmf(lexicon,model));
+                append(lexiconTag, lexEntry2lmf(entry, model));
+                append(lexiconTag, senses2spc(lexicon, model));
+                append(lexiconTag, frames2lmf(lexicon, model));
             }
+            return lexiconTag;
         }
 
-        public List<Node> lexEntry2lmf(LexicalEntry lexEntry, LemonModel model) {
+        private List<Node> lexEntry2lmf(LexicalEntry lexEntry, LemonModel model) {
             final Element lexEntryTag = document.createElement("LexicalEntry");
-            append(lexEntryTag,getFeats(lexEntry.getPropertys(), model));
-            append(lexEntryTag,getFeat("lexEntryType", lexEntry.getTypes()));
-            append(lexEntryTag,canForm2lmf(lexEntry.getCanonicalForm(),model));
-            append(lexEntryTag,forms2lmf(lexEntry,model));
-            append(lexEntryTag,abstractForms2lmf(lexEntry, model));
-            append(lexEntryTag,compList2lmf(lexEntry, model));
-            append(lexEntryTag,senses2lmf(lexEntry, model));
-        synBeh2lmf(lexEntry, model)
-            )
-              
-      Seq(Elem(null, "LexicalEntry", new UnprefixedAttribute("id", frag(lexEntry, model), Null), TopScope,
-                    elems.toSeq
-            :_ *
-            )) ++
-        mweLink2lmf(lexEntry, model)++
-        mwe2lmf(lexEntry, model) // TODO: topics
-                    // TODO: lexical variants
+            append(lexEntryTag, getFeats(lexEntry.getPropertys(), model));
+            append(lexEntryTag, getFeat("lexEntryType", lexEntry.getTypes().iterator().next().toString()));
+            append(lexEntryTag, canForm2lmf(lexEntry.getCanonicalForm(), model));
+            append(lexEntryTag, forms2lmf(lexEntry, model));
+            append(lexEntryTag, abstractForms2lmf(lexEntry, model));
+            append(lexEntryTag, compList2lmf(lexEntry, model));
+            append(lexEntryTag, senses2lmf(lexEntry, model));
+            append(lexEntryTag, synBeh2lmf(lexEntry, model));
+
+            LinkedList<Node> tags = new LinkedList<Node>();
+            tags.add(lexEntryTag);
+            tags.addAll(mweLink2lmf(lexEntry, model));
+            tags.addAll(mwe2lmf(lexEntry, model));
+            // TODO: topics
+            // TODO: lexical variants
+            return tags;
         }
 
-        def canForm2lmf(form  
-            : Form, model : LemonModel) = <Lemma>{getFeat("writtenForm", form.writtenRep.value)
-        }
-        </Lemma
-
-        >
-    
-    def forms2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) = {
-      ((lexEntry.canonicalForm 
-            :: lexEntry.otherForm
-            ) map(form2lmf(_, model))
-            ).toSeq
+        private Element canForm2lmf(LexicalForm form, LemonModel model) {
+            final Element lemmaTag = document.createElement("Lemma");
+            append(lemmaTag, getFeat("writtenForm", form.getWrittenRep().value));
+            return lemmaTag;
         }
 
-        def form2lmf(form  
-            : Form, model : LemonModel) = <WordForm>{
-      getFeat("writtenForm", form.writtenRep.value)++ 
-      getFeats(form.property, model)++
-      reps2formRep(form.representation, model)
+        private List<Node> forms2lmf(LexicalEntry lexEntry, LemonModel model) {
+            List<Node> rval = new LinkedList<Node>();
+            rval.add(form2lmf(lexEntry.getCanonicalForm(), model));
+            for (LexicalForm form : lexEntry.getOtherForms()) {
+                rval.add(form2lmf(form, model));
+            }
+            return rval;
         }
-        </WordForm
 
-        >
-    
-    def abstractForms2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) : Seq[XMLNode] = {
-      for (form< -lexEntry.abstractForm) {
-                yield(<Stem>
-            }
-            {
-                getFeat("writtenForm", form.writtenRep.value)++
-        getFeats(form.property, model)++
-      reps2formRep(form.representation, model)
-            }
-            < / Stem >
-        
+        private Node form2lmf(LexicalForm form, LemonModel model) {
+            final Element formTag = document.createElement("WordForm");
+            append(formTag, getFeat("writtenForm", form.getWrittenRep().value));
+            append(formTag, getFeats(form.getPropertys(), model));
+            append(formTag, reps2formRep(form.getRepresentations(), model));
+            return formTag;
+        }
 
-        )
-      
-      // TODO : form variants
-    }
-    
-    def reps2formRep(repMap  
-            : Map[Representation,List[Text]], model : LemonModel) = {
-      for (rep< -repMap.keys;
-                    value < -repMap(rep)) {
-                yield(<FormRepresentation>
+        private List<Node> abstractForms2lmf(LexicalEntry lexEntry, LemonModel model) {
+            List<Node> nodes = new LinkedList<Node>();
+            for (LexicalForm form : lexEntry.getAbstractForms()) {
+                final Element stemTag = document.createElement("Stem");
+                append(stemTag, getFeat("writtenForm", form.getWrittenRep().value));
+                append(stemTag, getFeats(form.getPropertys(), model));
+                append(stemTag, reps2formRep(form.getRepresentations(), model));
+                nodes.add(stemTag);
             }
-            {
-                getFeat("writtenForm", value.value)++
-        decodeLangTag(value.lang)
-            }
-            < / FormRepresentation >
-        
 
-        )
-      
-    }
-    
-    def decodeLangTag(langTag  
-            : String) = {
-      val ieft = ""
-            "([A-Za-z]{2,3})(-[A-Za-z]{4})?(-[A-Za-z]{2}|-[0-9]{3})?(-[A-Za-z]{5,8}|-[0-9]\w{3})?(-\w-\w{2,8})?"""r val ieft(lang, script, region, variant, extension) = langTag
-      val langTags = new ListBuffer[XMLNode]
-            ()
-      
-      if (script != null) {
-                langTags.append(getFeat("script", script.substring(1)))
+            // TODO : form variants
+            return nodes;
+        }
+
+        private List<Node> reps2formRep(Map<Representation, Collection<Text>> repMap, LemonModel model) {
+            List<Node> nodes = new LinkedList<Node>();
+            for (Representation rep : repMap.keySet()) {
+                for (Text value : repMap.get(rep)) {
+                    final Element formRepTag = document.createElement("FormRepresentation");
+                    append(formRepTag, getFeat("writtenForm", value.value));
+                    append(formRepTag, decodeLangTag(value.language));
+                    nodes.add(formRepTag);
+                }
+            }
+            return nodes;
+        }
+
+        private List<Node> decodeLangTag(String langTag) {
+            final String ieft = "([A-Za-z]{2,3})(-[A-Za-z]{4})?(-[A-Za-z]{2}|-[0-9]{3})?(-[A-Za-z]{5,8}|-[0-9]\\w{3})?(-\\w-\\w{2,8})?";
+            final Matcher matcher = Pattern.compile(ieft).matcher(langTag);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("Bad lang tag " + langTag);
+            }
+            final String lang = matcher.group(1);
+            final String script = matcher.group(2);
+            final String region = matcher.group(3);
+            final String variant = matcher.group(4);
+            final String extension = matcher.group(5);
+            final List<Node> langTags = new LinkedList<Node>();
+
+            if (script != null) {
+                langTags.add(getFeat("script", script.substring(1)));
             }
 
             if (region != null) {
-                langTags.append(getFeat("geographicalVariant", region.substring(1)))
+                langTags.add(getFeat("geographicalVariant", region.substring(1)));
             }
             if (variant != null) {
-                langTags.append(getFeat("variant", variant.substring(1)))
+                langTags.add(getFeat("variant", variant.substring(1)));
             }
             if (extension != null) {
-                langTags.append(getFeat("orthographyName", extension.substring(3)))
+                langTags.add(getFeat("orthographyName", extension.substring(3)));
             }
-            langTags.toList
+            return langTags;
         }
 
-        def compList2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) : Seq[XMLNode] =
-      if(lexEntry.decomposition.isEmpty) {
-        Seq()
-        }
-        
-
-        
-            else {
-        Seq(<ListOfComponents>
-            {
-                Seq(getFeat("size", lexEntry.decomposition(0).size.toString))++
-          (comp2lmf(lexEntry.decomposition(0), model, 1)
-            
-            )
-        }
-        < / ListOfComponents >
-        
-
-        )
-      }
-    
-    def comp2lmf(compList  
-        
-
-        : List[Component], model : LemonModel, order : Int) : List[XMLNode] = compList match {
-      case comp :: rest => (<Component>{
-        getFeat("order",order.toString) ++
-        getFeats(comp.property,model)
-      }</Component> % Map("entry" -> frag(comp.element,model))) :: comp2lmf(rest,model,order+1)
-      case Nil => Nil
-    }
-    
-    def senses2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) : Seq[XMLNode] = {
-      lexEntry.sense flatMap {
-                sense =  > sense2lmf(sense, model) }
-        }
-
-        def sense2lmf(sense  
-            : LexicalSense, model : LemonModel) : XMLNode = {
-      <Sense>
-       < MonolingualExternalRef >
-            {
-                getFeat("externalSystem", "application/rdf")++
-        getFeat("externalReference", sense.reference.toString)
-            }
-            < / MonolingualExternalRef >
-      
-            {
-                Seq(getFeat("refPref", sense.refPref.toString))++ // TODO: context
-                        // TODO: condition
-        (sense.subsense map {
-                    subsense = 
-                            > sense2lmf(subsense, model) }
-                
-                ) ++
-        examples2lmf(sense.example, model)++
-        defs2lmf(sense.definition, model)++
-        semArgs2pr(sense, model)++        
-        getFeats(sense.property, model)
-            }
-            < / Sense >
-    
-        }
-
-        def senseRelations2lmf(model  
-            : LemonModel) = {
-      // TODO: sense relations
-      Nil
-        }
-
-        def examples2lmf(examples  
-            : List[Example], model : LemonModel) = {
-      examples map {
-                example =  > 
-                {
-                    (<SenseExample> 
-                    {
-                        texts2textRep(example.value)++
-          getFeats(example.property, model)
-                    }
-                    < / SenseExample >
-                
-            
-        
-
-        )
-        }
-      }
-    }
-    
-    def defs2lmf(defs  
-            : List[Definition], model : LemonModel) = {
-      defs map {
-                defn =  > 
-                {
-                    (<Definition> 
-                    {
-                        texts2textRep(defn.value)++
-          getFeats(defn.property, model)
-                    }
-                    < / Definition >
-                
-            
-        
-
-        )
-        }
-      }
-    } 
-    
-    def texts2textRep(reps  
-            : List[Text]) = {
-      for (rep< -reps) {
-                yield(<TextRepresentation>
-            }
-            {
-                getFeat("writtenForm", rep.value)++
-        decodeLangTag(rep.lang)
-            }
-            < / TextRepresentation >
-        
-
-        )
-      
-    }
-    
-    def semArgs2pr(sense  
-            : LexicalSense, model : LemonModel) = {
-      if (sense.subjOfProp != None
-                    || sense.objOfProp != None
-                    || sense.isA != None) {
-                Seq((<PredicativeRepresentation / >) % Map("predicate" - > ("__predicate_" + frag(sense, model)),
-                        "correspondences" - > ("__correspondence_" + frag(sense, model))))
+        private List<Node> compList2lmf(LexicalEntry lexEntry, LemonModel model) {
+            if (lexEntry.getDecompositions().isEmpty()) {
+                return Collections.EMPTY_LIST;
             } else {
-                Seq()
+                final Node loc = document.createElement("ListOfComponents");
+                append(loc, getFeat("size", "" + lexEntry.getDecompositions().iterator().next().size()));
+                append(loc, comp2lmf(lexEntry.getDecompositions().iterator().next(), model, 1));
+                return Collections.singletonList(loc);
             }
         }
 
-        def senses2spc(lexicon  
-            : Lexicon, model : LemonModel) : Seq[XMLNode] = {
-      lexicon.entry flatMap {
-                entry = 
-                        > entry.sense flatMap {
-                    sense =  >
-          
-                    if (sense.subjOfProp != None
-                            || sense.objOfProp != None
-                            || sense.isA != None) {
-                        (<SemanticPredicate>
-                        {
-                            (
-                            if (sense.subjOfProp != None) {
-                                Seq((<SemanticArgument>
-                   < feat 
-                                att = "label" val = "subjOfProp" /
-                                        > < / SemanticArgument >
-                  
-                                ) % Map("id" - > ("__subjOfProp_" + frag(sense, model)))
-                              
-                                )
-               } else { Seq() }
-                            
-                            ) ++
-               (if (sense.objOfProp != None) {
-                                Seq((<SemanticArgument>
-                  < feat 
-                                att = "label" val = "objOfProp" /
-                                        > < / SemanticArgument >
-                 
-                                ) % Map("id" - > ("__objOfProp_" + frag(sense, model)))
-                              
-                                )
-               } else { Seq() }
-                            
-                            ) ++
-               (if (sense.isA != None) {
-                                Seq((<SemanticArgument>
-                  < feat 
-                                att = "label" val = "isA" /
-                                        > < / SemanticArgument >
-                 
-                                ) % Map("id" - > ("__isA_" + frag(sense, model)))
-                              
-                                )
-               } else { Seq() }
-                            
-                        
-                        )
-              }< / SemanticPredicate >  % Map("id" - > ("__predicate_" + frag(sense, model)))
-                        ) ++
-              (<SynSemCorrespondence >
-                        {
-                            (
-                            if (sense.subjOfProp != None) {
-                                Seq((<SynSemArgMap / >) % Map("semArg" - > ("__subjOfProp_" + frag(sense, model)),
-                                        "synArg" - > frag(sense.subjOfProp.get, model)))
-                            } else {
-                                Seq() }
-                            
-                            ) ++
-               (if (sense.objOfProp != None) {
-                                Seq((<SynSemArgMap / >) % Map("semArg" - > ("__objOfProp_" + frag(sense, model)),
-                                        "synArg" - > frag(sense.objOfProp.get, model)))
-                            } else {
-                                Seq() }
-                            
-                            ) ++
-               (if (sense.isA != None) {
-                                Seq((<SynSemArgMap / >) % Map("semArg" - > ("__isA_" + frag(sense, model)),
-                                        "synArg" - > frag(sense.isA.get, model)))
-                            } else {
-                                Seq() }
-                            
-                        
-                        )
-              }< / SynSemCorrespondence >  % Map("id" - > ("__correspondence_" + frag(sense, model)))
-                      
-                        )
-           } else { Seq() }
-                }
-            }
-
-        }
-        def getFeats[
-        T<
-        : LemonPredicate , U <: LemonElement
-        ](propVals 
-        : Map 
-        [ T,List[U
-        ]], model 
-        : LemonModel
-        ) : Seq 
-
-        
-            [XMLNode] = {
-      (
-            for (prop< -propVals.keys;
-                    value < -propVals(prop)) {
-                yield(getFeat(toLMFValue(prop, model), toLMFValue(value, model)))
-            }
-            ).toSeq
-        }
-
-        def getFeat(att 
-        : String, vl : String) = <feat/> % Map("att" -> att, "val" -> vl)
-    
-    private val rand = new java.util.Random
-    
-    
-
-        private def frag(elem  
-        
-
-        : LemonElement, model : LemonModel) = model.uri(elem) match {
-      case nn : NamedNode => nn.uri.getFragment
-      case bn : BlankNode => bn.id
-      case _ => "id"+Math.abs(rand.nextLong)
-    }
-    
-    def synBeh2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) : Seq[XMLNode]= {
-      if (lexEntry.synBehavior.isEmpty) {
-                Seq()
+        private List<Node> comp2lmf(List<Component> compList, LemonModel model, int order) {
+            if (compList.isEmpty()) {
+                return Collections.EMPTY_LIST;
             } else {
-                Seq((<SyntacticBehaviour>
-         <  / SyntacticBehaviour >)
-                        % Map("subcategorizationFrames" - > ((lexEntry.synBehavior map(sb =  > frag(sb, model))).mkString(" ")))
-            
-        
+                final Element compTag = document.createElement("Component");
+                append(compTag, getFeat("order", "" + order));
+                append(compTag, getFeats(compList.get(0).getPropertys(), model));
+                compTag.setAttribute("entry", frag(compList.get(0).getElement(), model));
+                List<Node> nodes = new LinkedList<Node>();
+                nodes.add(compTag);
+                nodes.addAll(comp2lmf(compList.subList(1, compList.size()), model, order + 1));
+                return nodes;
+            }
+        }
 
-        )
-      }
-      // TODO: subcat frame sets
-    }
-    
-    
-    
-    def frames2lmf(lexicon  
-            : Lexicon, model : LemonModel) = {
-      lexicon.entry flatMap {
-                lexEntry = 
-                        > lexEntry.synBehavior map {
-                    frame = 
-                            > (<SubcategorizationFrame>
-                    {
-                        args2lmf(frame, model)
-                    }
-                    < / SubcategorizationFrame >
-                    ) % Map("id" - > frag(frame, model))
+        private List<Node> senses2lmf(LexicalEntry lexEntry, LemonModel model) {
+            List<Node> nodes = new LinkedList<Node>();
+            for (LexicalSense sense : lexEntry.getSenses()) {
+                nodes.add(sense2lmf(sense, model));
+            }
+            return nodes;
+        }
+
+        private Node sense2lmf(LexicalSense sense, LemonModel model) {
+            final Element senseTag = document.createElement("Sense");
+            final Element refTag = document.createElement("MonolingualExternalRef");
+
+            append(refTag, getFeat("externalSystem", "application/rdf"));
+            append(refTag, getFeat("externalReference", sense.getReference().toString()));
+            append(senseTag, refTag);
+
+            append(senseTag, getFeat("refPref", sense.getRefPref().toString()));
+            // TODO: context
+            // TODO: condition
+            for (LexicalSense subsense : sense.getSubsenses()) {
+                append(senseTag, sense2lmf(sense, model));
+            }
+            append(senseTag, examples2lmf(sense.getExamples(), model));
+            append(senseTag, defs2lmf(sense.getDefinitions().values(), model));
+            append(senseTag, semArgs2pr(sense, model));
+            append(senseTag, getFeats(sense.getPropertys(), model));
+            return senseTag;
+        }
+
+        private List<Node> senseRelations2lmf(LemonModel model) {
+            // TODO: sense relations
+            return Collections.EMPTY_LIST;
+        }
+
+        private List<Node> examples2lmf(Collection<Example> examples, LemonModel model) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+
+            for (Example example : examples) {
+                final Element exampleTag = document.createElement("SenseExample");
+                append(exampleTag, texts2textRep(example.getValue()));
+                append(exampleTag, getFeats(example.getPropertys(), model));
+                nodes.add(exampleTag);
+            }
+            return nodes;
+        }
+
+        private List<Node> defs2lmf(Collection<Collection<SenseDefinition>> defss, LemonModel model) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+            for (Collection<SenseDefinition> defs : defss) {
+                for (SenseDefinition defn : defs) {
+                    final Element defTag = document.createElement("Definition");
+                    append(defTag, texts2textRep(defn.getValue()));
+                    append(defTag, getFeats(defn.getPropertys(), model));
+                    nodes.add(defTag);
                 }
             }
+            return nodes;
         }
 
-        def args2lmf(frame  
-            : Frame, model : LemonModel) = {
-      frame.synArg.keys map {
-                synArg = 
-                        > frame.synArg(synArg) map {
-                    arg = 
-                            > (<SyntacticArgument>
-                    {
-                        Seq(getFeat("syntacticFunction", toLMFValue(synArg, model)))++
-          getFeats(frame.property, model)++
-          getArgProps(arg, model)
+        private List<Node> texts2textRep(Collection<Text> reps) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+            for (Text rep : reps) {
+                Element repTag = texts2textRep(rep);
+                nodes.add(repTag);
+            }
+            return nodes;
+        }
+
+        private Element texts2textRep(Text rep) throws DOMException {
+            final Element repTag = document.createElement("TextRepresentation");
+            append(repTag, getFeat("writtenForm", rep.value));
+            append(repTag, decodeLangTag(rep.language));
+            return repTag;
+        }
+
+        private List<Node> semArgs2pr(LexicalSense sense, LemonModel model) {
+            if (!sense.getSubjOfProps().isEmpty()
+                    || !sense.getObjOfProps().isEmpty()
+                    || !sense.getIsAs().isEmpty()) {
+                final Element tag = document.createElement("PredicativeRepresentation");
+                tag.setAttribute("predicate", ("__predicate_" + frag(sense, model)));
+                tag.setAttribute("correspondences", ("__correspondence_" + frag(sense, model)));
+                return Collections.singletonList((Node) tag);
+            } else {
+                return Collections.EMPTY_LIST;
+            }
+        }
+
+        private List<Node> senses2spc(Lexicon lexicon, LemonModel model) {
+            List<Node> nodes = new LinkedList<Node>();
+            for (LexicalEntry entry : lexicon.getEntrys()) {
+                for (LexicalSense sense : entry.getSenses()) {
+                    if (!sense.getSubjOfProps().isEmpty() || !sense.getObjOfProps().isEmpty() || !sense.getIsAs().isEmpty()) {
+                        final Element semPredTag = document.createElement("SemanticPredicate");
+                        final Element sscTag = document.createElement("SynSemCorrespondence");
+                        for (Argument arg : sense.getSubjOfProps()) {
+                            final Element semArgTag = document.createElement("SemanticArgument");
+                            append(semArgTag, getFeat("label", "subjOfProp"));
+                            append(semArgTag, getFeat("id", "__subjOfProp_" + frag(sense, model)));
+                            append(semPredTag, semArgTag);
+                            final Element ssamTag = document.createElement("SynSemArgMap");
+                            ssamTag.setAttribute("semArg", "__subjOfProp_" + frag(sense, model));
+                            ssamTag.setAttribute("synArg", frag(arg, model));
+                            append(sscTag, ssamTag);
+                        }
+
+                        for (Argument arg : sense.getObjOfProps()) {
+                            final Element semArgTag = document.createElement("SemanticArgument");
+                            append(semArgTag, getFeat("label", "objOfProp"));
+                            append(semArgTag, getFeat("id", "__objOfProp_" + frag(sense, model)));
+                            append(semPredTag, semArgTag);
+                            final Element ssamTag = document.createElement("SynSemArgMap");
+                            ssamTag.setAttribute("semArg", "__subjOfProp_" + frag(sense, model));
+                            ssamTag.setAttribute("synArg", frag(arg, model));
+                            append(sscTag, ssamTag);
+                        }
+
+                        for (Argument arg : sense.getIsAs()) {
+                            final Element semArgTag = document.createElement("SemanticArgument");
+                            append(semArgTag, getFeat("label", "isA"));
+                            append(semArgTag, getFeat("id", "__isA_" + frag(sense, model)));
+                            append(semPredTag, semArgTag);
+                            final Element ssamTag = document.createElement("SynSemArgMap");
+                            ssamTag.setAttribute("semArg", "__subjOfProp_" + frag(sense, model));
+                            ssamTag.setAttribute("synArg", frag(arg, model));
+                            append(sscTag, ssamTag);
+                        }
+                        semPredTag.setAttribute("id", ("__predicate_" + frag(sense, model)));
+                        nodes.add(semPredTag);
+                        sscTag.setAttribute("id", "__correspondence_" + frag(sense, model));
+                        nodes.add(sscTag);
                     }
-                    < / SyntacticArgument >
-                    ) % Map("id" - > frag(arg, model))
                 }
             }
+            return nodes;
         }
 
-        def getArgProps(arg  
-            : Argument, model : LemonModel) = {
-      (arg.marker match {
-            
-            case Some(marker) => Seq(getFeat("marker",frag(marker,model)))
-        case None => Seq()
-      }
-        
+        private List<Node> synBeh2lmf(LexicalEntry lexEntry, LemonModel model) {
+            List<Node> nodes = new LinkedList<Node>();
+            if (lexEntry.getSynBehaviors().isEmpty()) {
+                return Collections.EMPTY_LIST;
+            } else {
+                final Element sbTag = document.createElement("SyntacticBehavior");
+                final StringBuilder builder = new StringBuilder();
+                for (Frame frame : lexEntry.getSynBehaviors()) {
+                    builder.append(frag(frame, model)).append(" ");
+                }
+                sbTag.setAttribute("subcategorizationFrames", builder.toString().trim());
+                return Collections.singletonList((Node) sbTag);
+            }
+            // TODO: subcat frame sets
+        }
 
-        )
-    }
-    
-    def mwe2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) = {
-      lexEntry.phraseRoot map {
-                root = 
-                        > (<MWEPattern>
-        
-                {
-                    node2lmf(root, model) }
-                < / MWEPattern >
-                ) % Map("id" - > frag(root, model))
+        private List<Node> frames2lmf(Lexicon lexicon, LemonModel model) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+            for (LexicalEntry entry : lexicon.getEntrys()) {
+                for (Frame frame : entry.getSynBehaviors()) {
+                    final Element sfTag = document.createElement("SubcategorizationFrame");
+                    append(sfTag, args2lmf(frame, model));
+                    sfTag.setAttribute("id", frag(frame, model));
+                    nodes.add(sfTag);
+                }
+            }
+            return nodes;
+        }
+
+        private List<Node> args2lmf(Frame frame, LemonModel model) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+            for (SynArg synArg : frame.getSynArgs().keySet()) {
+                for (Argument arg : frame.getSynArgs().get(synArg)) {
+                    final Element synArgTag = document.createElement("SyntacticArgument");
+                    append(synArgTag, getFeat("syntacticFunction", toLMFValue(synArg, model)));
+                    append(synArgTag, getFeats(frame.getPropertys(), model));
+                    append(synArgTag, getArgProps(arg, model));
+                    synArgTag.setAttribute("id", frag(arg, model));
+                    nodes.add(synArgTag);
+                }
+            }
+            return nodes;
+        }
+
+        private List<Node> getArgProps(Argument arg, LemonModel model) {
+            if (arg.getMarker() != null) {
+                return Collections.singletonList(getFeat("marker", frag(arg.getMarker(), model)));
+            } else {
+                return Collections.EMPTY_LIST;
             }
         }
 
-        def mweLink2lmf(lexEntry  
-            : LexicalEntry, model : LemonModel) = {
-      if (lexEntry.phraseRoot == Nil) {
-                Map[String
-                ,String
-              
-                ]()
-      } else {
-        Map("mwePattern" - > (lexEntry.phraseRoot map 
-                {
-                    node = 
-                            > frag(node, model) }
-                
-                ).mkString(" ")
-            
-        
+        private List<Node> mwe2lmf(LexicalEntry entry, LemonModel model) {
+            final LinkedList<Node> nodes = new LinkedList<Node>();
+            for (eu.monnetproject.lemon.model.Node root : entry.getPhraseRoots()) {
+                final Element patTag = document.createElement("MWEPattern");
+                append(patTag, node2lmf(root, model));
+                patTag.setAttribute("id", frag(root, model));
+                nodes.add(patTag);
+            }
+            return nodes;
+        }
 
-        )
-      }
+        private List<Node> mweLink2lmf(LexicalEntry lexEntry, LemonModel model) {
+            if (lexEntry.getPhraseRoots().isEmpty()) {
+                return Collections.EMPTY_LIST;
+            } else {
+                final StringBuilder sb = new StringBuilder();
+                for (eu.monnetproject.lemon.model.Node node : lexEntry.getPhraseRoots()) {
+                    sb.append(frag(node, model)).append(" ");
+                }
+                return Collections.singletonList(getFeat("mwePattern", sb.toString().trim()));
+            }
+        }
+
+        private Node node2lmf(eu.monnetproject.lemon.model.Node node, LemonModel model) {
+            final Element nodeTag = document.createElement("MWENode");
+            if (node.getConstituent() != null) {
+                append(nodeTag, getFeat("syntacticConstituent", toLMFValue(node.getConstituent(), model)));
+            }
+            for (Edge edge2 : node.getEdges().keySet()) {
+                for (eu.monnetproject.lemon.model.Node node2 : node.getEdge(edge2)) {
+                    final Element edgeTag = document.createElement("MWEEdge");
+                    append(edgeTag, getFeat("function", toLMFValue(edge2, model)));
+                    append(edgeTag, node2lmf(node, model));
+                    append(nodeTag, edgeTag);
+                }
+            }
+            if (node.getLeaf() != null) {
+                final Element lexTag = document.createElement("MWELex");
+                lexTag.setAttribute("target", frag(node.getLeaf(), model));
+                append(nodeTag, lexTag);
+            }
+            if (node.getSeparator() != null) {
+                append(nodeTag, getFeat("separator", node.getSeparator().value));
+            }
+            return nodeTag;
+        }
+
+        private <T extends LemonPredicate, U extends LemonElement> List<Node> getFeats(Map<T, Collection<U>> props, LemonModel model) {
+            List<Node> rval = new LinkedList<Node>();
+            for (T prop : props.keySet()) {
+                for (U value : props.get(prop)) {
+                    rval.add(getFeat(toLMFValue(prop, model), toLMFValue(value, model)));
+                }
+            }
+            return rval;
+        }
+
+        private Node getFeat(String att, String vl) {
+            final Element featTag = document.createElement("feat");
+            featTag.setAttribute("att", att);
+            featTag.setAttribute("val", vl);
+            return featTag;
+        }
+        private final Random rand = new java.util.Random();
+
+        private String frag(LemonElement elem, LemonModel model) {
+            if (elem.getURI() != null) {
+                return elem.getURI().getFragment();
+            } else /*if (elem.getID() != null)*/ {
+                return elem.getID();
+            }
+        }
     }
-        
-    
-    def node2lmf(node  
-            : Node, model : LemonModel) : XMLNode = {
-      (<MWENode>
-            {
-                (
-                if (node.constituent != None) {
-                    getFeat("syntacticConstituent", toLMFValue(node.constituent.get, model))
+
+    private static class ToLemon {
+
+
+        private static class StringPair {
+
+            private final String s1, s2;
+
+            public StringPair(String s1, String s2) {
+                this.s1 = s1;
+                this.s2 = s2;
+            }
+
+            public String s1() {
+                return s1;
+            }
+
+            public String s2() {
+                return s2;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null) {
+                    return false;
+                }
+                if (getClass() != obj.getClass()) {
+                    return false;
+                }
+                final StringPair other = (StringPair) obj;
+                if ((this.s1 == null) ? (other.s1 != null) : !this.s1.equals(other.s1)) {
+                    return false;
+                }
+                if ((this.s2 == null) ? (other.s2 != null) : !this.s2.equals(other.s2)) {
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int hash = 3;
+                hash = 73 * hash + (this.s1 != null ? this.s1.hashCode() : 0);
+                hash = 73 * hash + (this.s2 != null ? this.s2.hashCode() : 0);
+                return hash;
+            }
+        }
+
+        private static class LMFAugments {
+
+            private final Map<StringPair, Node> nodeMap;
+            private final Map<String, List<Node>> axisMap;
+
+            public LMFAugments(Map<StringPair, Node> nodeMap, Map<String, List<Node>> axisMap) {
+                this.nodeMap = nodeMap;
+                this.axisMap = axisMap;
+            }
+            private final Map<String, LemonElement> idMap = new HashMap<String, LemonElement>();
+            private String language = "und";
+            private final Map<String, Argument> argMap = new HashMap<String, Argument>();
+
+            public <T extends LemonElement> T add(Node node, T elem) {
+                final Node x = node.getAttributes().getNamedItem("id");
+                if (x != null) {
+                    idMap.put(x.getTextContent(), elem);
+                    return elem;
                 } else {
-                    Seq() }
-                
-                ) ++
-        (node.edge.keys map {
-                    edge2 = 
-                            > node.edge(edge2) map {
-                        node2 = 
-                                > (<MWEEdge>
-                        {
-                            (
-                            if (edge2 != edge) {
-                                getFeat("function", toLMFValue(edge2, model)) 
-                            } else {
-                                Seq() }
-                            
-                            ) ++
-          node2lmf(node2, model) }
-                        < / MWEEdge >
-                    
-                
-                ) 
-          }
-        }
-                ) ++
-        (node.leaf match {
-                
-                case Some(leaf) => Seq(<MWELex/> % Map("target" -> frag(leaf,model)))
-          case None => Seq()
-        }
-                ) ++
-        (if (node.separator != None) {
-                    getFeat("separator", node.separator.get)
-                } else {
-                    Seq() }
-                
-            
-            )
-      }< / MWENode >
-     
-        
-    
-    )
-    }
-    
-  }
-  
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  // LMF 2 lemon
-  
-  private object ToLemon
-
-    {
-    
-    
-    private [
-    ToLemon
-
-    ] class LMFAugments 
-
-        (val nodeMap : HashMap[(String,String),XMLNode],
-    val axisMap : HashMap[String,List[XMLNode]]) {
-      val idMap = new HashMap[String, LemonElement
-        ]()
-      var language = "und"
-      val argMap = new HashMap[String, Argument
-        ]()
-      
-      def add[
-        T<
-        : LemonElement
-        ](node 
-        : XMLNode , elem : T
-        ) : T  = {
-            (node 
-        \ "@id") match 
-
-        {
-        
-    
-
-case Seq(x,_*) => idMap.put(x.text,elem); elem
-          case Seq() => elem
-        }
-      }
-    }
-    
-    def lmf2lemon(lmfDoc : XMLNode) : List[Lexicon] = {
-      var augment = new LMFAugments(buildIDMap(lmfDoc),
-      buildAxisMap(lmfDoc))
-      
-      if(lmfDoc.label != "LexicalResource") {
-        throw new IllegalArgumentException("Not a LMF file: " + lmfDoc)
-      }
-      
-      val lexicons = new ListBuffer[Lexicon]
-      for(lexicon <- lmfDoc \ "Lexicon") {
-        lexicons += readLexicon(lexicon,augment)
-      }
-      
-      // IGNORE: Global Information
-      
-      lexicons.toList
-    }
-    
-    def buildIDMap(head : XMLNode) = {
-      val map = new HashMap[(String,String),XMLNode]()
-      
-      def _buildIDMap(node : XMLNode) {
-        for(elem <- node.child) {
-          if((elem\"@id").size >= 1) {
-            map.put((elem.label,(elem\"@id")(0).text),elem)
-          }
-          _buildIDMap(elem)
-        }
-      }
-      
-      _buildIDMap(head)
-      
-      map
-    }
-    
-    def buildAxisMap(head : XMLNode) = {
-      val map = new HashMap[String,List[XMLNode]]()
-      
-      for(senseAxis <- head \\ "SenseAxis") {
-        for(senseAxisRelation <- senseAxis \ "SenseAxisRelation") {
-          for(targ <- (senseAxisRelation \ "@senses")(0).text.split(" ")) {
-            if(map.contains(targ)) {
-              map.put(targ, senseAxis :: map(targ))
-            } else {
-              map.put(targ, List(senseAxis))
-            }
-          }
-        }
-      }
-      
-      // TODO: Target axes
-      
-      map
-    }
-    
-    def readLexicon(lexiconNode : XMLNode, augment : LMFAugments) : Lexicon = {
-      val language = getFeat(lexiconNode, "language").getOrElse("und") // "und" is code for undetermined
-      augment.language = language
-      val entries = (lexiconNode \ "LexicalEntry") map {
-      lexEntryNode => readLexicalEntry(lexEntryNode,augment) }
-      
-      // IGNORE: MorphologicalPattern
-      for(node <- lexiconNode \ "MorphologicalPattern") {
-        System.err.println("Morphological patterns not supported by lemon. Ignoring " + 
-        (node \ "@id")(0).text)
-      }
-      
-      // TODO: ConstraintSet
-      
-      Lexicon(language,entries.toList)
-    }
-    
-    def getByID(node : XMLNode, augment : LMFAugments) : Option[LemonElement] = {
-      (node \ "@id") match {
-        case Seq(x, _*) => { 
-          augment.idMap.get(x text)
-        }
-        case Seq() => None
-      }
-    }
-    
-    def readLexicalEntry(lexEntryNode : XMLNode, augment : LMFAugments) : LexicalEntry = {
-      getByID(lexEntryNode,augment) match {
-        case Some(elem) => elem.asInstanceOf[LexicalEntry]
-        case None => {
-          val lemmaNode = (lexEntryNode \ "Lemma")(0)
-          val canRep = getWrittenRep(lemmaNode,augment)
-          
-          val (canForm,otherForms) = filterCanonical(readForm(lexEntryNode \ "WordForm",augment),canRep.value)
-          
-          
-          val abstractForms = readForm(lexEntryNode \ "Stem",augment) 
-          
-          val decomposition = ((lexEntryNode \ "ListOfComponents") map { loc => readCompList(loc,augment) }).toList
-          
-          val lexEntryType = getFeat(lexEntryNode,"lexEntryType") match {
-            case Some("Word") => Word
-            case Some("Phrase") => Phrase
-            case Some("Part") => Part
-            case None => if(decomposition.isEmpty) { Word } else { Phrase }
-            case _ => throw new LMFFormatException("Unrecognised lexEntryType value")
-          }
-          
-          // TODO: Form relations
-          
-          val frames = ((lexEntryNode \ "SyntacticBehaviour") flatMap { synBehNode =>
-            readSynBehavior(synBehNode,augment)
-          }).toList
-          
-          val senses = ((lexEntryNode \ "Sense") map { senseNode =>
-            readSense(senseNode, augment)
-          }).toList
-          
-          val phraseRoot = if((lexEntryNode \ "@mwePattern").size >= 1) { 
-            readMWEPattern(augment.nodeMap("MWEPattern",(lexEntryNode \ "@mwePattern")(0).text),augment,decomposition)
-          } else {
-            Nil
-          }
-          
-          augment.add(lexEntryNode,
-          LexicalEntry(canForm, 
-          entryType = lexEntryType,
-          decomposition = decomposition,
-          otherForm = otherForms,
-          abstractForm = abstractForms,
-          sense = senses,
-          property = getFeats(lexEntryNode),
-          synBehavior = frames,
-          phraseRoot = phraseRoot))
-        }
-      }
-    }
-    
-    def filterCanonical(forms : List[Form], canFormRep : String) : (Form, List[Form]) = {
-      forms match {
-        case head :: rest => if(head.writtenRep.value == canFormRep) {
-          (head, rest)
-        } else {
-          val (canForm,otherForms) = filterCanonical(rest,canFormRep)
-          (canForm, head :: otherForms)
-        }
-        case Nil => throw new LMFFormatException("Lemma \""+canFormRep+"\" does not have a WordForm")
-      }
-    }
-    
-    def readForm(formNodes : NodeSeq, augment : LMFAugments) : List[Form] = {
-      (formNodes map { formNode => {
-        if((formNode \ "FormRepresentation").size > 1) {
-          Form(getWrittenRep(formNode,augment),property = getFeats(formNode),
-          representation = Map(representation -> ((formNode \ "FormRepresentation") map { repNode =>
-          getTextFromRep(repNode, augment) }).toList))
-        } else {
-          Form(getWrittenRep(formNode,augment), property = getFeats(formNode)) 
-        }
-        }
-      }).toList
-    }
-    
-    def readCompList(compListNode : XMLNode, augment : LMFAugments) = {
-      ((compListNode \ "Component") map { compNode => 
-        val element = augment.nodeMap(("LexicalEntry",(compNode \ "@entry")(0).text))
-        
-        Component(readLexicalEntry(element,augment),getFeats(compNode))
-      }).toList
-    }
-    
-    def readSynBehavior(synBehNode : XMLNode, augment : LMFAugments) : List[Frame] = {
-      for(frameNode <- synBehNode \ "@subcategorizationFrameSets") {
-        for(entryID <- frameNode.text.split(" ")) {
-          readSubcatFrameSet(augment.nodeMap(("SubcategorizationFrameSet",entryID)), augment)
-        }
-      }
-      
-      ((synBehNode \ "@subcategorizationFrames") flatMap { frameNode =>
-        frameNode.text.split(" ") map { entryID =>
-      readSubcatFrame(augment.nodeMap(("SubcategorizationFrame",entryID)), augment) } } ).toList
-    }
-    
-    
-    def readSubcatFrameSet(frameSetNode : XMLNode, augment : LMFAugments) : Unit = {
-      for(argMap <- frameSetNode \ "SynArgMap") {
-        val arg1ID = (argMap \ "@arg1")(0).text
-        val arg2ID = (argMap \ "@arg2")(0).text
-        
-        if(augment.argMap.contains(arg1ID)) {
-          if(!augment.argMap.contains(arg2ID)) {
-            augment.argMap.put(arg2ID,augment.argMap(arg1ID))
-          } else {
-            // Already processed
-          }
-        } else {
-          if(!augment.argMap.contains(arg1ID)) {
-            augment.argMap.put(arg1ID,augment.argMap(arg2ID))
-          } else {
-            val arg = readSyntacticArgument(augment.nodeMap(("Argument",arg1ID)), augment)
-            augment.argMap.put(arg1ID,arg)
-            augment.argMap.put(arg2ID,arg)
-          }
-        }
-      }
-    }
-    
-    def readSubcatFrame(frameNode : XMLNode, augment : LMFAugments) : Frame = {
-      getByID(frameNode,augment) match {
-        case Some(elem) => elem.asInstanceOf[Frame]
-        case None => {
-          val arguments = toFeatMap(((frameNode \ "SyntacticArgument") map { argNode => 
-          (readSynArgLink(argNode,augment), readSyntacticArgument(argNode,augment)) }).toList)
-          
-          for(lexemeProp <- frameNode \ "LexemeProperty") {
-            System.err.println("LexemeProperty ignored")
-          }
-          
-          
-          augment.add(frameNode,
-          Frame(synArg = arguments, property = getFeats(frameNode)))
-        }
-      }
-    }
-    
-    def readSynArgLink(argNode : XMLNode, augment : LMFAugments) : SynArg = {
-      getFeat(argNode,"syntacticFunction") match {
-        case Some(label) => ISOcatSynArg(label)
-        case None => synArg
-      }
-    }
-    
-    def readSyntacticArgument(argNode : XMLNode, augment : LMFAugments) : Argument = {
-      val id = (argNode \ "@id") match {
-        case Seq(x,_*) => Some(x.text)
-        case Seq() => None
-      }
-      
-      if(id != None && augment.argMap.contains(id.get)) {
-        augment.argMap(id.get)
-      } else {
-        val marker = getFeat(argNode,"marker") match {
-          case Some(markerID) => {
-            augment.nodeMap.get(("LexicalEntry",markerID)) match {
-              case Some(node) => Some(readLexicalEntry(node,augment))
-              case None => Some(ISOcatPropertyValue(markerID))
-            }
-          }
-          case None => None
-        }
-        
-        val arg = Argument(marker = marker, property = getFeats(argNode))
-        
-        if(id != None) {
-          augment.argMap.put(id.get,arg)
-        }
-        
-        arg
-      }
-    }
-    
-    
-    def readSense(senseNode : XMLNode, augment : LMFAugments) : LexicalSense = {
-      getByID(senseNode,augment) match {
-        case Some(sememe) => sememe.asInstanceOf[LexicalSense]
-        case None => {
-          for(senseNode2 <- senseNode \ "Sense") {
-            System.err.println("Recursive sense ignored!")
-          }
-          
-          for(equivNode <- senseNode \ "Equivalent") {
-            System.err.println("Equivalent ignored! Equivalents in LMF are ambiguous, please use SenseRelation instead");
-          }
-          
-          val examples = ((senseNode \ "Context") map { contextNode =>
-            readExample(contextNode,augment)
-          }).toList :::
-          ((senseNode \ "SenseExample") map { exampleNode =>
-            readExample(exampleNode,augment)
-          }).toList
-          
-          // TODO: Subject Field
-          
-          val semArgs = readPredicativeRepresentation((senseNode \ "PredicativeRepresentation")(0),augment)
-          
-          val definitions = ((senseNode \ "Definition") map { defNode =>
-          readDefinition(defNode,augment) }).toList
-          
-          val relations = toMutFeatMap(
-          ((senseNode \ "SenseRelation") map { relNode =>
-          readSenseRelation(relNode,augment) }).toList ::: 
-          ((senseNode \ "Synset") flatMap { synsetNode =>
-            (synsetNode \ "SynsetRelation") map { relNode =>
-            readSenseRelation(relNode,augment) }
-          }
-          ).toList ::: 
-          readAxes(senseNode,augment))
-          
-          val reference = (senseNode \ "MonolingualExternalRef") match {
-            case Seq(ref, _*) => Some(URI.create(getFeat(ref,"externalReference").getOrElse("error:undefined_reference")))
-            case Seq() => None
-          }
-          
-          val refPref = getFeat(senseNode,"refPref") match {
-            case Some("altSem") => altSem
-            case Some("hiddenSem") => hiddenSem
-            case _ => prefSem
-          }
-          
-          val subsense = ((senseNode \ "Sense") map {
-            subsenseNode => readSense(subsenseNode, augment)
-          }).toList
-          
-          augment.add(senseNode,
-          LexicalSense(reference,
-            refPref = refPref,
-            example = examples,
-            definition = definitions,
-            subjOfProp = semArgs.get("subjOfProp"),
-            objOfProp = semArgs.get("objOfProp"),
-            isA = semArgs.get("isA"),
-            senseRelation = relations,
-            subsense = subsense,
-            property = getFeats(senseNode)
-          ))
-        }
-      }
-    }
-    
-    def readExample(node : XMLNode, augment : LMFAugments) : Example = {
-      val values = ((node \ "TextRepresentation") map { textNode =>
-        getTextFromRep(textNode,augment) 
-      }).toList
-      
-      Example(values, getFeats(node))
-    }
-    
-    def readPredicativeRepresentation(prNode : XMLNode, augment : LMFAugments) : Map[String,Argument] = {
-      // IGNORE: Predicates
-      if((prNode \ "@correspondences").isEmpty) {
-        Map()
-      } else {
-      
-        val sscNodes = ((prNode \ "@correspondences")(0).text).split(" ") map ( corrID => 
-          augment.nodeMap(("SynSemCorrespondence",corrID) ))
-        val semPredNode = augment.nodeMap(("SemanticPredicate",(prNode \ "@predicate")(0).text))
-        
-        (sscNodes flatMap { corrNode => {
-            val buffer = new ListBuffer[Tuple2[String,Argument]]()
-            
-            for(mapNode <- corrNode \"SynSemArgMap") {
-              if((mapNode \ "@synArg").size > 0) {
-                // Thank god! Probably reversing a lemon lexicon
-                buffer += Tuple2(readSemArg(semPredNode,mapNode,augment),augment.argMap((mapNode \ "@synArg")(0).text))
-              } else {
-                System.err.println("Decoding LMF syn-sem arg map. This may take a while!")
-                
-                val synFeat = ISOcatPropertyValue(getFeat(mapNode, "syntacticFeature").getOrElse("#ERROR#"))
-                
-                var first = true
-                
-                (augment.argMap.values find { arg =>
-                arg.property(ISOcatProperty("syntacticFunction")) == synFeat }) match {
-                  case Some(arg) => { buffer += Tuple2(if(first) { "subjOfProp" } else { "objOfProp"},arg); 
-                                      first = false }
-                  case None =>
+                    return elem;
                 }
-              }
             }
-            
-            buffer.toList
-          }
-        }).toMap
-      }
-    }
-    
-    def readSemArg(semPredNode : XMLNode, mapNode : XMLNode, augment : LMFAugments) : String = {
-      val targID = (mapNode \ "@semArg")(0).text
-      
-      ((semPredNode \ "SemanticArgument") find { argNode => 
-      (argNode \ "@id")(0).text ==  targID }) match {
-        case Some(node) => getFeat(node,"label").getOrElse("subjOfProp")
-        case None => "subjOfProp"
-      }
-    }
-    
-    def readDefinition(defNode : XMLNode, augment : LMFAugments) : Definition = {
-      val values = ((defNode \ "TextRepresentation") map { textNode =>
-        getTextFromRep(textNode,augment) 
-      }).toList
-      
-      Definition(values, getFeats(defNode))
-    }
-    
-    def readSenseRelation(relNode : XMLNode, augment : LMFAugments) : (SenseRelation,LexicalSense) = {
-      // Assuming sense relations are binary
-      val targs = (relNode \ "@targets")(0).text.split(" ")
-      if(targs.length != 2) {
-        throw new LMFFormatException("Non-binary sense relation")
-      }
-      // UNSAFE: other target is second
-      val otherSem = readSense(augment.nodeMap(("Sense",targs(1))),augment)
-      getFeat(relNode,"label") match {
-        case Some("equivalent") => (equivalent,otherSem)
-        case Some("narrower") => (narrower,otherSem)
-        case Some("broader") => (broader,otherSem)
-        case Some("incompatible") => (incompatible,otherSem)
-        case Some(x) => (ISOcatSenseRelation(x),otherSem)
-        case None => (senseRelation,otherSem)
-      }
-    }
-    
-    def readAxes(senseNode : XMLNode, augment : LMFAugments) : List[(SenseRelation,LexicalSense)] = {
-      if(senseNode \ "@id" isEmpty) {
-        Nil
-      } else {
-        val id = (senseNode \ "@id")(0).text
-        if(!augment.axisMap.contains(id)) {
-          Nil
-        } else {
-          augment.axisMap(id) flatMap { senseAxis =>
-            (senseAxis \ "SenseAxisRelation") map { relNode => {
-                val targ = (relNode \ "@targets")(0).text.split(" ") find ( _ != id )
-                // UNSAFE: target may be synset
-                val otherSem = readSense(augment.nodeMap(("Sense",targ.get)),augment)
-                getFeat(relNode,"label") match {
-                  case Some("equivalent") => (equivalent,otherSem)
-                  case Some("narrower") => (narrower,otherSem)
-                  case Some("broader") => (broader,otherSem)
-                  case Some("incompatible") => (incompatible,otherSem)
-                  case Some(x) => (ISOcatSenseRelation(x),otherSem)
-                  case None => (senseRelation,otherSem)
+        }
+
+        private List<Element> e(NodeList nl) {
+            final LinkedList<Element> es = new LinkedList<Element>();
+            for (int i = 0; i < nl.getLength(); i++) {
+                if (nl.item(i) instanceof Element) {
+                    es.add((Element) nl.item(i));
                 }
-              }
             }
-          }
-        }
-      }
-    } 
-    
-    def readMWEPattern(patternNode : XMLNode, augment : LMFAugments, decomposition : List[List[Component]]) : List[Node] = {
-      ((patternNode \ "MWENode") map { nodeNode =>
-      readMWENode(nodeNode,augment,decomposition) } ).toList
-    }
-    
-    def readMWENode(nodeNode : XMLNode, augment : LMFAugments, decomposition : List[List[Component]]) : Node = {
-      val edges = readMWEEdge(nodeNode, augment,decomposition)
-      
-      val constituent = getFeat(nodeNode,"syntacticConstituent") match {
-        case Some(cons) => Some(ISOcatConstituent(cons))
-        case None => None
-      }
-      
-      val separator = getFeat(nodeNode,"separator") 
-      
-      val lex = (nodeNode \ "MWELex") match {
-        case Seq(lexNode,_*) => readMWELex(lexNode,augment,decomposition)
-        case Seq() => None
-      }
-      
-      Node(constituent = constituent, 
-        separator = separator, 
-        edge = edges, 
-        leaf = lex, 
-        property = getFeats(nodeNode))
-    }
-    
-    def readMWEEdge(nodeNode : XMLNode, augment : LMFAugments, decomposition : List[List[Component]]) : Map[Edge,List[Node]] = {
-      var map = HashMap[Edge,List[Node]]()
-      
-      for(edgeNode <- (nodeNode \ "MWEEdge")) {
-        val _edge = if(getFeat(edgeNode, "function") != None) {
-          ISOcatEdge(getFeat(edgeNode,"function").get)
-        } else {
-          eu.monnetproject.lemon.scala.edge
+            return es;
         }
         
-        val nodeNode2 = (edgeNode \ "MWENode")(0)
-        if(map.contains(_edge)) {
-          map.put(_edge, readMWENode(nodeNode2, augment,decomposition) :: map.get(_edge).get)
-        } else {
-          map.put(_edge, List(readMWENode(nodeNode2,augment,decomposition)))
+        private String att(Element n, String p) {
+            return n.getAttributes().getNamedItem(p).getTextContent();
         }
-      }
-      
-      Map[Edge,List[Node]]() ++ map
-    }
-    
-    def readMWELex(lexNode : XMLNode, augment : LMFAugments, decomposition : List[List[Component]]) : Option[PhraseTerminal] = {
-      getFeat(lexNode, "rank") match {
-        case Some(rank) => Some(decomposition(0)(Integer.parseInt(rank)))
-        case None =>
-        getFeat(lexNode, "componentRank") match {
-          case Some(rank) => Some(decomposition(0)(Integer.parseInt(rank)))
-          case None => None
-        }
-      }
-    }
-    
-    private def getWrittenRep(form : XMLNode, augment : LMFAugments) : Text = {
-      getFeat(form,"writtenForm") match {
-        case Some(writtenRep) => Text(writtenRep,augment.language)
-        case None => getTextFromRep((form \ "FormRepresentation")(0),augment)
-      }
-    }
-    
-    private def getTextFromRep(repNode : XMLNode, augment : LMFAugments) : Text = {
-      val langTag = new StringBuilder
-      langTag.append(augment.language)
-      
-      getFeat(repNode(0),"script") match {
-        case Some(script) => langTag.append("-" + script)
-        case None =>
-      }
-      getFeat(repNode(0),"geographicalVariant") match {
-        case Some(geo) => langTag.append("-" + geo)
-        case None =>
-      }
-      getFeat(repNode(0),"orthographyName") match {
-        case Some(ortho) => langTag.append("-x-"+ortho)
-        case None =>
-      }
-      
-      Text(getFeat(repNode,"writtenForm").getOrElse(""), langTag.toString)
-    }
-    
-    private def getFeat(node : XMLNode, att : String) : Option[String] = {
-      ((node \ "feat") find { feat => featAtt(feat) == att }) match {
-        case Some(feat) => Some(featVal(feat))
-        case None => None
-      }
-    }
-    
-    private def getFeats(node : XMLNode) : Map[Property,List[PropertyValue]] = {
-      val feats = new HashMap[Property,List[PropertyValue]]()
-      
-      for(feat <- node \ "feat" ; 
-
-if(!ignoredFeats.contains(featAtt(feat)))) {
-        val att = ISOcatProperty(featAtt(feat))
-        val value = ISOcatPropertyValue(featVal(feat))
-        if(feats.containsKey(att)) {
-          if(!feats(att).contains(value)) {
-            feats.put(att, value :: feats(att))
-          } else { }
-        } else {
-          feats.put(att, List(value))
-        }
-      }
-      
-      Map[Property,List[PropertyValue]]() ++ feats
-    }
-    
-    private def featAtt(feat:XMLNode) : String = (feat \ "@att")(0) text
-    private def featVal(feat:XMLNode) : String = (feat \ "@val")(0) text
-    
-    private def toFeatMap[T,U](list : List[Tuple2[T,U]]) : Map[T,List[U]] = {
-      Map[T,List[U]]() ++ toMutFeatMap(list)
-    }
-    
-    private def toMutFeatMap[T,U](list : List[Tuple2[T,U]]) : MutableMap[T,List[U]] = {
-      val rval = new HashMap[T,List[U]]()
-      for((prop,value) <- list) {
-        if(rval.contains(prop)) {
-          rval.put(prop,value :: rval(prop))
-        } else {
-          rval.put(prop,List(value))
-        }
-      }
-      rval
-    }
-  }
-}
-
-case class ISOcatProperty 
-
-    (val value : String) extends Property
-
-case class ISOcatPropertyValue 
-
-        (val value : String) extends PropertyValue {
-  override val property  = Map[Property, List[
-        PropertyValue
-    
-    ]]()
-}
-
-
-
-    case class ISOcatEdge 
-
-        (val value : String) extends Edge
-
-case class ISOcatSenseRelation 
-
-            (val value : String) extends SenseRelation
-
-case class ISOcatConstituent 
-
-                (val value : String) extends Constituent {  
-  override val property  = Map[Property, List[
-                PropertyValue
-            
-            ]]()
-}
-
-
-
-            case class ISOcatSynArg 
-
-                (val value : String) extends SynArg
-
-class LMFFormatException 
-                
-            
         
-    
+        private List<Element> c(Node n, String tag) {
+            final NodeList childNodes = n.getChildNodes();
+            final LinkedList<Element> elems = new LinkedList<Element>();
+            for(int i = 0; i < childNodes.getLength(); i++) {
+                if(childNodes.item(i) instanceof Element && ((Element)childNodes.item(i)).getTagName().equals(tag)) {
+                    elems.add((Element)childNodes.item(i));
+                }
+            }
+            return elems;
+        }
 
-(message:String) extends java.lang.RuntimeException(message)
-*/
+        public List<Lexicon> lmf2lemon(Document lmfDoc) {
+            final LMFAugments augment = new LMFAugments(buildIDMap(lmfDoc), buildAxisMap(lmfDoc.getDocumentElement()));
+
+            if (!lmfDoc.getDocumentElement().getTagName().equals("LexicalResource")) {
+                throw new IllegalArgumentException("Not an LMF file");
+            }
+            final LinkedList<Lexicon> lexica = new LinkedList<Lexicon>();
+
+            for (Element lexicon : e(lmfDoc.getDocumentElement().getElementsByTagName("Lexicon"))) {
+                lexica.add(readLexicon(lexicon, augment));
+            }
+            return lexica;
+        }
+
+        private Map<StringPair, Node> buildIDMap(Node head) {
+            final HashMap<StringPair, Node> map = new HashMap<StringPair, Node>();
+            _buildIDMap(head, map);
+            return map;
+        }
+
+        private void _buildIDMap(Node head, HashMap<StringPair, Node> map) {
+            for (Element elem : e(head.getChildNodes())) {
+                if(att(elem,"id") != null) {
+                    map.put(new StringPair(elem.getTagName(), att(elem,"id")),elem);
+                }
+                _buildIDMap(elem, map);
+            }
+        }
+        
+        private Map<String,List<Node>> buildAxisMap(Element head) {
+            final HashMap<String, List<Node>> map = new HashMap<String, List<Node>>();
+            
+            for (Element senseAxis : e(head.getElementsByTagName("SenseAxis"))) {
+                for(Element senseAxisRelation : c(head,"SenseAxisRelation")) {
+                    for(String targ : att(senseAxisRelation,"id").split(" ")) {
+                        if(!map.containsKey(targ)) {
+                            map.put(targ, new LinkedList<Node>());
+                        }
+                        map.get(targ).add(senseAxis);
+                    }
+                }
+            }
+            
+            // TODO: Target axes 
+            
+            return map;
+        }
+        
+        
+        private Lexicon readLexicon(Element lexicon, LMFAugments augment) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+    }
+}

@@ -49,26 +49,32 @@ public abstract class URIElement extends URIValue implements LemonElement {
         this.id = id;
     }
 
+    @Override
     public Map<Property, Collection<PropertyValue>> getPropertys() {
         return Collections.EMPTY_MAP;
     }
 
+    @Override
     public Collection<PropertyValue> getProperty(Property prop) {
         return null;
     }
 
+    @Override
     public boolean addProperty(Property prop, PropertyValue propVal) {
         throw new UnsupportedOperationException("Wrapped URI cannot have properties");
     }
 
+    @Override
     public boolean removeProperty(Property prop, PropertyValue propVal) {
         throw new UnsupportedOperationException("Wrapped URI cannot have properties");
     }
 
+    @Override
     public String getID() {
         return id;
     }
 
+    @Override
     public Collection<URI> getTypes() {
         LinkedList<URI> types = new LinkedList<URI>();
         for (Class c : this.getClass().getInterfaces()) {
@@ -79,10 +85,12 @@ public abstract class URIElement extends URIValue implements LemonElement {
         return types;
     }
 
+    @Override
     public void addType(URI uri) {
         throw new UnsupportedOperationException("Cannot modify class defined by URIElement");
     }
 
+    @Override
     public void removeType(URI uri) {
         throw new UnsupportedOperationException("Cannot modify class defined by URIElement");
     }

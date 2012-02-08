@@ -62,7 +62,7 @@ public interface LemonModel {
 	LemonFactory getFactory();
 	
 	/** 
-	 * Add a lexicon
+	 * Add a (new blank) lexicon
 	 */
 	Lexicon addLexicon(URI uri, String language);
 	

@@ -120,7 +120,7 @@ public class LexiconImpl extends SimpleLemonElement implements Lexicon {
             addTopic(topicImpl);
             return topicImpl;
         } 
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value,lingOnto);
     }
 
     @Override

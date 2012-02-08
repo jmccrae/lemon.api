@@ -71,7 +71,7 @@ public class ComponentImpl extends SimpleLemonElement implements Component {
                 
             };
         } else {
-            return defaultAccept(pred, value);
+            return defaultAccept(pred, value,lingOnto);
         }
     }
 

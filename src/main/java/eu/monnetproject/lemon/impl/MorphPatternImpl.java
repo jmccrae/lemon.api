@@ -26,7 +26,6 @@
  ********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
@@ -51,28 +50,33 @@ public class MorphPatternImpl extends SimpleLemonElement<MorphPattern> implement
         super(uri, "MorphPattern");
     }
 
+    @Override
     public Collection<MorphTransform> getTransforms() {
         return getStrElems("transform");
     }
 
+    @Override
     public boolean addTransform(MorphTransform mt) {
         return addStrElem("transform", mt);
     }
 
+    @Override
     public boolean removeTransform(MorphTransform mt) {
         return removeStrElem("transform", mt);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"transform")) {
             final MorphTransformImpl morphTransformImpl = factory.getMorphTransformImpl(value);
             addTransform(morphTransformImpl);
             return morphTransformImpl;
         } else {
-            return defaultAccept(pred, value);
+            return defaultAccept(pred, value,lingOnto);
         }
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"transform")) {
             final MorphTransformImpl morphTransformImpl = factory.getMorphTransformImpl(bNode);
@@ -83,16 +87,19 @@ public class MorphPatternImpl extends SimpleLemonElement<MorphPattern> implement
         }
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }
     
     private String language;
     
+    @Override
     public String getLanguage() {
         return language;
     }
 
+    @Override
     public void setLanguage(final String language) {
         this.language = language;
     }

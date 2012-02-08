@@ -26,7 +26,6 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.ElementVisitor;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
@@ -56,38 +55,47 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         super(id, "Frame");
     }
 
+    @Override
     public Map<SynArg, Collection<Argument>> getSynArgs() {
         return (Map<SynArg, Collection<Argument>>) getPredElems(SynArg.class);
     }
 
+    @Override
     public Collection<Argument> getSynArg(final SynArg synArg) {
         return (Collection<Argument>) getPredElem(synArg);
     }
 
+    @Override
     public boolean addSynArg(final SynArg synArg, final Argument synArgVal) {
         return addPredElem(synArg, synArgVal);
     }
 
+    @Override
     public boolean removeSynArg(final SynArg synArg, final Argument synArgVal) {
         return removePredElem(synArg, synArgVal);
     }
 
+    @Override
     public Collection<Node> getTrees() {
         return (Collection<Node>) getStrElems("tree");
     }
 
+    @Override
     public boolean addTree(final Node node) {
         return addStrElem("tree", node);
     }
 
+    @Override
     public boolean removeTree(final Node node) {
         return removeStrElem("tree", node);
     }
 
+    @Override
     public Collection<List<Component>> getDecompositions() {
         return Collections.unmodifiableSet(components);
     }
 
+    @Override
     public void addDecomposition(List<Component> comps) {
         for (Component comp : comps) {
             if (comp instanceof SimpleLemonElement) {
@@ -97,6 +105,7 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         components.add(comps);
     }
 
+    @Override
     public boolean removeDecomposition(List<Component> comps) {
         for (Component comp : comps) {
             if (comp instanceof SimpleLemonElement) {
@@ -144,6 +153,7 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         super.clearAll();
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "decomposition")) {
             final ListAccepter listAccepter = new ListAccepter();
@@ -162,9 +172,10 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
                 }
             }
         }
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value, lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "decomposition")) {
             final ListAccepter listAccepter = new ListAccepter();
@@ -186,6 +197,7 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         return defaultAccept(pred, value);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }

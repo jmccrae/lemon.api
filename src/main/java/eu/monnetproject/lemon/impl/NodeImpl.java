@@ -54,46 +54,57 @@ public class NodeImpl extends SimpleLemonElement implements Node {
         super(id, "Node");
     }
 
+    @Override
     public Constituent getConstituent() {
         return (Constituent) getStrElem("constituent");
     }
 
+    @Override
     public void setConstituent(final Constituent constituent) {
         setStrElem("constituent", constituent);
     }
 
+    @Override
     public Map<Edge, Collection<Node>> getEdges() {
         return (Map<Edge, Collection<Node>>) getPredElems(Edge.class);
     }
 
+    @Override
     public Collection<Node> getEdge(final Edge edge) {
         return (Collection<Node>) getPredElem(edge);
     }
 
+    @Override
     public boolean addEdge(final Edge edge, final Node edgeVal) {
         return addPredElem(edge, edgeVal);
     }
 
+    @Override
     public boolean removeEdge(final Edge edge, final Node edgeVal) {
         return removePredElem(edge, edgeVal);
     }
 
+    @Override
     public PhraseTerminal getLeaf() {
         return (PhraseTerminal) getStrElem("leaf");
     }
 
+    @Override
     public void setLeaf(final PhraseTerminal product) {
         setStrElem("leaf", product);
     }
 
+    @Override
     public Text getSeparator() {
         return separator;
     }
 
+    @Override
     public void setSeparator(final Text separator) {
         this.separator = separator;
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"constituent")) {
             final ConstituentImpl constituentImpl = factory.getConstituentImpl(value);
@@ -118,9 +129,10 @@ public class NodeImpl extends SimpleLemonElement implements Node {
                 }
             }
         }
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value, lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"constituent")) {
             final ConstituentImpl constituentImpl = factory.getConstituentImpl(value);
@@ -148,6 +160,7 @@ public class NodeImpl extends SimpleLemonElement implements Node {
         return defaultAccept(pred, value);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"separator")) {
             setSeparator(new Text(value,lang));

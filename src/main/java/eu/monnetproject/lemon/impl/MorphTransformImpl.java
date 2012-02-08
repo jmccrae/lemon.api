@@ -26,7 +26,6 @@
  ********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
@@ -53,52 +52,64 @@ public class MorphTransformImpl extends SimpleLemonElement<MorphTransform> imple
         super(uri, "MorphTransform");
     }
 
+    @Override
     public Collection<String> getRules() {
         return rules;
     }
 
+    @Override
     public boolean addRule(String string) {
         return rules.add(string);
     }
     
     
+    @Override
     public boolean removeRule(String string) {
         return rules.remove(string);
     }
 
+    @Override
     public Prototype getOnStem() {
         return (Prototype)getStrElem("onStem");
     }
 
+    @Override
     public void setOnStem(Prototype prtp) {
         setStrElem("onStem",prtp);
     }
 
+    @Override
     public Collection<Prototype> getGenerates() {
         return getStrElems("generates");
     }
 
+    @Override
     public boolean addGenerates(Prototype prtp) {
         return addStrElem("generates", prtp);
     }
 
+    @Override
     public boolean removeGenerates(Prototype prtp) {
         return removeStrElem("generates", prtp);
     }
 
 
+    @Override
     public Collection<MorphTransform> getNextTransforms() {
         return getStrElems("nextTransform");
     }
 
+    @Override
     public boolean addNextTransform(MorphTransform mt) {
         return addStrElem("nextTransform", mt);
     }
 
+    @Override
     public boolean removeNextTransform(MorphTransform mt) {
         return removeStrElem("nextTransform",mt);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"generates")) {
             final PrototypeImpl prototypeImpl = factory.getPrototypeImpl(value);
@@ -113,10 +124,11 @@ public class MorphTransformImpl extends SimpleLemonElement<MorphTransform> imple
             setOnStem(prototypeImpl);
             return prototypeImpl;
         } else {
-            return defaultAccept(pred, value);
+            return defaultAccept(pred, value,lingOnto);
         }
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"generates")) {
             final PrototypeImpl prototypeImpl = factory.getPrototypeImpl(value);
@@ -135,6 +147,7 @@ public class MorphTransformImpl extends SimpleLemonElement<MorphTransform> imple
         }
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"rule")) {
             addRule(value);

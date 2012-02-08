@@ -50,14 +50,17 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
         super(id, "Argument");
     }
 
+    @Override
     public SyntacticRoleMarker getMarker() {
         return (SyntacticRoleMarker) getStrElem("marker");
     }
 
+    @Override
     public void setMarker(final SyntacticRoleMarker marker) {
         setStrElem("marker", marker);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "marker")) {
             return new UnactualizedAccepter() {
@@ -69,10 +72,11 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
                 }
             };
         } else {
-            return defaultAccept(pred, value);
+            return defaultAccept(pred, value,lingOnto);
         }
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "marker")) {
             return new UnactualizedAccepter() {
@@ -88,6 +92,7 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
         }
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         super.defaultAccept(pred, value, lang);
     }

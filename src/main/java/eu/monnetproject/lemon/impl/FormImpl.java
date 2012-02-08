@@ -53,22 +53,27 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         super(id, "Form");
     }
 
+    @Override
     public Text getWrittenRep() {
         return getStrText("writtenRep");
     }
 
+    @Override
     public void setWrittenRep(final Text writtenRep) {
         setStrText("writtenRep", writtenRep);
     }
 
+    @Override
     public Map<Representation, Collection<Text>> getRepresentations() {
         return Collections.unmodifiableMap(reps);
     }
 
+    @Override
     public Collection<Text> getRepresentation(final Representation representation) {
         return Collections.unmodifiableCollection(reps.get(representation));
     }
 
+    @Override
     public boolean addRepresentation(final Representation representation, final Text representationVal) {
         if (!reps.containsKey(representation)) {
             reps.put(representation, new HashSet<Text>());
@@ -76,6 +81,7 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         return reps.get(representation).add(representationVal);
     }
 
+    @Override
     public boolean removeRepresentation(final Representation representation, final Text representationVal) {
         if (reps.containsKey(representation)) {
             return reps.get(representation).remove(representationVal);
@@ -84,18 +90,22 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         }
     }
 
+    @Override
     public Map<FormVariant, Collection<LexicalForm>> getFormVariants() {
         return (Map<FormVariant, Collection<LexicalForm>>) getPredElems(FormVariant.class);
     }
 
+    @Override
     public Collection<LexicalForm> getFormVariant(final FormVariant formVariant) {
         return (Collection<LexicalForm>) getPredElem(formVariant);
     }
 
+    @Override
     public boolean addFormVariant(final FormVariant formVariant, final LexicalForm formVariantVal) {
         return addPredElem(formVariant, formVariantVal);
     }
 
+    @Override
     public boolean removeFormVariant(final FormVariant formVariant, final LexicalForm formVariantVal) {
         return removePredElem(formVariant, formVariantVal);
     }
@@ -138,6 +148,7 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         super.clearAll();
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, final URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(lingOnto != null) {
             for(FormVariant var : lingOnto.getFormVariant()) {
@@ -148,9 +159,10 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
                 }
             }
         }
-        return defaultAccept(pred, value);
+        return defaultAccept(pred, value,lingOnto);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(lingOnto != null) {
             for(FormVariant var : lingOnto.getFormVariant()) {
@@ -164,9 +176,11 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         return defaultAccept(pred, value);
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"writtenRep")) {
             setWrittenRep(new Text(value, lang));
+            return;
         } else {
             for(Representation rep : lingOnto.getRepresentation()) {
                 if(rep.getURI().equals(pred)) {
@@ -182,11 +196,11 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
     public Map<URI,Collection<Object>> getElements() {
         Map<URI,Collection<Object>> rv = super.getElements();
         for(Map.Entry<Representation,Collection<Text>> entry : reps.entrySet()) {
-            if(!rv.containsKey(entry.getKey())) {
+            if(!rv.containsKey(entry.getKey().getURI())) {
                 rv.put(entry.getKey().getURI(), new LinkedList());
             }
             for(Text text : entry.getValue()) {
-                ((Collection)rv.get(entry.getKey())).add(text);
+                ((Collection)rv.get(entry.getKey().getURI())).add(text);
             }
         }
         return rv;
