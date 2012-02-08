@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="project" default="build"> 
+	<import file="../cnf/build.xml"/>
+	
+	<target name="package" depends="build">
+		<ant antfile="../eu.monnetproject.osgi/package.xml" target="package"/>
+		<delete dir="dist"/>
+		<mkdir dir="dist"/>
+		<mkdir dir="dist/bundles"/>
+		<mkdir dir="dist/framework"/>
+		<mkdir dir="dist/load"/>
+		<copy todir="dist">
+	      <fileset file="../eu.monnetproject.osgi/generated/kicker.jar"/>
+	      <fileset file="README.txt"/>
+	      <fileset file="run-kicker.bat"/>
+	    </copy>
+		<copy todir="dist/bundles">
+		  <fileset dir="generated" includes="*.jar"/>
+    	  <fileset dir="../cnf/repo/org.apache.felix.shell" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/org.apache.felix.shell.tui" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/com.vaadin" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/org.apache.felix.http.jetty" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/org.apache.felix.scr" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/org.apache.felix.configadmin" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/org.openrdf.sesame" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/osgi.cmpn" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/osgi.core" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/slf4j.api" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/slf4j.jdk14" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/scala" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/scalasemweb" includes="*.jar"/>
+		  <fileset dir="../cnf/repo/gwt-user" includes="*.jar"/>
+		  <fileset file="../eu.monnetproject.core/generated/eu.monnetproject.core.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.tagger.stanford.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.stemmer.german.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.tokenizer.latin.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.sesame.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.label.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.parser.stanford.jar"/>
+	      <fileset file="../eu.monnetproject.nlp/generated/eu.monnetproject.nlp.ontology.proxy.jar"/>
+	      <fileset file="../eu.monnetproject.kap/generated/eu.monnetproject.kap.laif.jar"/>
+	      <fileset file="../eu.monnetproject.osgi/generated/eu.monnetproject.osgi.openid.jar"/>
+	      <fileset file="../eu.monnetproject.osgi/generated/eu.monnetproject.osgi.vaadin.jar"/>
+	      <fileset file="../eu.monnetproject.osgi/generated/eu.monnetproject.osgi.fileinstall.jar"/>
+	  </copy>
+	  <copy todir="dist/load">
+		  <fileset dir="load" includes="*"/>
+	  </copy>
+	  <copy todir="dist/framework">
+		  <fileset dir="../cnf/repo/org.apache.felix.framework" includes="*.jar"/>
+	  </copy>
+  </target>
+</project>

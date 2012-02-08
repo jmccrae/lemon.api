@@ -1,0 +1,14 @@
+-buildpath: 
+Private-Package: eu.monnetproject.lemon.impl.io,\
+eu.monnetproject.lemon.impl.io.turtle,\
+eu.monnetproject.lemon.impl.io.xml,\
+eu.monnetproject.lemon.liam.impl
+Export-Package: eu.monnetproject.lemon,\
+eu.monnetproject.lemon.impl,\
+eu.monnetproject.lemon.liam,\
+eu.monnetproject.lemon.model,\
+net.lexinfo,\
+eu.monnetproject.lemon.conversions.lmf,\
+eu.monnetproject.lemon.conversions.skosxl
+Bundle-Version: 1.12.1
+Include-Resource: src/main/resources
