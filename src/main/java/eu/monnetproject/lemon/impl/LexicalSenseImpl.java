@@ -395,6 +395,24 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof LexicalSenseImpl) {
+            final LexicalSenseImpl lsi = (LexicalSenseImpl)accepter;
+            if(this.refPref == null && lsi.refPref != null) {
+                this.refPref = lsi.refPref;
+            } else if(this.refPref != null && lsi.refPref != null && !this.refPref.equals(lsi.refPref)) {
+                throw new RuntimeException("Merge failure");
+            }
+            if(this.reference == null && lsi.reference != null) {
+                this.reference = lsi.reference;
+            } else if(this.reference != null && lsi.reference != null && !this.reference.equals(lsi.reference)) {
+                throw new RuntimeException("Merge failure");
+            }
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
 
     @Override
     public Map<URI,Collection<Object>> getElements() {

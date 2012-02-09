@@ -60,4 +60,8 @@ public class PrototypeImpl extends SimpleLemonElement<Prototype> implements Prot
         defaultAccept(pred, value, lang);
     }
     
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }    
 }

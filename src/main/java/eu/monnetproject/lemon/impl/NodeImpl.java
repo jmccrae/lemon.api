@@ -168,4 +168,17 @@ public class NodeImpl extends SimpleLemonElement implements Node {
             defaultAccept(pred, value, lang);
         }
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof NodeImpl) {
+            final NodeImpl ni = (NodeImpl)accepter;
+            if(separator == null && ni.separator != null) {
+                this.separator = ni.separator;
+            } else if(separator != null && ni.separator != null && !separator.equals(ni.separator)) {
+                throw new RuntimeException("Merge exception");
+            }
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

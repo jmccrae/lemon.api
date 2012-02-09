@@ -168,5 +168,16 @@ public class LexiconImpl extends SimpleLemonElement implements Lexicon {
         return elements;
     }
     
-    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof LexiconImpl) {
+            final LexiconImpl li = (LexiconImpl)accepter;
+            if(this.language == null && li.language != null) {
+                this.language = li.language;
+            } else if(this.language != null && li.language != null && !this.language.equals(li.language)) {
+                throw new RuntimeException("Merge exception");
+            }
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

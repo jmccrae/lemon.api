@@ -166,7 +166,7 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         } else if (lingOnto != null) {
             for (SynArg synArg : lingOnto.getSynArgs()) {
                 if (synArg.getURI().equals(pred)) {
-                    final ArgumentImpl argumentImpl = new ArgumentImpl(value);
+                    final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
                     addSynArg(synArg, argumentImpl);
                     return argumentImpl;
                 }
@@ -188,7 +188,7 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
         } else if (lingOnto != null) {
             for (SynArg synArg : lingOnto.getSynArgs()) {
                 if (synArg.getURI().equals(pred)) {
-                    final ArgumentImpl argumentImpl = new ArgumentImpl(value);
+                    final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
                     addSynArg(synArg, argumentImpl);
                     return argumentImpl;
                 }
@@ -200,5 +200,13 @@ public class FrameImpl extends SimpleLemonElement implements Frame {
     @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
+    }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof FrameImpl) {
+            this.components.addAll(((FrameImpl)accepter).components);
+        }
+        defaultMerge(accepter, lingOnto, factory);
     }
 }

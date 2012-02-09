@@ -206,5 +206,11 @@ public class FormImpl extends SimpleLemonElement implements LexicalForm {
         return rv;
     }
     
-    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof FormImpl) {
+            merge(this.reps,((FormImpl)accepter).reps);
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

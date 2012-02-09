@@ -75,4 +75,9 @@ public class ExampleImpl extends SimpleLemonElement implements Example {
             defaultAccept(pred, value, lang);
         }
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

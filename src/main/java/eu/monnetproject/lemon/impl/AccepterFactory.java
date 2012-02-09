@@ -60,6 +60,8 @@ public class AccepterFactory {
                     addAccepter(entry.getKey(), entry.getValue());
                 }
                 accepters.put(value, accept);
+            } else {
+                accepters.get(value).merge(accept, lingOnto, this);
             }
         }
     }

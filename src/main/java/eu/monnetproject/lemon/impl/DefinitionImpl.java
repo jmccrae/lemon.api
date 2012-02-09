@@ -75,4 +75,9 @@ public class DefinitionImpl extends SimpleLemonElement implements SenseDefinitio
             defaultAccept(pred, value, lang);
         }
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

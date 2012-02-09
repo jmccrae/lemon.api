@@ -92,6 +92,19 @@ public class MorphPatternImpl extends SimpleLemonElement<MorphPattern> implement
         defaultAccept(pred, value, lang);
     }
     
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof MorphPatternImpl) {
+            final MorphPatternImpl mpi = (MorphPatternImpl)accepter;
+            if(this.language == null && mpi.language != null) {
+                this.language = mpi.language;
+            } else if(this.language != null && mpi.language != null && !this.language.equals(mpi.language)) {
+                throw new RuntimeException("Merge Exception");
+            }
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
+    
     private String language;
     
     @Override

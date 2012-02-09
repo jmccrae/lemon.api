@@ -108,6 +108,8 @@ public class ReaderVisitor implements Visitor {
                     addAccepter(entry.getKey(), entry.getValue());
                 }
                 accepters.put(value, accept);
+            } else {
+                accepters.get(value).merge(accept, lingOnto, accepterFactory);
             }
         }
     }

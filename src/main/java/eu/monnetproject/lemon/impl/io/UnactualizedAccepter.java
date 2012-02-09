@@ -86,6 +86,20 @@ public class UnactualizedAccepter implements ReaderAccepter {
         return rval;
     }
 
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(!(accepter instanceof UnactualizedAccepter)) {
+            throw new RuntimeException("Merging actualized accepter into non-actualized accepter!");
+        } else {
+            final UnactualizedAccepter unact = (UnactualizedAccepter)accepter;
+            uRIStrStrs.addAll(unact.uRIStrStrs);
+            uRIStrings.addAll(unact.uRIStrings);
+            uriuris.addAll(unact.uriuris);
+        }
+    }
+    
+    
+
     private static class URIURI {
 
         private final URI pred;

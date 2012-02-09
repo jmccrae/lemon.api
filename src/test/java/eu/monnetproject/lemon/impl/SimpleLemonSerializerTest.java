@@ -4,22 +4,33 @@
  */
 package eu.monnetproject.lemon.impl;
 
+import eu.monnetproject.lemon.model.Text;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LemonModels;
+import eu.monnetproject.lemon.LemonSerializer;
 import eu.monnetproject.lemon.LinguisticOntology;
+import eu.monnetproject.lemon.model.Argument;
+import eu.monnetproject.lemon.model.Frame;
 import eu.monnetproject.lemon.model.LexicalEntry;
+import eu.monnetproject.lemon.model.LexicalForm;
+import eu.monnetproject.lemon.model.LexicalSense;
 import eu.monnetproject.lemon.model.Lexicon;
+import eu.monnetproject.lemon.model.Property;
+import eu.monnetproject.lemon.model.PropertyValue;
+import eu.monnetproject.lemon.model.SynArg;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import junit.framework.Assert;
+import java.util.Collection;
+import java.util.Map;
 import net.lexinfo.LexInfo;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -109,7 +120,7 @@ public class SimpleLemonSerializerTest {
         Writer target = new StringWriter();
         instance.write(model, target);
         System.out.println(target.toString());
-        Assert.assertEquals(expResult, target.toString().trim());
+        assertEquals(expResult, target.toString().trim());
     }
 
     private LemonModel lazyModel;
@@ -237,7 +248,7 @@ public class SimpleLemonSerializerTest {
         Writer dt = new StringWriter();
         boolean xml = false;
         instance.writeEntry(lm, le, lo, dt, xml);
-        Assert.assertEquals(expResult, dt.toString().trim());
+        assertEquals(expResult, dt.toString().trim());
     }
 
     /**
@@ -264,6 +275,73 @@ public class SimpleLemonSerializerTest {
         Writer dt = new StringWriter();
         boolean xml = false;
         instance.writeLexicon(lm, lxcn, lo, dt, xml);
-        Assert.assertEquals(expResult, dt.toString().trim());
+        assertEquals(expResult, dt.toString().trim());
+    }
+    
+    
+    private final String input = "@prefix MusicBrainzLexicon: <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>.\n"
+            + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n"
+            + "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.\n"
+            + "@prefix lemon: <http://www.monnet-project.eu/lemon#>.\n"
+            + "@prefix lexinfo: <http://www.lexinfo.net/ontology/2.0/lexinfo#>."
+            + "@prefix : <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>.\n\n"
+            + "MusicBrainzLexicon:lexicon a lemon:Lexicon ; lemon:entry MusicBrainzLexicon:collaborationOf.\n"
+            + "MusicBrainzLexicon:collaborationOf lemon:sense [ lemon:reference <http://purl.org/vocab/relationship/collaboratesWith> ;\n"
+            + "                                    lemon:subjOfProp :arg1collaboration ;\n"
+            + "                                   lemon:objOfProp  :arg2collaboration ] ;\n"
+            + " lexinfo:partOfSpeech lexinfo:noun ;\n"
+            + "lemon:synBehavior [ rdf:type lexinfo:NounPPFrame ;\n"
+            + " 	              lexinfo:subject :arg2collaboration ;\n"
+            + "                    lexinfo:prepositionalObject :arg1collaboration ] ;\n"
+            + "lexinfo:partOfSpeech lexinfo:noun ;\n"
+            + "lemon:canonicalForm [ lemon:writtenRep \"collaboration\"@en ;\n"
+            + "                      lexinfo:number lexinfo:singular ] ;\n"
+            + "lemon:otherForm [ lemon:writtenRep \"collaborations\"@en ;\n"
+            + "                  lexinfo:number lexinfo:plural ] .\n"
+            + ""
+            + ":arg2collaboration lemon:marker :Of.\n";
+
+    @Test
+    public void testSynArgRead() {
+        final LemonSerializer lemonSerializer = LemonSerializer.newInstance();
+        final LemonModel model = lemonSerializer.read(new StringReader(input));
+        final Collection<Lexicon> lexica = model.getLexica();
+        assertFalse(lexica.isEmpty());
+        final Lexicon lexicon = lexica.iterator().next();
+        final Collection<LexicalEntry> entrys = lexicon.getEntrys();
+        assertFalse(entrys.isEmpty());
+        final LexicalEntry entry = entrys.iterator().next();
+        final Collection<Frame> synBehaviors = entry.getSynBehaviors();
+        assertFalse(synBehaviors.isEmpty());
+        final Frame frame = synBehaviors.iterator().next();
+        final Map<SynArg, Collection<Argument>> synArgs = frame.getSynArgs();
+        assertFalse(synArgs.isEmpty());
+        final Map<Property, Collection<PropertyValue>> props = entry.getPropertys();
+        assertFalse(props.isEmpty());
+        final LexInfo lexInfo = new LexInfo();
+        final Property pos = lexInfo.getProperty("partOfSpeech");
+        final Collection<PropertyValue> pvs = entry.getProperty(pos);
+        assertFalse(pvs.isEmpty());
+        assertEquals(lexInfo.getPropertyValue("noun"),pvs.iterator().next());
+        final Collection<LexicalSense> senses = entry.getSenses();
+        assertFalse(senses.isEmpty());
+        final LexicalSense sense = senses.iterator().next();
+        assertEquals(URI.create("http://purl.org/vocab/relationship/collaboratesWith"), sense.getReference());
+        assertEquals(null, sense.getRefPref());
+        assertEquals(1,sense.getSubjOfProps().size());
+        assertFalse(sense.getObjOfProps().isEmpty());
+        assertTrue(sense.getIsAs().isEmpty());
+        final Argument subject = frame.getSynArg(lexInfo.getSynArg("subject")).iterator().next();
+        assertEquals(subject, sense.getObjOfProps().iterator().next());
+        assertNotNull(subject.getMarker());
+        assertEquals(2,frame.getTypes().size());
+        for(URI frameType : frame.getTypes()) {
+            assertTrue(URI.create("http://www.lexinfo.net/ontology/2.0/lexinfo#NounPPFrame").equals(frameType) ||
+                    URI.create("http://www.monnet-project.eu/lemon#Frame").equals(frameType));
+        }
+        assertFalse(entry.getOtherForms().isEmpty());
+        final LexicalForm otherForm = entry.getOtherForms().iterator().next();
+        assertEquals(new Text("collaborations","en"), otherForm.getWrittenRep());
+               
     }
 }

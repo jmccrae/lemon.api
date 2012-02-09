@@ -30,7 +30,9 @@ package eu.monnetproject.lemon.conversions.lmf;
  *
  * @author John McCrae
  */
+import eu.monnetproject.lemon.LemonFactory;
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.impl.LexiconImpl;
 import eu.monnetproject.lemon.model.Argument;
 import eu.monnetproject.lemon.model.Component;
 import eu.monnetproject.lemon.model.Edge;
@@ -47,6 +49,8 @@ import eu.monnetproject.lemon.model.Representation;
 import eu.monnetproject.lemon.model.SenseDefinition;
 import eu.monnetproject.lemon.model.SynArg;
 import eu.monnetproject.lemon.model.Text;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -522,8 +526,7 @@ public class LemonLMFConverter {
     }
 
     private static class ToLemon {
-
-
+        
         private static class StringPair {
 
             private final String s1, s2;
@@ -570,13 +573,18 @@ public class LemonLMFConverter {
 
         private static class LMFAugments {
 
-            private final Map<StringPair, Node> nodeMap;
-            private final Map<String, List<Node>> axisMap;
+            public final Map<StringPair, Node> nodeMap;
+            public final Map<String, List<Node>> axisMap;
+            private final LemonModel model;
+            public final LemonFactory factory;
 
-            public LMFAugments(Map<StringPair, Node> nodeMap, Map<String, List<Node>> axisMap) {
+            public LMFAugments(Map<StringPair, Node> nodeMap, Map<String, List<Node>> axisMap, LemonModel model) {
                 this.nodeMap = nodeMap;
                 this.axisMap = axisMap;
+                this.model = model;
+                this.factory = model.getFactory();
             }
+
             private final Map<String, LemonElement> idMap = new HashMap<String, LemonElement>();
             private String language = "und";
             private final Map<String, Argument> argMap = new HashMap<String, Argument>();
@@ -601,24 +609,42 @@ public class LemonLMFConverter {
             }
             return es;
         }
-        
+
         private String att(Element n, String p) {
             return n.getAttributes().getNamedItem(p).getTextContent();
         }
-        
+
         private List<Element> c(Node n, String tag) {
             final NodeList childNodes = n.getChildNodes();
             final LinkedList<Element> elems = new LinkedList<Element>();
-            for(int i = 0; i < childNodes.getLength(); i++) {
-                if(childNodes.item(i) instanceof Element && ((Element)childNodes.item(i)).getTagName().equals(tag)) {
-                    elems.add((Element)childNodes.item(i));
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                if (childNodes.item(i) instanceof Element && ((Element) childNodes.item(i)).getTagName().equals(tag)) {
+                    elems.add((Element) childNodes.item(i));
                 }
             }
             return elems;
         }
+        
+        private Element c1(Node n, String tag) {
+            final NodeList childNodes = n.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                if (childNodes.item(i) instanceof Element && ((Element) childNodes.item(i)).getTagName().equals(tag)) {
+                    return (Element) childNodes.item(i);
+                }
+            }
+            return null;
+        }
 
-        public List<Lexicon> lmf2lemon(Document lmfDoc) {
-            final LMFAugments augment = new LMFAugments(buildIDMap(lmfDoc), buildAxisMap(lmfDoc.getDocumentElement()));
+        private URI uri(String s1, String s2) {
+            try {
+                return URI.create(s1 + URLEncoder.encode(s2,"UTF-8"));
+            } catch(Exception x) {
+                throw new RuntimeException(x);
+            }
+        }
+        
+        public List<Lexicon> lmf2lemon(Document lmfDoc, LemonModel model) {
+            final LMFAugments augment = new LMFAugments(buildIDMap(lmfDoc), buildAxisMap(lmfDoc.getDocumentElement()),model);
 
             if (!lmfDoc.getDocumentElement().getTagName().equals("LexicalResource")) {
                 throw new IllegalArgumentException("Not an LMF file");
@@ -639,35 +665,90 @@ public class LemonLMFConverter {
 
         private void _buildIDMap(Node head, HashMap<StringPair, Node> map) {
             for (Element elem : e(head.getChildNodes())) {
-                if(att(elem,"id") != null) {
-                    map.put(new StringPair(elem.getTagName(), att(elem,"id")),elem);
+                if (att(elem, "id") != null) {
+                    map.put(new StringPair(elem.getTagName(), att(elem, "id")), elem);
                 }
                 _buildIDMap(elem, map);
             }
         }
-        
-        private Map<String,List<Node>> buildAxisMap(Element head) {
+
+        private Map<String, List<Node>> buildAxisMap(Element head) {
             final HashMap<String, List<Node>> map = new HashMap<String, List<Node>>();
-            
+
             for (Element senseAxis : e(head.getElementsByTagName("SenseAxis"))) {
-                for(Element senseAxisRelation : c(head,"SenseAxisRelation")) {
-                    for(String targ : att(senseAxisRelation,"id").split(" ")) {
-                        if(!map.containsKey(targ)) {
+                for (Element senseAxisRelation : c(head, "SenseAxisRelation")) {
+                    for (String targ : att(senseAxisRelation, "id").split(" ")) {
+                        if (!map.containsKey(targ)) {
                             map.put(targ, new LinkedList<Node>());
                         }
                         map.get(targ).add(senseAxis);
                     }
                 }
             }
-            
+
             // TODO: Target axes 
-            
+
             return map;
         }
+
+        private Lexicon readLexicon(Element lexiconNode, LMFAugments augment) {
+            String language = getFeatOrElse(lexiconNode, "language", "und");
+            augment.language = language;
+            final LinkedList<LexicalEntry> entries = new LinkedList<LexicalEntry>();
+            for (Element lexEntryNode : c(lexiconNode, "LexicalEntry")) {
+                entries.add(readLexicalEntry(lexEntryNode, augment));
+            }
+
+            // IGNORE: MorphologicalPattern
+            for (Element node : c(lexiconNode, "MorphologicalPattern")) {
+                System.err.println("Morphological patterns not supported by lemon. Ignoring " + att(node, "id"));
+            }
+            final LexiconImpl lexicon = new LexiconImpl(URI.create(getFeatOrElse(lexiconNode, "uri", "unknown:lexicon#lexicon")), augment.model);
+            for (LexicalEntry entry : entries) {
+                lexicon.addEntry(entry);
+            }
+            return lexicon;
+        }
         
+        private LemonElement getByID(Element node, LMFAugments augment) {
+            final String att = att(node,"id");
+            if(att != null) 
+                return augment.idMap.get(att);
+            else
+                return null;
+        }
         
-        private Lexicon readLexicon(Element lexicon, LMFAugments augment) {
+
+        private LexicalEntry readLexicalEntry(Element lexEntryNode, LMFAugments augment) {
+            if(getByID(lexEntryNode, augment) != null) {
+                return (LexicalEntry)getByID(lexEntryNode, augment);
+            }
+            final Element lemmaNode = c1(lexEntryNode,"Lemma");
+            if(lemmaNode == null)
+                throw new RuntimeException();
+            String canRep = getWrittenRep(lemmaNode,augment);
+            LexicalEntry entry = augment.factory.makeLexicalEntry(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#",canRep).toString())));
+            
+            
+                    
             throw new UnsupportedOperationException("Not yet implemented");
+        }
+
+        private String getWrittenRep(Element lemmaNode, LMFAugments augment) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+
+        private String getFeatOrElse(Element lexiconNode, String att, String def) {
+            final String val = getFeat(lexiconNode, att);
+            if (val == null) {
+                return def;
+            } else {
+                return val;
+            }
+        }
+
+        private String getFeat(Element lexiconNode, String att) {
+            return lexiconNode.getAttribute(att);
         }
     }
 }

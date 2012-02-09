@@ -59,4 +59,9 @@ public class ContextImpl extends SimpleLemonElement implements SenseContext {
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

@@ -26,24 +26,28 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
+import eu.monnetproject.lemon.URIElement;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
 import eu.monnetproject.lemon.impl.io.UnactualizedAccepter;
 import eu.monnetproject.lemon.model.Argument;
 import eu.monnetproject.lemon.model.SyntacticRoleMarker;
 import java.net.URI;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Instantiated via {@link SimpleLemonFactory}
  * @author John McCrae
  */
 public class ArgumentImpl extends SimpleLemonElement implements Argument {
-
+    private final int i = new Random().nextInt();
+    
+    
     ArgumentImpl(URI uri) {
         super(uri, "Argument");
+        System.err.println("arg " + i);
     }
 
     ArgumentImpl(String id) {
@@ -52,6 +56,7 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
 
     @Override
     public SyntacticRoleMarker getMarker() {
+        System.err.println("get arg " + i);
         return (SyntacticRoleMarker) getStrElem("marker");
     }
 
@@ -63,6 +68,7 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
     @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "marker")) {
+            setMarker(new UntypedMarker(value));
             return new UnactualizedAccepter() {
 
                 @Override
@@ -79,6 +85,7 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
     @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "marker")) {
+            setMarker(new UntypedMarker(bNode));
             return new UnactualizedAccepter() {
 
                 @Override
@@ -95,5 +102,24 @@ public class ArgumentImpl extends SimpleLemonElement implements Argument {
     @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         super.defaultAccept(pred, value, lang);
+    }
+
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }
+    
+    
+    
+    private static class UntypedMarker extends URIElement implements SyntacticRoleMarker {
+
+        public UntypedMarker(String id) {
+            super(id);
+        }
+
+        public UntypedMarker(URI uri) {
+            super(uri);
+        }
+        
     }
 }

@@ -26,16 +26,12 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.impl;
 
-import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.impl.io.UnactualizedAccepter;
 import eu.monnetproject.lemon.model.Component;
 import eu.monnetproject.lemon.model.LexicalEntry;
 import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Instantiated via {@link SimpleLemonFactory}
@@ -51,48 +47,48 @@ public class ComponentImpl extends SimpleLemonElement implements Component {
         super(id, "Component");
     }
 
+    @Override
     public LexicalEntry getElement() {
         return (LexicalEntry) getStrElem("element");
     }
 
+    @Override
     public void setElement(final LexicalEntry element) {
         setStrElem("element", element);
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"element")) {
-            return new UnactualizedAccepter() {
-
-                @Override
-                public Map<Object, ReaderAccepter> actualizedAs(ReaderAccepter actual, LinguisticOntology lingOnto, AccepterFactory factory) {
-                    setElement((LexicalEntry)actual);
-                    return super.actualizedAs(actual, lingOnto, factory);
-                }
-                
-            };
+            final LexicalEntryImpl lexicalEntryImpl = new LexicalEntryImpl(value);
+            setElement(lexicalEntryImpl);
+            return lexicalEntryImpl;
         } else {
             return defaultAccept(pred, value,lingOnto);
         }
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         
         if(pred.toString().equals(LemonModel.LEMON_URI+"element")) {
-            return new UnactualizedAccepter() {
-
-                @Override
-                public Map<Object, ReaderAccepter> actualizedAs(ReaderAccepter actual, LinguisticOntology lingOnto, AccepterFactory factory) {
-                    setElement((LexicalEntry)actual);
-                    return super.actualizedAs(actual, lingOnto, factory);
-                }
-                
-            };
+            final LexicalEntryImpl lexicalEntryImpl = new LexicalEntryImpl(bNode);
+            setElement(lexicalEntryImpl);
+            return lexicalEntryImpl;
         } else {
             return defaultAccept(pred, bNode);
         }
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultAccept(pred, value, lang);
     }
+
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        defaultMerge(accepter, lingOnto, factory);
+    }
+    
+    
 }

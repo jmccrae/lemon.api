@@ -453,4 +453,13 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     public void setHead(Component cmpnt) {
         setStrElem("head", cmpnt);
     }
+    
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof LexicalEntryImpl) {
+            this.components.addAll(((LexicalEntryImpl)accepter).components);
+        }
+    
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

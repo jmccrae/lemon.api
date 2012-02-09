@@ -156,4 +156,11 @@ public class MorphTransformImpl extends SimpleLemonElement<MorphTransform> imple
         }
     }
     
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof MorphTransformImpl) {
+            rules.addAll(((MorphTransformImpl)accepter).rules);
+        }
+        defaultMerge(accepter, lingOnto, factory);
+    }
 }

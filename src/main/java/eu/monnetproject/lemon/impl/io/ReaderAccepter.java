@@ -38,5 +38,5 @@ public interface ReaderAccepter {
     ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto,AccepterFactory factory);
     ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto,AccepterFactory factory);
     void accept(URI pred, String value, String lang, LinguisticOntology lingOnto,AccepterFactory factory);
-    
+    void merge(ReaderAccepter accepter, LinguisticOntology lingOnto,AccepterFactory factory);
 }

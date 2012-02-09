@@ -129,6 +129,7 @@ public class ListAccepter extends AbstractList<Component> implements ReaderAccep
     }
     
 
+    @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")) {
             this.value = factory.getComponentImpl(value);
@@ -141,6 +142,7 @@ public class ListAccepter extends AbstractList<Component> implements ReaderAccep
         }
     }
 
+    @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")) {
             this.value = factory.getComponentImpl(bNode);
@@ -153,9 +155,40 @@ public class ListAccepter extends AbstractList<Component> implements ReaderAccep
         }
     }
 
+    @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
         
     }
+
+    @Override
+    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(accepter instanceof ListAccepter) {
+            final ListAccepter accepter2 = (ListAccepter)accepter;
+            if(this.next == null) {
+                if(accepter2.next != null) {
+                    this.next = accepter2.next;
+                }
+            } else {
+                if(!accepter2.next.equals(this.next)) {
+                    throw new RuntimeException("Incompatible merge");
+                }
+            }
+            
+            if(this.value == null) {
+                if(accepter2.value != null) {
+                    this.value = accepter2.value;
+                }
+            } else {
+                if(!accepter2.value.equals(this.value)) {
+                    throw new RuntimeException("Incompatible merge");
+                }
+            }
+        } else if(accepter instanceof UnactualizedAccepter) {
+            ((UnactualizedAccepter)accepter).actualizedAs(this, lingOnto,factory);
+        }
+    }
+    
+    
     
     private static class ListAccepterIterator implements Iterator<Component> {
         ListAccepter node;

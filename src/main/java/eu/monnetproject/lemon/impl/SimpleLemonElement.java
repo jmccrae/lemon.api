@@ -31,6 +31,7 @@ import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.URIElement;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
+import eu.monnetproject.lemon.impl.io.UnactualizedAccepter;
 import eu.monnetproject.lemon.model.LemonElement;
 import eu.monnetproject.lemon.model.LemonPredicate;
 import eu.monnetproject.lemon.model.Property;
@@ -548,6 +549,45 @@ public abstract class SimpleLemonElement<Elem extends LemonElement> extends URIE
         System.err.println("Skipped triple: " + pred + " " + val + "@" + lang);
     }
 
+    protected <X,Y> void merge(Map<X,Collection<Y>> map1, Map<X,Collection<Y>> map2) {
+        for(X x : map2.keySet()) {
+            if(!map1.containsKey(x)) {
+                map1.put(x,map2.get(x));
+            } else {
+                for(Y y : map2.get(x)) {
+                    if(!map1.get(x).contains(y)) {
+                        map1.get(x).add(y);
+                    }
+                }
+            }
+        }
+    }
+    
+    protected <X> void merge(Collection<X> list1, Collection<X> list2) {
+        for(X x : list2) {
+            if(!list1.contains(x)) {
+                list1.add(x);
+            }
+        }
+    }
+    
+    protected void defaultMerge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(this == accepter)
+            return;
+        if(accepter instanceof SimpleLemonElement) {
+            final SimpleLemonElement sle = (SimpleLemonElement)accepter;
+            merge(this.annotations,sle.annotations);
+            merge(this.predElems,sle.predElems);
+            merge(this.referencers,sle.referencers);
+            this.strElem.putAll(sle.strElem);
+            merge(this.strElems,sle.strElem);
+            this.strText.putAll(sle.strText);
+            merge(this.types,sle.types);
+        } else if(accepter instanceof UnactualizedAccepter) {
+            ((UnactualizedAccepter)accepter).actualizedAs(this, lingOnto, factory);
+        }
+    }
+    
     protected boolean acceptProperties(URI pred, URI value, LinguisticOntology lingOnto) {
         try {
             if(pred.getFragment() != null && lingOnto.getProperty(pred.getFragment()) != null &&
