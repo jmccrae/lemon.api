@@ -25,8 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
-import java.net.URI;
-import java.util.*;
 
 /**
  * A constituent indicates the phrase type of a node in a phrase structure tree

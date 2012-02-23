@@ -25,38 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
-import java.util.*;
 
 /**
  * A predicate used to relate senses
  * @author John McCrae
  */
 public interface SenseRelation extends LemonPredicate {
-	/** The lemon super-property of all relations */
-	final SenseRelation senseRelation = new SenseRelation() {
-		public String toString() { return "senseRelation"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "senseRelation"); }
-	};
-	/** Indicates equivalence between the senses */
-	final SenseRelation equivalent = new SenseRelation() {
-		public String toString() { return "equivalent"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "equivalent"); }
-	};
-	/** Indicates incompatibility (disjointness) between the senses */
-	final SenseRelation incompatible = new SenseRelation() {
-		public String toString() { return "incompatible"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "incompatible"); }
-	};
-	/** Indicates that the target sense is narrower */
-	final SenseRelation narrower = new SenseRelation() {
-		public String toString() { return "narrower"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "narrower"); }
-	};
-	/** Indicates that the target sense is broader */
-	final SenseRelation broader = new SenseRelation() {
-		public String toString() { return "broader"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "broader"); }
-	};
+
+    /** The lemon super-property of all relations */
+    final SenseRelation senseRelation = new SenseRelationImpl(LemonModel.LEMON_URI + "senseRelation");
+    /** Indicates equivalence between the senses */
+    final SenseRelation equivalent = new SenseRelationImpl(LemonModel.LEMON_URI + "equivalent");
+    /** Indicates incompatibility (disjointness) between the senses */
+    final SenseRelation incompatible = new SenseRelationImpl(LemonModel.LEMON_URI + "incompatible");
+    /** Indicates that the target sense is narrower */
+    final SenseRelation narrower = new SenseRelationImpl(LemonModel.LEMON_URI + "narrower");
+    /** Indicates that the target sense is broader */
+    final SenseRelation broader = new SenseRelationImpl(LemonModel.LEMON_URI + "broader");
+}
+
+class SenseRelationImpl extends URIValue implements SenseRelation {
+
+    public SenseRelationImpl(String uri) {
+        super(URI.create(uri));
+    }
+    
 }

@@ -27,6 +27,7 @@
 package eu.monnetproject.lemon.model;
 
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
 
 /**
@@ -35,8 +36,13 @@ import java.net.URI;
  */
 public interface Definition extends LemonPredicate {
 	/** The lemon super-property for definition predicates */
-	final Definition definition = new Definition() {
-		public String toString() { return "definition"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "definition"); }
-	};
+	final Definition definition = new DefinitionImpl(LemonModel.LEMON_URI + "definition");
+}
+
+class DefinitionImpl extends URIValue implements Definition {
+
+    public DefinitionImpl(String uri) {
+        super(URI.create(uri));
+    }
+    
 }

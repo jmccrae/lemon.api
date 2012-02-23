@@ -25,8 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
-import java.net.URI;
-import java.util.*;
 
 /**
  * A topic for a lexicon or individual entry

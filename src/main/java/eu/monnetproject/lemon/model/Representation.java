@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIElement;
 import java.net.URI;
-import java.util.*;
 
 /**
  * The predicate for a representation of a form
@@ -35,8 +36,13 @@ import java.util.*;
  */
 public interface Representation extends LemonPredicate {
 	/** The lemon super-property of all representation properties */
-	final Representation representation = new Representation() {
-		public String toString() { return "representation"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "representation"); }
-	};
+	final Representation representation = new RepresentationImpl(URI.create(LemonModel.LEMON_URI + "representation"));
+}
+
+class RepresentationImpl extends URIElement implements Representation {
+
+    public RepresentationImpl(URI uri) {
+        super(uri);
+    }
+    
 }

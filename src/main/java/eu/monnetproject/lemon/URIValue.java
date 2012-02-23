@@ -53,7 +53,7 @@ public abstract class URIValue {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if(!(obj instanceof URIValue)) {
             return false;
         }
         final URIValue other = (URIValue) obj;
@@ -73,7 +73,7 @@ public abstract class URIValue {
     protected int getInfHash() {
         int hash = 3;
         for (Class interf : this.getClass().getInterfaces()) {
-            if (interf.getName().startsWith("eu.monnetproject.lemon.model")) {
+            if (interf.getName().startsWith("eu.monnetproject.lemon.model") && !interf.getName().endsWith("Impl")) {
                 hash += interf.getName().hashCode();
             }
         }

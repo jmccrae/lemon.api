@@ -44,6 +44,7 @@ public final class Text implements Serializable {
         this.language = language;
     }
 
+    @Override
     public String toString() {
         return "\"" + value + "\"@" + language.toString();
     }

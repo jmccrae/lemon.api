@@ -25,8 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
-import java.net.URI;
-import java.util.*;
 
 /**
  * Abstract class for the range of <code>leaf</code> arcs

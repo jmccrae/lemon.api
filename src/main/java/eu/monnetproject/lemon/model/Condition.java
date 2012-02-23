@@ -27,6 +27,7 @@
 package eu.monnetproject.lemon.model;
 
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
 
 /**
@@ -35,18 +36,17 @@ import java.net.URI;
  */
 public interface Condition extends LemonPredicate {
 	/** The lemon super-property for condition predicates */
-	final Condition condition = new Condition() {
-		public String toString() { return "condition"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "condition"); }
-	};
+	final Condition condition = new ConditionImpl(LemonModel.LEMON_URI + "condition");
 	/** Indicate a restriction on the domain of the property */
-	final Condition propertyDomain = new Condition() {
-		public String toString() { return "propertyDomain"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "propertyDomain"); }
-	};
+	final Condition propertyDomain = new ConditionImpl(LemonModel.LEMON_URI + "propertyDomain");
 	/** Indicates a restriction on the range of the property */
-	final Condition propertyRange = new Condition() {
-		public String toString() { return "propertyRange"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "propertyRange"); }
-	};
+	final Condition propertyRange = new ConditionImpl(LemonModel.LEMON_URI + "propertyRange");
+}
+
+class ConditionImpl extends URIValue implements Condition {
+
+    public ConditionImpl(String uri) {
+        super(URI.create(uri));
+    }
+    
 }

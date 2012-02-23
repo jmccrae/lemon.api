@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
-import java.util.*;
 
 /**
  * A property of a lemon element
@@ -35,8 +36,13 @@ import java.util.*;
  */
 public interface Property extends LemonPredicate {
 	/** The lemon super-property of all properties */
-	final Property property = new Property() {
-		public String toString() { return "property"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "property"); }
-	};
+	final Property property = new PropertyImpl(URI.create(LemonModel.LEMON_URI + "property"));
+}
+
+class PropertyImpl extends URIValue implements Property {
+
+    public PropertyImpl(URI uri) {
+        super(uri);
+    }
+    
 }

@@ -25,9 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
-import java.util.*;
+
 
 /**
  * A predicate indicating the syntactic role of an argument
@@ -35,8 +37,13 @@ import java.util.*;
  */
 public interface SynArg extends LemonPredicate { 
 	/** The lemon super-property of all syntactic arguments */
-	final SynArg synArg = new SynArg() {
-		public String toString() { return "synArg"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "synArg"); }
-	};
+	final SynArg synArg = new SynArgImpl(URI.create(LemonModel.LEMON_URI + "synArg"));
+}
+
+class SynArgImpl extends URIValue implements SynArg {
+
+    public SynArgImpl(URI uri) {
+        super(uri);
+    }
+    
 }

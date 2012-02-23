@@ -25,8 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /** 
  * A lexical sense indicates a meaning of an entry by mapping it to an ontology entity

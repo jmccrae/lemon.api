@@ -26,8 +26,8 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
-import java.util.*;
 
 /**
  * The predicate for a variant of a form
@@ -35,8 +35,14 @@ import java.util.*;
  */
 public interface FormVariant extends LemonPredicate {
 	/** The lemon super-property for form variants */
-	final FormVariant formVariant = new FormVariant() {
-		public String toString() { return "formVariant"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "formVariant"); }
-	};
+	final FormVariant formVariant = new FormVariantImpl(URI.create(LemonModel.LEMON_URI + "formVariant"));
 }
+
+class FormVariantImpl extends URIValue implements FormVariant {
+
+    public FormVariantImpl(URI uri) {
+        super(uri);
+    }
+    
+}
+        

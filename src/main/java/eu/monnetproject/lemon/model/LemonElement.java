@@ -26,8 +26,10 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
 
-import java.net.*;
-import java.util.*;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
+
 
 /**
  * The super-class for all lemon elements (individuals)

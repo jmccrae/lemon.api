@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
+
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIElement;
 import java.net.URI;
-import java.util.*;
 
 /** 
  * Predicate for variants between lexical entries
@@ -35,8 +36,13 @@ import java.util.*;
  */
 public interface LexicalVariant extends LemonPredicate {
 	/** The lemon super-property for lexical variants */
-	final LexicalVariant lexicalVariant = new LexicalVariant() {
-		public String toString() { return "lexicalVariant"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "lexicalVariant"); }
-	};
+	final LexicalVariant lexicalVariant = new LexicalVariantImpl(URI.create(LemonModel.LEMON_URI + "lexicalVariant"));
+}
+
+class LexicalVariantImpl extends URIElement implements LexicalVariant {
+
+    public LexicalVariantImpl(URI uri) {
+        super(uri);
+    }
+    
 }

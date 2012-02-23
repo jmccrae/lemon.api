@@ -116,8 +116,8 @@ public abstract class URIElement extends URIValue implements LemonElement {
     @Override
     public int hashCode() {
         int hash = getInfHash();
-        hash = 79 * hash + (this.id != null ? this.id.hashCode() : 0);
-        hash = 79 * hash + (this.getURI() != null ? this.getURI().hashCode() : 0);
+        hash = hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = hash + (this.getURI() != null ? this.getURI().hashCode() : 0);
         return hash;
     }
 

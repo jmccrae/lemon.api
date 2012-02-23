@@ -25,8 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
-import java.net.URI;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A syntactic frame describing a syntactic behavior of an entry

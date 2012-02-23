@@ -26,8 +26,8 @@
  *********************************************************************************/
 package eu.monnetproject.lemon.model;
 import eu.monnetproject.lemon.LemonModel;
+import eu.monnetproject.lemon.URIValue;
 import java.net.URI;
-import java.util.*;
 
 /**
  * An edge or arc in a phrase structure tree
@@ -35,8 +35,13 @@ import java.util.*;
  */
 public interface Edge extends LemonPredicate {
 	/** The lemon super-property for edges */
-	final Edge edge = new Edge() {
-		public String toString() { return "edge"; }
-		public URI getURI() { return URI.create(LemonModel.LEMON_URI + "edge"); }
-	};
+	final Edge edge = new EdgeImpl(LemonModel.LEMON_URI + "edge");
+}
+
+class EdgeImpl extends URIValue implements Edge {
+
+    public EdgeImpl(String uri) {
+        super(URI.create(uri));
+    }
+    
 }
