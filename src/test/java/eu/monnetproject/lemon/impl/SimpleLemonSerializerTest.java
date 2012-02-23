@@ -288,7 +288,8 @@ public class SimpleLemonSerializerTest {
             + "MusicBrainzLexicon:lexicon a lemon:Lexicon ; lemon:entry MusicBrainzLexicon:collaborationOf.\n"
             + "MusicBrainzLexicon:collaborationOf lemon:sense [ lemon:reference <http://purl.org/vocab/relationship/collaboratesWith> ;\n"
             + "                                    lemon:subjOfProp :arg1collaboration ;\n"
-            + "                                   lemon:objOfProp  :arg2collaboration ] ;\n"
+            + "                                   lemon:objOfProp  :arg2collaboration ;\n"
+            + "                                   lemon:propertyDomain :example ] ;\n"
             + " lexinfo:partOfSpeech lexinfo:noun ;\n"
             + "lemon:synBehavior [ rdf:type lexinfo:NounPPFrame ;\n"
             + " 	              lexinfo:subject :arg2collaboration ;\n"
@@ -331,6 +332,7 @@ public class SimpleLemonSerializerTest {
         assertEquals(1,sense.getSubjOfProps().size());
         assertFalse(sense.getObjOfProps().isEmpty());
         assertTrue(sense.getIsAs().isEmpty());
+        assertFalse(sense.getConditions().isEmpty());
         final Argument subject = frame.getSynArg(lexInfo.getSynArg("subject")).iterator().next();
         assertEquals(subject, sense.getObjOfProps().iterator().next());
         assertNotNull(subject.getMarker());
