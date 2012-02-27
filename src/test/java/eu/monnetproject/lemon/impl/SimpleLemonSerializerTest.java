@@ -10,6 +10,7 @@ import eu.monnetproject.lemon.LemonModels;
 import eu.monnetproject.lemon.LemonSerializer;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.model.Argument;
+import eu.monnetproject.lemon.model.Condition;
 import eu.monnetproject.lemon.model.Frame;
 import eu.monnetproject.lemon.model.LexicalEntry;
 import eu.monnetproject.lemon.model.LexicalForm;
@@ -333,6 +334,7 @@ public class SimpleLemonSerializerTest {
         assertFalse(sense.getObjOfProps().isEmpty());
         assertTrue(sense.getIsAs().isEmpty());
         assertFalse(sense.getConditions().isEmpty());
+        assertFalse(sense.getCondition(Condition.propertyDomain).isEmpty());
         final Argument subject = frame.getSynArg(lexInfo.getSynArg("subject")).iterator().next();
         assertEquals(subject, sense.getObjOfProps().iterator().next());
         assertNotNull(subject.getMarker());
