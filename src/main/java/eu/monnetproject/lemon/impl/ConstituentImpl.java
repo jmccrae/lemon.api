@@ -36,6 +36,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class ConstituentImpl extends SimpleLemonElement implements Constituent {
+    private static final long serialVersionUID = -7919650982044360527L;
 
     ConstituentImpl(URI uri) {
         super(uri, "Constituent");

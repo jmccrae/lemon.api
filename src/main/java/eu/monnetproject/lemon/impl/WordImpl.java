@@ -33,6 +33,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class WordImpl extends LexicalEntryImpl implements Word {
+    private static final long serialVersionUID = 736175757260710405L;
 	WordImpl(URI uri) { super(uri,"Word"); }
 	WordImpl(String id) { super(id,"Word"); }
 }

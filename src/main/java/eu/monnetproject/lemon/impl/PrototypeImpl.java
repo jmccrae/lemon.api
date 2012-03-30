@@ -36,6 +36,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class PrototypeImpl extends SimpleLemonElement<Prototype> implements Prototype {
+    private static final long serialVersionUID = 5793213109212070001L;
 
     public PrototypeImpl(String id) {
         super(id, "Prototype");

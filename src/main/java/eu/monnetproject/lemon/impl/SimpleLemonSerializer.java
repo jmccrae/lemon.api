@@ -47,13 +47,8 @@ public class SimpleLemonSerializer extends LemonSerializer {
  
     private final LinguisticOntology lingOnto;
 
-    /** Create a serializer */
-    public SimpleLemonSerializer() {
-        lingOnto = new LexInfo();
-    }
-
     public SimpleLemonSerializer(LinguisticOntology lingOnto) {
-        this.lingOnto = lingOnto;
+        this.lingOnto = lingOnto == null ? new LexInfo() : lingOnto;
     }
 
     @Override
@@ -76,6 +71,11 @@ public class SimpleLemonSerializer extends LemonSerializer {
         }
     }
 
+    @Override
+    public LemonModel create() {
+        return create(null);
+    }
+    
     @Override
     public LemonModel create(URI context) {
         return new SimpleLemonModel(context != null ? context.toString() : "unknown:lexicon");

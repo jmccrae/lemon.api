@@ -37,6 +37,7 @@ import eu.monnetproject.lemon.model.LemonPredicate;
 import eu.monnetproject.lemon.model.Property;
 import eu.monnetproject.lemon.model.PropertyValue;
 import eu.monnetproject.lemon.model.Text;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +51,7 @@ import java.util.Map;
  * Base class for element implementations
  * @author John McCrae
  */
-public abstract class SimpleLemonElement<Elem extends LemonElement> extends URIElement implements LemonElement, ReaderAccepter, IntrospectableElement {
+public abstract class SimpleLemonElement<Elem extends LemonElement> extends URIElement implements LemonElement, ReaderAccepter, IntrospectableElement, Serializable {
 
     private final HashMap<LemonPredicate, Collection<LemonElement>> predElems =
             new HashMap<LemonPredicate, Collection<LemonElement>>();
@@ -61,7 +62,7 @@ public abstract class SimpleLemonElement<Elem extends LemonElement> extends URIE
     private final HashMap<String, Text> strText =
             new HashMap<String, Text>();
     private HashSet<URI> types = new HashSet<URI>();
-    protected List<SimpleLemonElement> referencers = new LinkedList<SimpleLemonElement>();
+    protected List<SimpleLemonElement<?>> referencers = new LinkedList<SimpleLemonElement<?>>();
     private final HashMap<URI, Collection<Object>> annotations = new HashMap<URI, Collection<Object>>();
     private final String modelName;
 

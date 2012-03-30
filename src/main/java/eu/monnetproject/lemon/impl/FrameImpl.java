@@ -44,6 +44,7 @@ import java.util.*;
  * @author John McCrae
  */
 public class FrameImpl extends SimpleLemonElement implements Frame {
+    private static final long serialVersionUID = -2731269230726069536L;
 
     private final HashSet<List<Component>> components = new HashSet<List<Component>>();
 

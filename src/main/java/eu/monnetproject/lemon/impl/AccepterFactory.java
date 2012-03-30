@@ -75,7 +75,7 @@ public class AccepterFactory {
                 addAccepter(uri, accepter);
                 return accepter;
             } else {
-                throw new IllegalStateException();
+                throw new IllegalStateException("Model already contains object of type " + accepters.get(uri).getClass().getName() + " for URI: " + uri + " but was attempted to create as " + clazz.getName());
             }
         } else {
             return make(clazz, uri);
@@ -91,7 +91,7 @@ public class AccepterFactory {
                 addAccepter(bNode, accepter);
                 return accepter;
             } else {
-                throw new IllegalStateException();
+                throw new IllegalStateException("Model already contains object of type " + accepters.get(bNode).getClass().getName() + " for BNode: " + bNode + " but was attempted to create as " + clazz.getName());
             }
         } else {
             return make(clazz, bNode);

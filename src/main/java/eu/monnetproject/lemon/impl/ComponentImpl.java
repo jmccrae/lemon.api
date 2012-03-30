@@ -38,6 +38,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class ComponentImpl extends SimpleLemonElement implements Component {
+    private static final long serialVersionUID = 3066039691421245142L;
 
     ComponentImpl(URI uri) {
         super(uri, "Component");

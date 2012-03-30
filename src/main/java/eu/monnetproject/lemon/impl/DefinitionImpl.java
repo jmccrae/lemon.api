@@ -38,6 +38,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class DefinitionImpl extends SimpleLemonElement implements SenseDefinition {
+    private static final long serialVersionUID = 31654907228618356L;
 
     DefinitionImpl(URI uri) {
         super(uri, "Definition");

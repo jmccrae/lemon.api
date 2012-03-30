@@ -40,6 +40,7 @@ import eu.monnetproject.lemon.model.Lexicon;
  * @author John McCrae
  */
 public class LexiconImpl extends SimpleLemonElement implements Lexicon {
+    private static final long serialVersionUID = 2163929528117965687L;
 
     private String language;
     private LemonModel model;

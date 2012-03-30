@@ -36,6 +36,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class ConditionImpl extends SimpleLemonElement implements SenseCondition {
+    private static final long serialVersionUID = -1175673773960468804L;
 
     ConditionImpl(URI uri) {
         super(uri, "Condition");

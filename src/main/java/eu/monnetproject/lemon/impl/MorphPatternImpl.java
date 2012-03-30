@@ -41,6 +41,7 @@ import java.util.Map;
  * @author John McCrae
  */
 public class MorphPatternImpl extends SimpleLemonElement<MorphPattern> implements MorphPattern {
+    private static final long serialVersionUID = -6942196754150273136L;
 
     public MorphPatternImpl(String id) {
         super(id, "MorphPattern");

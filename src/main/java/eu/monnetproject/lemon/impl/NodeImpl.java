@@ -43,6 +43,7 @@ import java.util.*;
  * @author John McCrae
  */
 public class NodeImpl extends SimpleLemonElement implements Node {
+    private static final long serialVersionUID = 6829501075252056350L;
 
     private Text separator;
 

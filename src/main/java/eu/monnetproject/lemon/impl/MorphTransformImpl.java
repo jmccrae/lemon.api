@@ -41,6 +41,7 @@ import java.util.Set;
  * @author John McCrae
  */
 public class MorphTransformImpl extends SimpleLemonElement<MorphTransform> implements MorphTransform {
+    private static final long serialVersionUID = 5402920069758179942L;
 
     private Set<String> rules = new HashSet<String>();
     

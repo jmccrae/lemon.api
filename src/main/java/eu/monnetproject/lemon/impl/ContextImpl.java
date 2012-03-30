@@ -36,6 +36,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class ContextImpl extends SimpleLemonElement implements SenseContext {
+    private static final long serialVersionUID = 2200935241503958078L;
 
     ContextImpl(URI uri) {
         super(uri, "Context");

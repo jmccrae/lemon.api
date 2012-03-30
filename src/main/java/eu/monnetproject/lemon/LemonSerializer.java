@@ -50,6 +50,11 @@ public abstract class LemonSerializer {
     public abstract void read(LemonModel model, Reader source);
 
     /**
+     * Create a blank model. Equivalent to {@code create(null)}
+     */
+    public abstract LemonModel create();
+    
+    /**
      * Create a blank model
      * @param graph The context of the model or null for no context
      */
@@ -126,7 +131,7 @@ public abstract class LemonSerializer {
      * @return A lemon serializer
      */
     public final static LemonSerializer newInstance() {
-        return new SimpleLemonSerializer();
+        return new SimpleLemonSerializer(null);
     }
 
     /**

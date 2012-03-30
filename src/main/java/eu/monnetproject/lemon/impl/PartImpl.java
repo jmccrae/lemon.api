@@ -33,6 +33,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class PartImpl extends LexicalEntryImpl implements Part {
+    private static final long serialVersionUID = 1004261337659064364L;
 	PartImpl(URI uri) { super(uri,"Part"); }
 	PartImpl(String id) { super(id,"Part"); }
 }

@@ -33,6 +33,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class PhraseImpl extends LexicalEntryImpl implements Phrase {
+    private static final long serialVersionUID = 1410754390690275390L;
 	PhraseImpl(URI uri) { super(uri,"Phrase"); }
 	PhraseImpl(String id) { super(id,"Phrase"); }
 }

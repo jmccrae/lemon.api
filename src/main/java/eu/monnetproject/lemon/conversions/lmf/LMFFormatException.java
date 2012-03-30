@@ -24,61 +24,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
-package eu.monnetproject.lemon.impl;
-
-import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
-import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Text;
-import java.net.URI;
+package eu.monnetproject.lemon.conversions.lmf;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ *
  * @author John McCrae
  */
-public class ExampleImpl extends SimpleLemonElement implements Example {
-    private static final long serialVersionUID = 2991255226882942129L;
+public class LMFFormatException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
-    ExampleImpl(URI uri) {
-        super(uri, "Example");
-    }
-
-    ExampleImpl(String id) {
-        super(id, "Example");
+    public LMFFormatException(String message) {
+        super(message);
     }
 
-    @Override
-    public Text getValue() {
-        return getStrText("value");
+    public LMFFormatException(Throwable cause) {
+        super(cause);
     }
 
-    @Override
-    public void setValue(final Text value) {
-        setStrText("value", value);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value,lingOnto);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, bNode);
-    }
-
-    @Override
-    public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
-            setValue(new Text(value, lang));
-        } else {
-            defaultAccept(pred, value, lang);
-        }
-    }
-    
-    @Override
-    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
-        defaultMerge(accepter, lingOnto, factory);
-    }
 }

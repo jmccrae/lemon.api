@@ -42,6 +42,7 @@ import java.util.*;
  * @author John McCrae
  */
 public class FormImpl extends SimpleLemonElement implements LexicalForm {
+    private static final long serialVersionUID = 5932803932322555340L;
 
     public HashMap<Representation, Collection<Text>> reps = new HashMap<Representation, Collection<Text>>();
 

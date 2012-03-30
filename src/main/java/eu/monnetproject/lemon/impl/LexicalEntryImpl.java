@@ -50,6 +50,7 @@ import java.util.*;
  * @author John McCrae
  */
 public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> implements LexicalEntry {
+    private static final long serialVersionUID = -4744607952919065833L;
 
     private final HashSet<List<Component>> components = new HashSet<List<Component>>();
 

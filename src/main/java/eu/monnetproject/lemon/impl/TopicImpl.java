@@ -36,6 +36,7 @@ import java.net.URI;
  * @author John McCrae
  */
 public class TopicImpl extends SimpleLemonElement implements LexicalTopic {
+    private static final long serialVersionUID = 2397732933445668682L;
 
     TopicImpl(URI uri) {
         super(uri, "Topic");

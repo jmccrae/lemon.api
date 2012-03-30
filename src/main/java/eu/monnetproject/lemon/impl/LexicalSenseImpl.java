@@ -48,6 +48,7 @@ import java.util.*;
  * @author John McCrae
  */
 public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense {
+    private static final long serialVersionUID = -5234654151711425881L;
 
     private URI reference;
     private ReferencePreference refPref;

@@ -42,6 +42,7 @@ import java.util.Random;
  * @author John McCrae
  */
 public class ArgumentImpl extends SimpleLemonElement implements Argument {
+    private static final long serialVersionUID = -7363823973988514256L;
     private final int i = new Random().nextInt();
     
     
