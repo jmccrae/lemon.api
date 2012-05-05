@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io
+END
+Visitor.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/2453/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io/Visitor.java
+END
+UnactualizedAccepter.java
+K 25
+svn:wc:ra_dav:version-url
+V 137
+/monnet_dev/!svn/ver/2731/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io/UnactualizedAccepter.java
+END
+ReaderVisitor.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io/ReaderVisitor.java
+END
+ReaderAccepter.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/monnet_dev/!svn/ver/2731/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io/ReaderAccepter.java
+END
+ListAccepter.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/3123/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/io/ListAccepter.java
+END

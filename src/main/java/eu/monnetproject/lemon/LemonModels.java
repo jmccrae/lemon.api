@@ -26,6 +26,9 @@
  *********************************************************************************/
 package eu.monnetproject.lemon;
 
+import eu.monnetproject.lemon.impl.SPARQLResolver;
+import eu.monnetproject.lemon.impl.LemonModelImpl;
+import eu.monnetproject.lemon.impl.SPARULUpdater;
 import eu.monnetproject.lemon.model.PropertyValue;
 import eu.monnetproject.lemon.model.Text;
 import eu.monnetproject.lemon.model.LexicalForm;
@@ -38,6 +41,7 @@ import eu.monnetproject.lemon.liam.MorphologyEngine;
 import eu.monnetproject.lemon.liam.impl.MorphologyEngineImpl;
 import eu.monnetproject.lemon.model.MorphPattern;
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -250,22 +254,30 @@ public final class LemonModels {
      * @param model The model containing the appropriate lexica
      * @param sense The sense object
      */
-    public static List<LexicalEntry> getEntryBySense(LemonModel model, LexicalSense sense) {
-        LinkedList<LexicalEntry> rval = new LinkedList<LexicalEntry>();
-        String senseSparql;
-        if (sense.getURI() != null) {
-            senseSparql = "<" + sense.getURI() + ">";
+    @SuppressWarnings("unchecked")
+    public static LexicalEntry getEntryBySense(LemonModel model, LexicalSense sense) {
+        if(sense.getIsSenseOf() != null) {
+            return sense.getIsSenseOf();
         } else {
-            senseSparql = "_:" + sense.getID();
+            String senseSparql;
+            if (sense.getURI() != null) {
+                senseSparql = "<" + sense.getURI() + ">";
+            } else {
+                senseSparql = "_:" + sense.getID();
+            }
+            String query = "PREFIX lemon: <" + LemonModel.LEMON_URI + ">  "
+                    + "SELECT DISTINCT ?entry { "
+                    + "?entry lemon:sense " + senseSparql + " }";
+            System.err.println(query);
+            Iterator<LexicalEntry> iter = model.query(LexicalEntry.class, query);
+            if (iter.hasNext()) {
+                final LexicalEntry entry = iter.next();
+                sense.setIsSenseOf(entry);
+                return entry;
+            } else {
+                return null;
+            }
         }
-        String query = "PREFIX lemon: <" + LemonModel.LEMON_URI + ">  "
-                + "SELECT DISTINCT ?entry { "
-                + "?entry lemon:sense " + senseSparql + " }";
-        Iterator<LexicalEntry> iter = model.query(LexicalEntry.class, query);
-        while (iter.hasNext()) {
-            rval.add(iter.next());
-        }
-        return rval;
     }
 
     /**
@@ -559,5 +571,44 @@ public final class LemonModels {
             }
         }
         return null;
+    }
+    
+    /**
+     * Connect to a lemon model contained in a SPARQL endpoint
+     * @param endpoint The URL of the SPARQL endpoint
+     * @param graphs The graphs in the endpoint to use
+     * @param lingOnto The linguistic ontology to use (may be null)
+     * @return A model which resolves based on the endpoint
+     */
+    public static LemonModel sparqlEndpoint(URL endpoint, Set<URI> graphs, LinguisticOntology lingOnto) {
+        return new LemonModelImpl(null, new SPARQLResolver(endpoint, graphs, lingOnto));
+    }
+    
+    /**
+     * Connect to a lemon model in a repository supporting SPARQL and SPARQL update
+     * @param sparqlEndpoint The URL of the endpoint for querying, e.g., "http://localhost:8080/sparql"
+     * @param graph The graph to use in the endpoint
+     * @param lingOnto The linguistic ontology to use (may be null)
+     * @param updateEndpoint The URL pattern for the endpoint with query, e.g., "http://localhost:8080/sparql-auth?query="
+     * @return A model which resolves and updates based on the endpoint
+     */
+    public static LemonModel sparqlUpdateEndpoint(URL sparqlEndpoint, URI graph, LinguisticOntology lingOnto,
+            String updateEndpoint) {
+        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdater(updateEndpoint, graph));
+    }
+    
+    /**
+     * Connect to a lemon model in a repository supporting SPARQL and SPARQL update
+     * @param sparqlEndpoint The URL of the endpoint for querying, e.g., "http://localhost:8080/sparql"
+     * @param graph The graph to use in the endpoint
+     * @param lingOnto The linguistic ontology to use (may be null)
+     * @param updateEndpoint The URL pattern for the endpoint with query, e.g., "http://localhost:8080/sparql-auth?query="
+     * @param username The user name to use to authenticate
+     * @param password The password to use to authenticate
+     * @return A model which resolves and updates based on the endpoint
+     */
+    public static LemonModel sparqlUpdateEndpoint(URL sparqlEndpoint, URI graph, LinguisticOntology lingOnto,
+            String updateEndpoint, String username, String password) {
+        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdater(updateEndpoint, graph,username,password));
     }
 }

@@ -26,22 +26,17 @@
  *********************************************************************************/
 package eu.monnetproject.lemon;
 
-import eu.monnetproject.lemon.ElementVisitor;
-import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.model.FormVariant;
-import eu.monnetproject.lemon.model.LemonElement;
 import eu.monnetproject.lemon.model.LexicalVariant;
 import eu.monnetproject.lemon.model.SenseRelation;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
  * @author John McCrae
  */
-public abstract class AbstractVisitor<Element extends LemonElement> implements ElementVisitor<Element> {
+public abstract class AbstractVisitor implements ElementVisitor {
     private final HashSet<String> nofollows;
 
     public AbstractVisitor(LinguisticOntology lingOnto) {
@@ -59,6 +54,7 @@ public abstract class AbstractVisitor<Element extends LemonElement> implements E
         noFollow.add(LemonModel.LEMON_URI + "incompatible");
         noFollow.add(LemonModel.LEMON_URI + "element");
         noFollow.add(LemonModel.LEMON_URI + "marker");
+        noFollow.add(LemonModel.LEMON_URI + "isSenseOf");
         for (FormVariant var : lingOnto.getFormVariant()) {
             noFollow.add(var.getURI().toString());
         }

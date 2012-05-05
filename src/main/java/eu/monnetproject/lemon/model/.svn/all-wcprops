@@ -1,0 +1,173 @@
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model
+END
+SyntacticRoleMarker.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SyntacticRoleMarker.java
+END
+SynArg.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SynArg.java
+END
+LexicalEntry.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LexicalEntry.java
+END
+Representation.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Representation.java
+END
+SenseCondition.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SenseCondition.java
+END
+Text.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Text.java
+END
+Frame.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Frame.java
+END
+LexicalTopic.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LexicalTopic.java
+END
+SenseRelation.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SenseRelation.java
+END
+LexicalSense.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LexicalSense.java
+END
+Example.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Example.java
+END
+LemonElement.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LemonElement.java
+END
+LexicalForm.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LexicalForm.java
+END
+Constituent.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Constituent.java
+END
+LemonPredicate.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LemonPredicate.java
+END
+Node.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Node.java
+END
+LexicalVariant.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/LexicalVariant.java
+END
+SenseContext.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3128/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SenseContext.java
+END
+SenseDefinition.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/SenseDefinition.java
+END
+FormVariant.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/FormVariant.java
+END
+Component.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Component.java
+END
+Edge.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Edge.java
+END
+Argument.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Argument.java
+END
+PropertyValue.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/PropertyValue.java
+END
+Condition.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Condition.java
+END
+PhraseTerminal.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/PhraseTerminal.java
+END
+Property.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Property.java
+END
+Definition.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/model/Definition.java
+END

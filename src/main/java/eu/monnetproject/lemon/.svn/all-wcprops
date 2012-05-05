@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon
+END
+URIElement.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/URIElement.java
+END
+LemonRepository.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/3052/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonRepository.java
+END
+LemonModels.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/monnet_dev/!svn/ver/3123/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonModels.java
+END
+AbstractVisitor.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/AbstractVisitor.java
+END
+LemonRepositoryAlreadyClosedException.java
+K 25
+svn:wc:ra_dav:version-url
+V 146
+/monnet_dev/!svn/ver/3050/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonRepositoryAlreadyClosedException.java
+END
+LemonFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/monnet_dev/!svn/ver/2401/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonFactory.java
+END
+LemonModel.java
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/3068/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonModel.java
+END
+LemonSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LemonSerializer.java
+END
+URIValue.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/monnet_dev/!svn/ver/2759/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/URIValue.java
+END
+LinguisticOntology.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/2401/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/LinguisticOntology.java
+END
+SPARQLLemonRepository.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/SPARQLLemonRepository.java
+END
+ElementVisitor.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/ElementVisitor.java
+END

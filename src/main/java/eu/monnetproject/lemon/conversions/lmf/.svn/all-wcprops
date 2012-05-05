@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/conversions/lmf
+END
+LemonLMFConverter.java
+K 25
+svn:wc:ra_dav:version-url
+V 142
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/conversions/lmf/LemonLMFConverter.java
+END
+CollectionFunctions.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/monnet_dev/!svn/ver/2979/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/conversions/lmf/CollectionFunctions.java
+END
+LMFFormatException.java
+K 25
+svn:wc:ra_dav:version-url
+V 143
+/monnet_dev/!svn/ver/2979/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/conversions/lmf/LMFFormatException.java
+END

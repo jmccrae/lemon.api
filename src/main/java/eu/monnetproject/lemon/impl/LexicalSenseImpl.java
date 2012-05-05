@@ -34,6 +34,7 @@ import eu.monnetproject.lemon.model.Condition;
 import eu.monnetproject.lemon.model.Definition;
 import eu.monnetproject.lemon.model.Example;
 import eu.monnetproject.lemon.model.LemonPredicate;
+import eu.monnetproject.lemon.model.LexicalEntry;
 import eu.monnetproject.lemon.model.LexicalSense;
 import eu.monnetproject.lemon.model.LexicalSense.ReferencePreference;
 import eu.monnetproject.lemon.model.SenseCondition;
@@ -47,37 +48,78 @@ import java.util.*;
  * Instantiated via {@link SimpleLemonFactory}
  * @author John McCrae
  */
-public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense {
+public class LexicalSenseImpl extends LemonElementImpl<LexicalSense> implements LexicalSense {
     private static final long serialVersionUID = -5234654151711425881L;
 
     private URI reference;
     private ReferencePreference refPref;
+    private transient LexicalEntry entry;
 
-    LexicalSenseImpl(URI uri) {
-        super(uri, "LexicalSense");
+    LexicalSenseImpl(URI uri, LemonModelImpl model) {
+        super(uri, "LexicalSense",model);
     }
 
-    LexicalSenseImpl(String id) {
-        super(id, "LexicalSense");
+    LexicalSenseImpl(String id, LemonModelImpl model) {
+        super(id, "LexicalSense",model);
     }
 
     @Override
     public URI getReference() {
+        if(checkRemote) {
+            resolveRemote();
+        }
         return reference;
     }
 
     @Override
     public void setReference(final URI reference) {
+        checkRemote = false;
+        if(model.allowUpdate()) {
+            if(this.reference != null) {
+                if(getURI() != null) {
+                    model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI+"reference"), this.reference);
+                } else {
+                    model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI+"reference"), this.reference);
+                }
+            }
+            if(reference != null) {
+                if(getURI() != null) {
+                    model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI+"reference"), reference);
+                } else {
+                    model.updater().add(getID(), URI.create(LemonModel.LEMON_URI+"reference"), reference);
+                }
+            }
+        }
         this.reference = reference;
     }
 
     @Override
     public ReferencePreference getRefPref() {
+        if(checkRemote) {
+            resolveRemote();
+        }
         return refPref;
     }
 
     @Override
     public void setRefPref(final ReferencePreference refPref) {
+        checkRemote = false;
+        if(model.allowUpdate()) {
+            if(this.refPref != null) {
+                if(getURI() != null) {
+                    model.updater().remove(reference, URI.create(LemonModel.LEMON_URI+this.refPref.toString()), getURI());
+                } else {
+                    model.updater().remove(reference, URI.create(LemonModel.LEMON_URI+this.refPref.toString()), getID());
+                }
+            } 
+            if(refPref != null) {
+                if(getURI() != null) {
+                    model.updater().add(reference, URI.create(LemonModel.LEMON_URI+refPref.toString()), getURI());
+                } else {
+                    model.updater().add(reference, URI.create(LemonModel.LEMON_URI+refPref.toString()), getID());
+                }
+            }
+        }
         this.refPref = refPref;
     }
 
@@ -92,18 +134,21 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<SenseContext> getContexts() {
-        return (Collection<SenseContext>) getStrElems("context");
+        return (Collection) getStrElems("context");
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<Condition, Collection<SenseCondition>> getConditions() {
-        return (Map<Condition, Collection<SenseCondition>>) getPredElems(Condition.class);
+        return (Map) getPredElems(Condition.class);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<SenseCondition> getCondition(Condition predicate) {
-        return (Collection<SenseCondition>) getPredElem(predicate);
+        return (Collection) getPredElem(predicate);
     }
 
     @Override
@@ -117,8 +162,9 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Example> getExamples() {
-        return (Collection<Example>) getStrElems("example");
+        return (Collection) getStrElems("example");
     }
 
     @Override
@@ -132,13 +178,15 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<Definition, Collection<SenseDefinition>> getDefinitions() {
-        return (Map<Definition, Collection<SenseDefinition>>) getPredElems(Definition.class);
+        return (Map) getPredElems(Definition.class);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<SenseDefinition> getDefinition(Definition predicate) {
-        return (Collection<SenseDefinition>) getPredElem(predicate);
+        return (Collection) getPredElem(predicate);
     }
 
     @Override
@@ -152,8 +200,9 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Argument> getSubjOfProps() {
-        return (Collection<Argument>) getStrElems("subjOfProp");
+        return (Collection) getStrElems("subjOfProp");
     }
 
     @Override
@@ -167,8 +216,9 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Argument> getObjOfProps() {
-        return (Collection<Argument>) getStrElems("objOfProp");
+        return (Collection) getStrElems("objOfProp");
     }
 
     @Override
@@ -182,10 +232,11 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Argument> getIsAs() {
-        return (Collection<Argument>) getStrElems("isA");
+        return (Collection) getStrElems("isA");
     }
-
+    
     @Override
     public boolean addIsA(final Argument argument) {
         return addStrElem("isA", argument);
@@ -197,8 +248,9 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalSense> getSubsenses() {
-        return (Collection<LexicalSense>) getStrElems("subsense");
+        return (Collection) getStrElems("subsense");
     }
 
     @Override
@@ -212,13 +264,15 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<SenseRelation, Collection<LexicalSense>> getSenseRelations() {
-        return (Map<SenseRelation, Collection<LexicalSense>>) getPredElems(SenseRelation.class);
+        return (Map) getPredElems(SenseRelation.class);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalSense> getSenseRelation(final SenseRelation senseRelation) {
-        return (Collection<LexicalSense>) getPredElem(senseRelation);
+        return (Collection) getPredElem(senseRelation);
     }
 
     @Override
@@ -229,6 +283,20 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     @Override
     public boolean removeSenseRelation(final SenseRelation senseRelation, final LexicalSense senseRelationVal) {
         return addPredElem(senseRelation, senseRelationVal);
+    }
+
+    @Override
+    public LexicalEntry getIsSenseOf() {
+        return entry;
+    }
+
+    @Override
+    public void setIsSenseOf(LexicalEntry entry) {
+        this.entry = entry;
+    }
+    
+    void setEntry(LexicalEntry entry) {
+        this.entry = entry;
     }
 
     @Override
@@ -277,62 +345,62 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"context")) {
             final ContextImpl contextImpl = factory.getContextImpl(value);
-            addContext(contextImpl);
+            addStrElemDirect("context",contextImpl);
             return contextImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"example")) {
             final ExampleImpl exampleImpl = factory.getExampleImpl(value);
-            addExample(exampleImpl);
+            addStrElemDirect("example",exampleImpl);
             return exampleImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"isA")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addIsA(argumentImpl);
+            addStrElemDirect("isA",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"subjOfProp")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addSubjOfProp(argumentImpl);
+            addStrElemDirect("subjOfProp",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"objOfProp")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addObjOfProp(argumentImpl);
+            addStrElemDirect("objOfProp",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"reference")) {
-            setReference(value);
+            reference = value;
             return null;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"prefRef")) {
-            setReference(value);
-            setRefPref(ReferencePreference.prefRef);
+            reference = value;
+            refPref = ReferencePreference.prefRef;
             return null;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"altRef")) {
-            setReference(value);
-            setRefPref(ReferencePreference.altRef);
+            reference = value;
+            refPref = ReferencePreference.altRef;
             return null;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"hiddenRef")) {
-            setReference(value);
-            setRefPref(ReferencePreference.hiddenRef);
+            reference = value;
+            refPref = ReferencePreference.hiddenRef;
             return null;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"subsense")) {
             final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(value);
-            addSubsense(lexicalSenseImpl);
+            addStrElemDirect("subsense",lexicalSenseImpl);
             return lexicalSenseImpl;
         } else if(lingOnto != null) {
             for(Condition condition : lingOnto.getConditions()) {
                 if(condition.getURI().equals(pred)) {
                     final ConditionImpl conditionImpl = factory.getConditionImpl(value);
-                    addCondition(condition, conditionImpl);
+                    addPredElemDirect(condition, conditionImpl);
                     return conditionImpl;
                 }
             }
             for(Definition definitionPredicate : lingOnto.getDefinitions()) {
                 if(definitionPredicate.getURI().equals(pred)) {
                     final DefinitionImpl definitionImpl = factory.getDefinitionImpl(value);
-                    addDefinition(definitionPredicate, definitionImpl);
+                    addPredElemDirect(definitionPredicate, definitionImpl);
                     return definitionImpl;
                 }
             }
             for(SenseRelation senseRelation : lingOnto.getSenseRelation()) {
                 if(senseRelation.getURI().equals(pred)) {
-                    final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(pred);
-                    addSenseRelation(senseRelation, lexicalSenseImpl);
+                    final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(value);
+                    addPredElemDirect(senseRelation, lexicalSenseImpl);
                     return lexicalSenseImpl;
                 }
             }
@@ -344,47 +412,47 @@ public class LexicalSenseImpl extends SimpleLemonElement implements LexicalSense
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(pred.toString().equals(LemonModel.LEMON_URI+"context")) {
             final ContextImpl contextImpl = factory.getContextImpl(value);
-            addContext(contextImpl);
+            addStrElemDirect("context",contextImpl);
             return contextImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"example")) {
             final ExampleImpl exampleImpl = factory.getExampleImpl(value);
-            addExample(exampleImpl);
+            addStrElemDirect("example",exampleImpl);
             return exampleImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"isA")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addIsA(argumentImpl);
+            addStrElemDirect("isA",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"subjOfProp")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addSubjOfProp(argumentImpl);
+            addStrElemDirect("subjOfProp",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"objOfProp")) {
             final ArgumentImpl argumentImpl = factory.getArgumentImpl(value);
-            addObjOfProp(argumentImpl);
+            addStrElemDirect("objOfProp",argumentImpl);
             return argumentImpl;
         } else if(pred.toString().equals(LemonModel.LEMON_URI+"subsense")) {
             final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(value);
-            addSubsense(lexicalSenseImpl);
+            addStrElemDirect("subsense",lexicalSenseImpl);
             return lexicalSenseImpl;
         } else if(lingOnto != null) {
             for(Condition condition : lingOnto.getConditions()) {
                 if(condition.getURI().equals(pred)) {
                     final ConditionImpl conditionImpl = factory.getConditionImpl(value);
-                    addCondition(condition, conditionImpl);
+                    addPredElemDirect(condition, conditionImpl);
                     return conditionImpl;
                 }
             }
             for(Definition definitionPredicate : lingOnto.getDefinitions()) {
                 if(definitionPredicate.getURI().equals(pred)) {
                     final DefinitionImpl definitionImpl = factory.getDefinitionImpl(value);
-                    addDefinition(definitionPredicate, definitionImpl);
+                    addPredElemDirect(definitionPredicate, definitionImpl);
                     return definitionImpl;
                 }
             }
             for(SenseRelation senseRelation : lingOnto.getSenseRelation()) {
                 if(senseRelation.getURI().equals(pred)) {
                     final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(pred);
-                    addSenseRelation(senseRelation, lexicalSenseImpl);
+                    addPredElemDirect(senseRelation, lexicalSenseImpl);
                     return lexicalSenseImpl;
                 }
             }

@@ -42,6 +42,8 @@ import eu.monnetproject.lemon.model.LexicalTopic;
 import eu.monnetproject.lemon.model.LexicalVariant;
 import eu.monnetproject.lemon.model.MorphPattern;
 import eu.monnetproject.lemon.model.Node;
+import eu.monnetproject.lemon.model.Property;
+import eu.monnetproject.lemon.model.PropertyValue;
 import java.net.URI;
 import java.util.*;
 
@@ -49,90 +51,104 @@ import java.util.*;
  * Instantiated via {@link SimpleLemonFactory}
  * @author John McCrae
  */
-public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> implements LexicalEntry {
+public class LexicalEntryImpl extends LemonElementImpl<LexicalEntryImpl> implements LexicalEntry {
+    private static final String ABSTRACT_FORM = "abstractForm";
+    private static final String CANONICAL_FORM = "canonicalForm";
+    private static final String DECOMPOSITION = "decomposition";
+    private static final String FORM = "form";
+    private static final String OTHER_FORM = "otherForm";
+    private static final String PHRASE_ROOT = "phraseRoot";
+    private static final String SENSE = "sense";
+    private static final String TOPIC = "topic";
+    private static final String SYN_BEHAVIOR = "synBehavior";
     private static final long serialVersionUID = -4744607952919065833L;
 
     private final HashSet<List<Component>> components = new HashSet<List<Component>>();
 
-    LexicalEntryImpl(URI uri) {
-        super(uri, "LexicalEntry");
+    LexicalEntryImpl(URI uri, LemonModelImpl model) {
+        super(uri, "LexicalEntry",model);
     }
 
-    LexicalEntryImpl(String id) {
-        super(id, "LexicalEntry");
+    LexicalEntryImpl(String id, LemonModelImpl model) {
+        super(id, "LexicalEntry",model);
     }
 
-    LexicalEntryImpl(URI uri, String type) {
-        super(uri, type);
+    LexicalEntryImpl(URI uri, String type, LemonModelImpl model) {
+        super(uri, type,model);
     }
 
-    LexicalEntryImpl(String id, String type) {
-        super(id, type);
+    LexicalEntryImpl(String id, String type, LemonModelImpl model) {
+        super(id, type,model);
     }
 
     @Override
     public LexicalForm getCanonicalForm() {
-        return (LexicalForm) getStrElem("canonicalForm");
+        return (LexicalForm) getStrElem(CANONICAL_FORM);
     }
 
     @Override
     public void setCanonicalForm(final LexicalForm canonicalForm) {
-        setStrElem("canonicalForm", canonicalForm);
+        setStrElem(CANONICAL_FORM, canonicalForm);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalForm> getOtherForms() {
-        return (Collection<LexicalForm>) getStrElems("otherForm");
+        return (Collection) getStrElems(OTHER_FORM);
     }
 
     @Override
     public boolean addOtherForm(final LexicalForm otherForm) {
-        return addStrElem("otherForm", otherForm);
+        return addStrElem(OTHER_FORM, otherForm);
     }
 
     @Override
     public boolean removeOtherForm(final LexicalForm otherForm) {
-        return removeStrElem("otherForm", otherForm);
+        return removeStrElem(OTHER_FORM, otherForm);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalForm> getAbstractForms() {
-        return (Collection<LexicalForm>) getStrElems("abstractForm");
+        return (Collection) getStrElems(ABSTRACT_FORM);
     }
 
     @Override
     public boolean addAbstractForm(final LexicalForm abstractForm) {
-        return addStrElem("abstractForm", abstractForm);
+        return addStrElem(ABSTRACT_FORM, abstractForm);
     }
 
     @Override
     public boolean removeAbstractForm(final LexicalForm abstractForm) {
-        return removeStrElem("abstractForm", abstractForm);
+        return removeStrElem(ABSTRACT_FORM, abstractForm);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalTopic> getTopics() {
-        return (Collection<LexicalTopic>) getStrElems("topic");
+        return (Collection) getStrElems(TOPIC);
     }
 
     @Override
     public boolean addTopic(final LexicalTopic topic) {
-        return addStrElem("topic", topic);
+        return addStrElem(TOPIC, topic);
     }
 
     @Override
     public boolean removeTopic(final LexicalTopic topic) {
-        return removeStrElem("topic", topic);
+        return removeStrElem(TOPIC, topic);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<LexicalVariant, Collection<LexicalEntry>> getLexicalVariants() {
-        return (Map<LexicalVariant, Collection<LexicalEntry>>) getPredElems(LexicalVariant.class);
+        return (Map)getPredElems(LexicalVariant.class);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalEntry> getLexicalVariant(final LexicalVariant lexicalVariant) {
-        return (Collection<LexicalEntry>) getPredElem(lexicalVariant);
+        return (Collection) getPredElem(lexicalVariant);
     }
 
     @Override
@@ -146,30 +162,57 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Frame> getSynBehaviors() {
-        return (Collection<Frame>) getStrElems("synBehavior");
+        return (Collection) getStrElems(SYN_BEHAVIOR);
     }
 
     @Override
     public boolean addSynBehavior(final Frame synBehavior) {
-        return addStrElem("synBehavior", synBehavior);
+        return addStrElem(SYN_BEHAVIOR, synBehavior);
     }
 
     @Override
     public boolean removeSynBehavior(final Frame synBehavior) {
-        return removeStrElem("synBehavior", synBehavior);
+        return removeStrElem(SYN_BEHAVIOR, synBehavior);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<List<Component>> getDecompositions() {
+        if(checkRemote) {
+            resolveRemote();
+            final ArrayList<List<Component>> compCopy = new ArrayList<List<Component>>(components);
+            for(List<Component> comps : compCopy) {
+                if(comps instanceof ListAccepter) {
+                    final List<Component> list = (List)model.resolver().resolveRemoteList(((ListAccepter)comps).head());
+                    if(list != null) {
+                        components.remove(comps);
+                        components.add(list);
+                    }
+                } 
+            }
+        }
         return Collections.unmodifiableSet(components);
     }
 
     @Override
     public void addDecomposition(List<Component> comps) {
+        checkRemote = false;
+        if(model.allowUpdate()) {
+            List<Object> compIds = new ArrayList<Object>(comps.size());
+            for(Component comp : comps) {
+                compIds.add(comp.getURI() == null ? comp.getID() : comp.getURI());
+            }
+            if(getURI() != null) {
+                model.updater().addList(getURI(), URI.create(LemonModel.LEMON_URI+DECOMPOSITION), compIds);
+            } else {
+                model.updater().addList(getID(), URI.create(LemonModel.LEMON_URI+DECOMPOSITION), compIds);
+            }
+        }
         for (Component comp : comps) {
-            if (comp instanceof SimpleLemonElement) {
-                ((SimpleLemonElement) comp).addReference(this);
+            if (comp instanceof LemonElementImpl) {
+                ((LemonElementImpl<?>) comp).addReference(this);
             }
         }
         components.add(comps);
@@ -177,47 +220,64 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
 
     @Override
     public boolean removeDecomposition(List<Component> comps) {
+        checkRemote = false;
+        if(model.allowUpdate()) {
+            List<Object> compIds = new ArrayList<Object>(comps.size());
+            for(Component comp : comps) {
+                compIds.add(comp.getURI() == null ? comp.getID() : comp.getURI());
+            }
+            if(getURI() != null) {
+                model.updater().removeList(getURI(), URI.create(LemonModel.LEMON_URI+DECOMPOSITION), compIds);
+            } else {
+                model.updater().removeList(getID(), URI.create(LemonModel.LEMON_URI+DECOMPOSITION), compIds);
+            }
+        }
         for (Component comp : comps) {
-            if (comp instanceof SimpleLemonElement) {
-                ((SimpleLemonElement) comp).removeReference(this);
+            if (comp instanceof LemonElementImpl) {
+                ((LemonElementImpl<?>) comp).removeReference(this);
             }
         }
         return components.remove(comps);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LexicalSense> getSenses() {
-        return (Collection<LexicalSense>) getStrElems("sense");
+        return (Collection) getStrElems(SENSE);
     }
 
     @Override
     public boolean addSense(final LexicalSense sense) {
-        return addStrElem("sense", sense);
+        sense.setIsSenseOf(this);
+        return addStrElem(SENSE, sense);
     }
 
     @Override
     public boolean removeSense(final LexicalSense sense) {
-        return removeStrElem("sense", sense);
+        sense.setIsSenseOf(null);
+        return removeStrElem(SENSE, sense);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Node> getPhraseRoots() {
-        return (Collection<Node>) getStrElems("phraseRoot");
+        return (Collection) getStrElems(PHRASE_ROOT);
     }
 
     @Override
     public boolean addPhraseRoot(final Node phraseRoot) {
-        return addStrElem("phraseRoot", phraseRoot);
+        return addStrElem(PHRASE_ROOT, phraseRoot);
     }
 
     @Override
     public boolean removePhraseRoot(final Node phraseRoot) {
-        return addStrElem("phraseRoot", phraseRoot);
+        return addStrElem(PHRASE_ROOT, phraseRoot);
     }
 
     @Override
     public Collection<LexicalForm> getForms() {
-        LinkedList<LexicalForm> forms = new LinkedList<LexicalForm>(getStrElems("form"));
+        @SuppressWarnings("unchecked")
+        LinkedList<LexicalForm> forms = new LinkedList<LexicalForm>((Collection)getStrElems(FORM));
         if(getCanonicalForm() != null) {
             forms.add(getCanonicalForm());
         }
@@ -228,12 +288,12 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
 
     @Override
     public boolean addForm(final LexicalForm form) {
-        return addStrElem("form", form);
+        return addStrElem(FORM, form);
     }
 
     @Override
     public boolean removeForm(final LexicalForm form) {
-        return removeStrElem("form", form);
+        return removeStrElem(FORM, form);
     }
 
     @Override
@@ -288,8 +348,8 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     public void doAccept(ElementVisitor visitor) {
         for (List<Component> compList : components) {
             for (Component comp : compList) {
-                if (comp instanceof SimpleLemonElement) {
-                    ((SimpleLemonElement) comp).accept(visitor);
+                if (comp instanceof LemonElementImpl) {
+                    ((LemonElementImpl) comp).accept(visitor);
                 }
             }
         }
@@ -298,9 +358,9 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     @Override
     public Map<URI, Collection<Object>> getElements() {
         final Map<URI, Collection<Object>> elements = super.getElements();
-        final URI decomposition = URI.create(LemonModel.LEMON_URI+"decomposition");
+        final URI decomposition = URI.create(LemonModel.LEMON_URI+DECOMPOSITION);
         if(!components.isEmpty()) {
-            elements.put(decomposition,new LinkedList());
+            elements.put(decomposition,new LinkedList<Object>());
         }
         for(List<Component> compList : components) {
             elements.get(decomposition).add(compList);
@@ -314,8 +374,8 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     public void clearAll() {
         for (List<Component> compList : components) {
             for (Component comp : compList) {
-                if (comp instanceof SimpleLemonElement) {
-                    ((SimpleLemonElement) comp).referencers.remove(this);
+                if (comp instanceof LemonElementImpl) {
+                    ((LemonElementImpl) comp).referencers.remove(this);
                 }
             }
         }
@@ -325,49 +385,59 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
 
     @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if (pred.toString().equals(LemonModel.LEMON_URI + "abstractForm")) {
+        if (pred.toString().equals(LemonModel.LEMON_URI + ABSTRACT_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addAbstractForm(formImpl);
+            addStrElemDirect(ABSTRACT_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "canonicalForm")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + CANONICAL_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            setCanonicalForm(formImpl);
+            setStrElemDirect(CANONICAL_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "otherForm")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + OTHER_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addOtherForm(formImpl);
+            addStrElemDirect(OTHER_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "form")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addForm(formImpl);
+            addStrElemDirect(FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "decomposition")) {
-            final ListAccepter listAccepter = new ListAccepter();
-            addDecomposition(listAccepter);
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + DECOMPOSITION)) {
+            final ListAccepter listAccepter = new ListAccepter(value);
+            components.add(listAccepter);
             return listAccepter;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "phraseRoot")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + PHRASE_ROOT)) {
             final NodeImpl nodeImpl = factory.getNodeImpl(value);
-            addPhraseRoot(nodeImpl);
+            addStrElemDirect(PHRASE_ROOT,nodeImpl);
             return nodeImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "sense")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + SENSE)) {
             final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(value);
-            addSense(lexicalSenseImpl);
+            addStrElemDirect(SENSE,lexicalSenseImpl);
+            lexicalSenseImpl.setEntry(this);
             return lexicalSenseImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "synBehavior")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + SYN_BEHAVIOR)) {
             final FrameImpl frameImpl = factory.getFrameImpl(value);
-            addSynBehavior(frameImpl);
+            addStrElemDirect(SYN_BEHAVIOR, frameImpl);
             return frameImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "topic")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + TOPIC)) {
             final TopicImpl topicImpl = factory.getTopicImpl(value);
-            addTopic(topicImpl);
+            addStrElemDirect(TOPIC, topicImpl);
             return topicImpl;
         }
         if(lingOnto != null) {
             for(LexicalVariant lexicalVariant : lingOnto.getLexicalVariant()) {
                 if(lexicalVariant.getURI().equals(pred)) {
                     final LexicalEntryImpl lexicalEntryImpl = factory.getLexicalEntryImpl(value);
-                    addLexicalVariant(lexicalVariant, lexicalEntryImpl);
+                    addPredElemDirect(lexicalVariant, lexicalEntryImpl);
                     return lexicalEntryImpl;
+                }
+            }
+            for(Property property : lingOnto.getProperties()) {
+                if(property.getURI().equals(pred)) {
+                    final PropertyValue propertyValue = lingOnto.getPropertyValue(value.getFragment());
+                    if(propertyValue != null) {
+                        addPredElemDirect(property, propertyValue);
+                        return null;
+                    }
                 }
             }
         }
@@ -376,48 +446,50 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
 
     @Override
     public ReaderAccepter accept(URI pred, String value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if (pred.toString().equals(LemonModel.LEMON_URI + "abstractForm")) {
+        if (pred.toString().equals(LemonModel.LEMON_URI + ABSTRACT_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addAbstractForm(formImpl);
+            addStrElemDirect(ABSTRACT_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "canonicalForm")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + CANONICAL_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            setCanonicalForm(formImpl);
+            setStrElemDirect(CANONICAL_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "otherForm")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + OTHER_FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addOtherForm(formImpl);
+            addStrElemDirect(OTHER_FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "form")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + FORM)) {
             final FormImpl formImpl = factory.getFormImpl(value);
-            addForm(formImpl);
+            addStrElemDirect(FORM,formImpl);
             return formImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "decomposition")) {
-            final ListAccepter listAccepter = new ListAccepter();
-            addDecomposition(listAccepter);
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + DECOMPOSITION)) {
+            final ListAccepter listAccepter = new ListAccepter(value);
+            components.add(listAccepter);
             return listAccepter;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "phraseRoot")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + PHRASE_ROOT)) {
             final NodeImpl nodeImpl = factory.getNodeImpl(value);
-            addPhraseRoot(nodeImpl);
+            addStrElemDirect(PHRASE_ROOT,nodeImpl);
             return nodeImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "sense")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + SENSE)) {
             final LexicalSenseImpl lexicalSenseImpl = factory.getLexicalSenseImpl(value);
-            addSense(lexicalSenseImpl);
+            addStrElemDirect(SENSE,lexicalSenseImpl);
+            lexicalSenseImpl.setEntry(this);
             return lexicalSenseImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "synBehavior")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + SYN_BEHAVIOR)) {
             final FrameImpl frameImpl = factory.getFrameImpl(value);
-            addSynBehavior(frameImpl);
+            addStrElemDirect(SYN_BEHAVIOR, frameImpl);
             return frameImpl;
-        } else if (pred.toString().equals(LemonModel.LEMON_URI + "topic")) {
+        } else if (pred.toString().equals(LemonModel.LEMON_URI + TOPIC)) {
             final TopicImpl topicImpl = factory.getTopicImpl(value);
-            addTopic(topicImpl);
+            addStrElemDirect(TOPIC, topicImpl);
             return topicImpl;
         }
         if(lingOnto != null) {
             for(LexicalVariant lexicalVariant : lingOnto.getLexicalVariant()) {
                 if(lexicalVariant.getURI().equals(pred)) {
                     final LexicalEntryImpl lexicalEntryImpl = factory.getLexicalEntryImpl(value);
-                    addLexicalVariant(lexicalVariant, lexicalEntryImpl);
+                    //addLexicalVariant(lexicalVariant, lexicalEntryImpl);
+                    addPredElemDirect(lexicalVariant, lexicalEntryImpl);
                     return lexicalEntryImpl;
                 }
             }
@@ -431,8 +503,9 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<MorphPattern> getPatterns() {
-        return (Collection<MorphPattern>)getStrElems("pattern");
+        return (Collection)getStrElems("pattern");
     }
 
     @Override
@@ -462,5 +535,11 @@ public class LexicalEntryImpl extends SimpleLemonElement<LexicalEntryImpl> imple
         }
     
         defaultMerge(accepter, lingOnto, factory);
+    }
+
+    @Override
+    protected void resolveRemote() {
+        checkRemote = false;
+        model.resolver().resolveRemote(model, this,3);
     }
 }

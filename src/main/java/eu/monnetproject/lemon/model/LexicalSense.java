@@ -108,4 +108,8 @@ public interface LexicalSense extends LemonElement {
 	boolean addSenseRelation(final SenseRelation senseRelation, final LexicalSense senseRelationVal);
 	/** Remove a related sense */
 	boolean removeSenseRelation(final SenseRelation senseRelation, final LexicalSense senseRelationVal);
+        /** Get the lexical entry this sense is attached to */
+        LexicalEntry getIsSenseOf();
+        /** Set the lexical entry this sense is attached to (avoid calling) */
+        void setIsSenseOf(LexicalEntry entry);
 }

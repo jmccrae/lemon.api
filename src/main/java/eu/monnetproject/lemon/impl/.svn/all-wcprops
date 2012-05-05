@@ -1,0 +1,215 @@
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl
+END
+HttpResolver.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/HttpResolver.java
+END
+LexicalEntryImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LexicalEntryImpl.java
+END
+RemoteResolver.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/RemoteResolver.java
+END
+LexicalSenseImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LexicalSenseImpl.java
+END
+ExampleImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ExampleImpl.java
+END
+LemonElementImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LemonElementImpl.java
+END
+MorphPatternImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/MorphPatternImpl.java
+END
+ConstituentImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ConstituentImpl.java
+END
+PrototypeImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/PrototypeImpl.java
+END
+SerializationState.java
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/monnet_dev/!svn/ver/2401/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/SerializationState.java
+END
+RemoteUpdateException.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/monnet_dev/!svn/ver/3119/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/RemoteUpdateException.java
+END
+ArgumentImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ArgumentImpl.java
+END
+ComponentImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ComponentImpl.java
+END
+CopyVisitor.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/CopyVisitor.java
+END
+PhraseImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/PhraseImpl.java
+END
+LexiconImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LexiconImpl.java
+END
+IntrospectableElement.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/monnet_dev/!svn/ver/2401/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/IntrospectableElement.java
+END
+PartImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/PartImpl.java
+END
+TopicImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/TopicImpl.java
+END
+ContextImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/monnet_dev/!svn/ver/3128/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ContextImpl.java
+END
+SPARQLResolver.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/SPARQLResolver.java
+END
+FrameImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/FrameImpl.java
+END
+WordImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/WordImpl.java
+END
+LemonSerializerImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/monnet_dev/!svn/ver/3123/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LemonSerializerImpl.java
+END
+FormImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/FormImpl.java
+END
+MorphTransformImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 132
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/MorphTransformImpl.java
+END
+SPARULUpdater.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3123/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/SPARULUpdater.java
+END
+RemoteUpdater.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3123/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/RemoteUpdater.java
+END
+NodeImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/NodeImpl.java
+END
+LexiconResolver.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/3116/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LexiconResolver.java
+END
+ConditionImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/ConditionImpl.java
+END
+LemonFactoryImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/monnet_dev/!svn/ver/3120/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LemonFactoryImpl.java
+END
+LemonModelImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/3127/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/LemonModelImpl.java
+END
+AccepterFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/monnet_dev/!svn/ver/3126/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/AccepterFactory.java
+END
+DefinitionImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/monnet_dev/!svn/ver/3128/sources/trunk/eu.monnetproject.lemon.api/src/main/java/eu/monnetproject/lemon/impl/DefinitionImpl.java
+END
