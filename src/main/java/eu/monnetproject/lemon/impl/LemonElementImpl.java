@@ -54,8 +54,8 @@ import java.util.Map;
  * @author John McCrae
  */
 public abstract class LemonElementImpl<Elem extends LemonElement> extends URIElement implements LemonElement, ReaderAccepter, IntrospectableElement, Serializable {
-    public static final URI RDF_TYPE = URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 
+    public static final URI RDF_TYPE = URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
     private final HashMap<LemonPredicate, Collection<LemonElement>> predElems =
             new HashMap<LemonPredicate, Collection<LemonElement>>();
     private final HashMap<String, Collection<LemonElement>> strElems =
@@ -128,13 +128,13 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
     @Override
     public void addType(URI uri) {
         checkRemote = false;
-        if(model.allowUpdate()) {
-            if(getURI() != null) {
+        if (model.allowUpdate()) {
+            if (getURI() != null) {
                 model.updater().add(getURI(), RDF_TYPE, uri);
             }
         }
         addTypeDirect(uri);
-        
+
     }
 
     protected boolean addStrElemDirect(String p, LemonElement e) {
@@ -144,7 +144,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         }
         return strElems.get(p).add(e);
     }
-    
+
     protected void addTypeDirect(URI uri) {
         checkRemote = false;
         types.add(uri);
@@ -165,11 +165,13 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<Object> getAnnotations(URI uri) {
         if (checkRemote) {
             resolveRemote();
         }
-        return annotations.get(uri);
+        final Collection<Object> annos = annotations.get(uri);
+        return annos == null ? Collections.EMPTY_LIST : annos;
     }
 
     @Override
@@ -189,7 +191,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
     public boolean removeAnnotation(URI uri, Object o) {
         checkRemote = false;
         if (o instanceof URI || o instanceof String || o instanceof Text) {
-            if (annotations.containsKey(uri)) {
+            if (!annotations.containsKey(uri)) {
                 annotations.put(uri, new LinkedList<Object>());
             }
             final boolean rval = annotations.get(uri).remove(o);
@@ -221,8 +223,8 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         } else {
             strElem.remove(name);
         }
-    }   
-    
+    }
+
     protected void setStrElem(String name, LemonElement elem) {
         checkRemote = false;
         if (strElem.containsKey(name)) {
@@ -233,7 +235,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         if (model.allowUpdate()) {
             if (getURI() != null) {
                 if (strElem.containsKey(name)) {
-                    if(strElem.get(name).getURI() != null) {
+                    if (strElem.get(name).getURI() != null) {
                         model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI + name), strElem.get(name).getURI());
                     } else {
                         model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI + name), strElem.get(name).getID());
@@ -241,12 +243,12 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
                 }
                 if (elem != null && elem.getURI() != null) {
                     model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI + name), elem.getURI());
-                } else if(elem != null) {
+                } else if (elem != null) {
                     model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI + name), elem.getID());
                 }
             } else {
                 if (strElem.containsKey(name)) {
-                    if(strElem.get(name).getURI() != null) {
+                    if (strElem.get(name).getURI() != null) {
                         model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI + name), strElem.get(name).getURI());
                     } else {
                         model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI + name), strElem.get(name).getID());
@@ -254,7 +256,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
                 }
                 if (elem != null && elem.getURI() != null) {
                     model.updater().add(getID(), URI.create(LemonModel.LEMON_URI + name), elem.getURI());
-                } else if(elem != null) {
+                } else if (elem != null) {
                     model.updater().add(getID(), URI.create(LemonModel.LEMON_URI + name), elem.getID());
                 }
             }
@@ -272,14 +274,14 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
     protected void setStrText(String name, Text txt) {
         checkRemote = false;
         if (model.allowUpdate()) {
-            if(strText.containsKey(name)) {
-                if(getURI() != null) {
+            if (strText.containsKey(name)) {
+                if (getURI() != null) {
                     model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI + name), strText.get(name).value, strText.get(name).language);
                 } else {
                     model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI + name), strText.get(name).value, strText.get(name).language);
                 }
             }
-            if(txt != null) {
+            if (txt != null) {
                 if (getURI() != null) {
                     model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI + name), txt.value, txt.language);
                 } else {
@@ -287,12 +289,12 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
                 }
             }
         }
-        setStrTextDirect(name,txt);
+        setStrTextDirect(name, txt);
     }
-    
+
     protected void setStrTextDirect(String name, Text txt) {
         checkRemote = false;
-        if(txt != null) {
+        if (txt != null) {
             strText.put(name, txt);
         } else {
             strText.remove(name);
@@ -330,7 +332,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         updateAddPredElem(e, p);
         return addPredElemDirect(p, e);
     }
-    
+
     protected boolean addPredElemDirect(LemonPredicate p, LemonElement e) {
         checkRemote = false;
         if (e instanceof LemonElementImpl) {
@@ -411,15 +413,15 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         if (model.allowUpdate()) {
             if (getURI() != null) {
                 if (e.getURI() != null) {
-                    model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI+p), e.getURI());
+                    model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI + p), e.getURI());
                 } else {
-                    model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI+p), e.getID());
+                    model.updater().add(getURI(), URI.create(LemonModel.LEMON_URI + p), e.getID());
                 }
             } else {
                 if (e.getURI() != null) {
-                    model.updater().add(getID(), URI.create(LemonModel.LEMON_URI+p), e.getURI());
+                    model.updater().add(getID(), URI.create(LemonModel.LEMON_URI + p), e.getURI());
                 } else {
-                    model.updater().add(getID(), URI.create(LemonModel.LEMON_URI+p), e.getID());
+                    model.updater().add(getID(), URI.create(LemonModel.LEMON_URI + p), e.getID());
                 }
             }
         }
@@ -434,15 +436,15 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         if (model.allowUpdate()) {
             if (getURI() != null) {
                 if (e.getURI() != null) {
-                    model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI+p), e.getURI());
+                    model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI + p), e.getURI());
                 } else {
-                    model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI+p), e.getID());
+                    model.updater().remove(getURI(), URI.create(LemonModel.LEMON_URI + p), e.getID());
                 }
             } else {
                 if (e.getURI() != null) {
-                    model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI+p), e.getURI());
+                    model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI + p), e.getURI());
                 } else {
-                    model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI+p), e.getID());
+                    model.updater().remove(getID(), URI.create(LemonModel.LEMON_URI + p), e.getID());
                 }
             }
         }
@@ -498,7 +500,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         strElem.putAll(lesp.strElem);
         strText.putAll(lesp.strText);
         types.addAll(lesp.types);
-        for (Iterator<LemonElementImpl<?>> it = referencers.iterator(); it.hasNext();) {
+        for (Iterator<LemonElementImpl<?>> it = lesp.referencers.iterator(); it.hasNext();) {
             LemonElementImpl<?> rlesp = it.next();
             rlesp.updateReference(elem, this);
         }
@@ -546,12 +548,24 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             for (LemonElement elem : predElems.get(pred)) {
                 if (!first2) {
                     stream.println(" ,");
+                } else {
+                    stream.print(" ");
                 }
-                ((LemonElementImpl) elem).visit(stream, state);
-                if (((LemonElementImpl) elem).isMultiReferenced() && elem.getURI() != null) {
-                    state.postponed.add(elem);
+                if (elem instanceof LemonElementImpl) {
+                    ((LemonElementImpl) elem).visit(stream, state);
+                    if (((LemonElementImpl) elem).isMultiReferenced() && elem.getURI() != null) {
+                        state.postponed.add(elem);
+                    }
+                    first2 = false;
+                } else {
+                    if (elem.getURI() != null) {
+                        stream.print(" ");
+                        printURI(elem.getURI(), stream);
+                    } else {
+                        throw new RuntimeException("Not an element and blank... can't serialize");
+                    }
+                    first2 = false;
                 }
-                first2 = false;
             }
             first = false;
         }
@@ -581,9 +595,11 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             }
             stream.print(" lemon:" + pred + " ");
             LemonElement elem = strElem.get(pred);
-            ((LemonElementImpl) elem).visit(stream, state);
-            if (((LemonElementImpl) elem).isMultiReferenced() && elem.getURI() != null) {
-                state.postponed.add(elem);
+            if (elem instanceof LemonElementImpl) {
+                ((LemonElementImpl) elem).visit(stream, state);
+                if (((LemonElementImpl) elem).isMultiReferenced() && elem.getURI() != null) {
+                    state.postponed.add(elem);
+                }
             }
             first = false;
         }
@@ -656,11 +672,11 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
 
     @SuppressWarnings("unchecked")
     public final void accept(ElementVisitor visitor) {
-        if (visitor.hasVisited((Elem)this)) {
+        if (visitor.hasVisited((Elem) this)) {
             return;
         }
         if (visitor.visitFirst()) {
-            visitor.visit((Elem)this);
+            visitor.visit((Elem) this);
         }
         for (Map.Entry<String, Collection<LemonElement>> elemsES : strElems.entrySet()) {
             final String pred = elemsES.getKey();
@@ -799,7 +815,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         try {
             if (pred.getFragment() != null && lingOnto.getProperty(pred.getFragment()) != null
                     && value.getFragment() != null && lingOnto.getPropertyValue(value.getFragment()) != null) {
-                addProperty(lingOnto.getProperty(pred.getFragment()), lingOnto.getPropertyValue(value.getFragment()));
+                addPredElemDirect(lingOnto.getProperty(pred.getFragment()), lingOnto.getPropertyValue(value.getFragment()));
                 return true;
             }
         } catch (Exception x) {
@@ -859,6 +875,6 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
 
     protected void resolveRemote() {
         checkRemote = false;
-        model.resolver().resolveRemote(model, this,1);
+        model.resolver().resolveRemote(model, this, 1);
     }
 }

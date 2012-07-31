@@ -30,6 +30,7 @@ import eu.monnetproject.lemon.impl.AccepterFactory;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.LemonModelImpl;
+import eu.monnetproject.lemon.model.LexicalEntry;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,4 +154,8 @@ public class ReaderVisitor implements Visitor {
     }
     
     public LemonModel getModel() { return accepterFactory.getModel(); }
+
+    public LexicalEntry getEntry() {
+        return accepterFactory.getEntry();
+    }
 }

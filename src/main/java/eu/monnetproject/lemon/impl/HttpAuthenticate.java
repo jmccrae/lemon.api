@@ -26,26 +26,25 @@
  */
 package eu.monnetproject.lemon.impl;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
+import java.net.URLEncoder;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.xml.bind.DatatypeConverter;
+import java.util.Map;
+import javax.net.ssl.HttpsURLConnection;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  *
@@ -107,6 +106,46 @@ public class HttpAuthenticate {
             HttpGet get = new HttpGet(url.toString());
 
             return httpclient.execute(get).getEntity().getContent();
+        }
+    }
+    
+    public static InputStream postAuthenticate(URL url, String username, String password, Map<String,String> parameters) throws IOException {
+        if (username == null || password == null) {
+            final URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection)conn).setRequestMethod("POST");
+            } else if(conn instanceof HttpsURLConnection) {
+                ((HttpsURLConnection)conn).setRequestMethod("POST");
+            } else {
+                System.err.println("Attempting to send SPARQL Update to non-HTTP address: " + url);
+            }
+            final DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            final StringBuffer content = new StringBuffer();
+            for (Map.Entry<String, String> param : parameters.entrySet()) {
+                if(content.length() > 0) {
+                    content.append("&");
+                }
+                content.append(param.getKey()).append("=").append(URLEncoder.encode(param.getValue(),"UTF-8"));
+            }
+            out.writeBytes(content.toString());
+            out.flush();
+            out.close();
+            return conn.getInputStream();
+        } else {
+            DefaultHttpClient httpclient = new DefaultHttpClient();
+            httpclient.getCredentialsProvider().setCredentials(new AuthScope(url.getHost(), url.getPort() > 0 ? url.getPort() : 80),
+                    new UsernamePasswordCredentials(username, password));
+            HttpPost post = new HttpPost(url.toString());
+            final List<NameValuePair> ps = new LinkedList<NameValuePair>();
+            for (Map.Entry<String, String> param : parameters.entrySet()) {
+                ps.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+            }
+            post.setEntity(new UrlEncodedFormEntity(ps));
+
+            return httpclient.execute(post).getEntity().getContent();
         }
     }
 //    

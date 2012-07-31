@@ -40,9 +40,10 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
+@SuppressWarnings("unchecked")
 public class FrameImpl extends LemonElementImpl implements Frame {
     private static final long serialVersionUID = -2731269230726069536L;
 
@@ -91,21 +92,25 @@ public class FrameImpl extends LemonElementImpl implements Frame {
         return removeStrElem("tree", node);
     }
 
+    boolean resolveRemoteList = model.allowRemote();
+    
     @Override
-    @SuppressWarnings("unchecked")
     public Collection<List<Component>> getDecompositions() {
-        if(checkRemote) {
-            resolveRemote();
+        if(resolveRemoteList) {
+            if(checkRemote) {
+                resolveRemote();
+            }
             final ArrayList<List<Component>> compCopy = new ArrayList<List<Component>>(components);
             for(List<Component> comps : compCopy) {
                 if(comps instanceof ListAccepter) {
-                    final List list = (List)model.resolver().resolveRemoteList(((ListAccepter)comps).head());
+                    final List<Component> list = model.resolver().resolveRemoteList(((ListAccepter)comps).head(),Component.class,model);
                     if(list != null) {
                         components.remove(comps);
                         components.add(list);
-                    }
+                    } 
                 } 
             }
+            resolveRemoteList = false;
         }
         return Collections.unmodifiableSet(components);
     }
@@ -170,10 +175,11 @@ public class FrameImpl extends LemonElementImpl implements Frame {
     public Map<URI, Collection<Object>> getElements() {
         final Map<URI, Collection<Object>> elements = super.getElements();
         final URI decomposition = URI.create(LemonModel.LEMON_URI+"decomposition");
-        if(!components.isEmpty()) {
+        final Collection<List<Component>> decompositions = getDecompositions();
+        if(!decompositions.isEmpty()) {
             elements.put(decomposition,new LinkedList());
         }
-        for(List<Component> compList : components) {
+        for(List<Component> compList : decompositions) {
             elements.get(decomposition).add(compList);
         }
         return elements;

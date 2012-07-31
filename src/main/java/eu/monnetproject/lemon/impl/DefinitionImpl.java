@@ -34,7 +34,7 @@ import eu.monnetproject.lemon.model.Text;
 import java.net.URI;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class DefinitionImpl extends LemonElementImpl<SenseDefinition> implements SenseDefinition {

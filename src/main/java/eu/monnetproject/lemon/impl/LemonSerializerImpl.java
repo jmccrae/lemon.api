@@ -27,6 +27,7 @@
 package eu.monnetproject.lemon.impl;
 
 import eu.monnetproject.lemon.*;
+import eu.monnetproject.lemon.impl.io.ReaderVisitor;
 import eu.monnetproject.lemon.impl.io.turtle.TurtleParser;
 import eu.monnetproject.lemon.impl.io.turtle.TurtleWriter;
 import eu.monnetproject.lemon.impl.io.xml.RDFXMLReader;
@@ -35,6 +36,10 @@ import eu.monnetproject.lemon.model.LexicalEntry;
 import eu.monnetproject.lemon.model.Lexicon;
 import java.io.*;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import net.lexinfo.LexInfo;
@@ -51,7 +56,8 @@ public class LemonSerializerImpl extends LemonSerializer {
 
     /**
      * DO NOT USE!. Obtain a serializer by {@code LemonSerializer.newInstance()}
-     * @param lingOnto 
+     *
+     * @param lingOnto
      */
     public LemonSerializerImpl(LinguisticOntology lingOnto) {
         this.lingOnto = lingOnto == null ? new LexInfo() : lingOnto;
@@ -62,7 +68,7 @@ public class LemonSerializerImpl extends LemonSerializer {
         if (isClosed) {
             throw new LemonRepositoryAlreadyClosedException();
         }
-        final LemonModelImpl model = new LemonModelImpl();
+        final LemonModelImpl model = new LemonModelImpl(remoteUpdateFactory);
         read(model, source);
         return model;
     }
@@ -73,7 +79,7 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new LemonRepositoryAlreadyClosedException();
         }
         try {
-            final RDFXMLWriter xmlWriter = new RDFXMLWriter(lingOnto);
+            final RDFXMLWriter xmlWriter = new RDFXMLWriter(lingOnto, Lexicon.class);
             for (Lexicon lexicon : model.getLexica()) {
                 ((LexiconImpl) lexicon).accept(xmlWriter);
             }
@@ -88,7 +94,7 @@ public class LemonSerializerImpl extends LemonSerializer {
         if (isClosed) {
             throw new LemonRepositoryAlreadyClosedException();
         }
-        return new LemonModelImpl();
+        return new LemonModelImpl(remoteUpdateFactory);
     }
 
     @Override
@@ -97,7 +103,7 @@ public class LemonSerializerImpl extends LemonSerializer {
         if (isClosed) {
             throw new LemonRepositoryAlreadyClosedException();
         }
-        return new LemonModelImpl(context != null ? context.toString() : "unknown:lexicon");
+        return new LemonModelImpl(context != null ? context.toString() : "unknown:lexicon", remoteUpdateFactory);
     }
 
     @Override
@@ -107,9 +113,11 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new LemonRepositoryAlreadyClosedException();
         }
         try {
-            final RDFXMLWriter visitor = new RDFXMLWriter(lingOnto);
+            final RDFXMLWriter visitor = new RDFXMLWriter(lingOnto, LexicalEntry.class);
             if (entry instanceof LexicalEntryImpl) {
-                ((LexicalEntryImpl) entry).accept(visitor);
+                final LexicalEntryImpl entryImpl = (LexicalEntryImpl) entry;
+                entryImpl.getCanonicalForm(); // Force remote resolve
+                entryImpl.accept(visitor);
             } else {
                 throw new IllegalArgumentException("Cannot write model I didn't create");
             }
@@ -131,7 +139,12 @@ public class LemonSerializerImpl extends LemonSerializer {
         }
 
         try {
-            final RDFXMLWriter visitor = new RDFXMLWriter(lingOnto);
+            final RDFXMLWriter visitor = new RDFXMLWriter(lingOnto, Lexicon.class);
+            System.err.println(">>>>>>>Writing lexicon");
+            for (LexicalEntry entry : lexicon.getEntrys()) {
+                System.err.println(entry.getURI().toString());
+                entry.getCanonicalForm(); // force remote resolve
+            }
             if (lexicon instanceof LexiconImpl) {
                 ((LexiconImpl) lexicon).accept(visitor);
             } else {
@@ -146,6 +159,7 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new RuntimeException(x);
         }
     }
+    
 
     @Override
     public void moveLexicon(Lexicon lexicon, LemonModel from, LemonModel to) {
@@ -153,7 +167,7 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new LemonRepositoryAlreadyClosedException();
         }
         if (lexicon instanceof LexiconImpl) {
-            final CopyVisitor copyVisitor = new CopyVisitor(lingOnto, to);
+            final CopyVisitor copyVisitor = new CopyVisitor(lingOnto, (LemonModelImpl) to);
             ((LexiconImpl) lexicon).accept(copyVisitor);
         } else {
             throw new IllegalArgumentException("moveLexicon has to be called by the serializer that created the from lexicon");
@@ -196,6 +210,43 @@ public class LemonSerializerImpl extends LemonSerializer {
     }
 
     @Override
+    public LexicalEntry readEntry(Reader source) {
+        if (isClosed) {
+            throw new LemonRepositoryAlreadyClosedException();
+        }
+        final LemonModelImpl lm = new LemonModelImpl(remoteUpdateFactory);
+        StringBuilder sb = new StringBuilder();
+        try {
+            char[] buf = new char[1024];
+            int s;
+            while ((s = source.read(buf)) != -1) {
+                sb.append(buf, 0, s);
+            }
+        } catch (IOException x) {
+            throw new RuntimeException(x);
+        }
+        source = new BufferedReader(new StringReader(sb.toString()));
+        if (!(lm instanceof LemonModelImpl)) {
+            throw new IllegalArgumentException("Lemon Model not created by this serializer");
+        }
+        final ReaderVisitor model = new ReaderVisitor(lm);
+        final RDFXMLReader rdfXMLReader = new RDFXMLReader(model);
+        try {
+            rdfXMLReader.parse(source);
+        } catch (Exception ex) {
+            try {
+                source = new BufferedReader(new StringReader(sb.toString()));
+                final TurtleParser parser = new TurtleParser(source, model);
+                parser.parse();
+            } catch (Exception ex2) {
+                ex.printStackTrace();
+                throw new RuntimeException(ex2);
+            }
+        }
+        return model.getEntry();
+    }
+
+    @Override
     public void write(LemonModel lm, Writer dt, boolean xml) {
         if (isClosed) {
             throw new LemonRepositoryAlreadyClosedException();
@@ -225,10 +276,11 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new LemonRepositoryAlreadyClosedException();
         }
         if (xml) {
-            write(lm, dt);
+            writeEntry(lm, le, lo, dt);
         } else {
             try {
                 final TurtleWriter turtleWriter = new TurtleWriter(lingOnto);
+                le.getForms(); // resolve remote
                 ((LexicalEntryImpl) le).accept(turtleWriter);
                 dt.write(turtleWriter.getDocument());
             } catch (Exception ex) {
@@ -243,10 +295,15 @@ public class LemonSerializerImpl extends LemonSerializer {
             throw new LemonRepositoryAlreadyClosedException();
         }
         if (xml) {
-            write(lm, dt);
+            writeLexicon(lm, lxcn, lo, dt);
         } else {
 
             try {
+                System.err.println(">>>>>>>Writing lexicon");
+                for (LexicalEntry entry : lxcn.getEntrys()) {
+                    System.err.println(entry.getURI().toString());
+                    entry.getCanonicalForm(); // force remote resolve
+                }
                 final TurtleWriter turtleWriter = new TurtleWriter(lingOnto);
                 ((LexiconImpl) lxcn).accept(turtleWriter);
                 dt.write(turtleWriter.getDocument());

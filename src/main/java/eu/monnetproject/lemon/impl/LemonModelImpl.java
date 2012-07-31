@@ -26,6 +26,7 @@
  */
 package eu.monnetproject.lemon.impl;
 
+import eu.monnetproject.lemon.RemoteUpdater;
 import eu.monnetproject.lemon.*;
 import eu.monnetproject.lemon.AbstractVisitor;
 import eu.monnetproject.lemon.model.LemonElement;
@@ -39,7 +40,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 /**
- * Instantiated via {@link SimpleLemonSerializer}
+ * Instantiated via {@link LemonSerializerImpl}
  *
  * @author John McCrae
  */
@@ -52,27 +53,21 @@ public class LemonModelImpl implements LemonModel {
     private final RemoteResolver resolver;
     private final RemoteUpdater updater;
 
-    public LemonModelImpl() {
+    public LemonModelImpl(RemoteUpdaterFactory updaterFactory) {
         this.resolver = null;
-        this.updater = null;
+        this.updater = updaterFactory == null ? null : updaterFactory.updaterForModel(this);
     }
 
-    public LemonModelImpl(String baseURI) {
+    public LemonModelImpl(String baseURI, RemoteUpdaterFactory updaterFactory) {
         this.baseURI = baseURI;
         this.resolver = null;
-        this.updater = null;
+        this.updater = updaterFactory == null ? null : updaterFactory.updaterForModel(this);
     }
 
-    public LemonModelImpl(String baseURI, RemoteResolver resolver) {
+    public LemonModelImpl(String baseURI, RemoteResolver resolver, RemoteUpdaterFactory updaterFactory) {
         this.baseURI = baseURI;
         this.resolver = resolver;
-        this.updater = null;
-    }
-
-    public LemonModelImpl(String baseURI, RemoteResolver resolver, RemoteUpdater updater) {
-        this.baseURI = baseURI;
-        this.resolver = resolver;
-        this.updater = updater;
+        this.updater = updaterFactory == null ? null : updaterFactory.updaterForModel(this);
     }
 
 //    public void activate(Map properties) {
@@ -113,6 +108,9 @@ public class LemonModelImpl implements LemonModel {
     @Override
     public Lexicon addLexicon(URI uri, String language) {
         Lexicon lexicon = new LexiconImpl(uri, this);
+        if(updater != null) {
+            updater.add(uri, URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URI.create(LemonModel.LEMON_URI+"Lexicon"));
+        } 
         lexicon.setLanguage(language);
         lexica.add(lexicon);
         return lexicon;
@@ -139,7 +137,7 @@ public class LemonModelImpl implements LemonModel {
 
     @Override
     public <Elem extends LemonElementOrPredicate> Iterator<Elem> query(Class<Elem> target, String sparqlQuery) {
-        if (resolver instanceof SPARQLResolver) {
+        if (resolver != null && resolver instanceof SPARQLResolver) {
             try {
                 return ((SPARQLResolver) resolver).query(target, sparqlQuery, this);   
             } catch(IOException x) {
@@ -150,7 +148,7 @@ public class LemonModelImpl implements LemonModel {
                 throw new RuntimeException(x);
             }
         } else {
-            throw new RuntimeException("No SPARQL support in this model");
+            throw new RuntimeException("No SPARQL support in this model " + (resolver == null ? "null" : resolver.getClass().toString()));
         }
     }
 
@@ -222,5 +220,9 @@ public class LemonModelImpl implements LemonModel {
         public boolean hasVisited(LemonElement element) {
             return visited.contains(element);
         }
+    }
+    
+    public void register(URI uri, LemonElementOrPredicate lep) {
+        this.elements.put(uri, lep);
     }
 }

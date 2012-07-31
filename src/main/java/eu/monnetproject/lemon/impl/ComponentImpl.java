@@ -32,12 +32,14 @@ import eu.monnetproject.lemon.impl.io.ReaderAccepter;
 import eu.monnetproject.lemon.model.Component;
 import eu.monnetproject.lemon.model.LexicalEntry;
 import java.net.URI;
+import java.util.Collection;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
-public class ComponentImpl extends LemonElementImpl implements Component {
+public class ComponentImpl extends LemonElementImpl<ComponentImpl> implements Component {
+    private static final String ELEMENT = "element";
     private static final long serialVersionUID = 3066039691421245142L;
 
     ComponentImpl(URI uri, LemonModelImpl model) {
@@ -50,19 +52,19 @@ public class ComponentImpl extends LemonElementImpl implements Component {
 
     @Override
     public LexicalEntry getElement() {
-        return (LexicalEntry) getStrElem("element");
+        return (LexicalEntry) getStrElem(ELEMENT);
     }
 
     @Override
     public void setElement(final LexicalEntry element) {
-        setStrElem("element", element);
+        setStrElem(ELEMENT, element);
     }
 
     @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"element")) {
+        if(pred.toString().equals(LemonModel.LEMON_URI+ELEMENT)) {
             final LexicalEntryImpl lexicalEntryImpl = factory.getLexicalEntryImpl(value);//new LexicalEntryImpl(value,model);
-            setElement(lexicalEntryImpl);
+            setStrElemDirect(ELEMENT,lexicalEntryImpl);
             return lexicalEntryImpl;
         } else {
             return defaultAccept(pred, value,lingOnto);
@@ -72,9 +74,9 @@ public class ComponentImpl extends LemonElementImpl implements Component {
     @Override
     public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
         
-        if(pred.toString().equals(LemonModel.LEMON_URI+"element")) {
+        if(pred.toString().equals(LemonModel.LEMON_URI+ELEMENT)) {
             final LexicalEntryImpl lexicalEntryImpl = factory.getLexicalEntryImpl(bNode);//new LexicalEntryImpl(bNode,model);
-            setStrElemDirect("element", lexicalEntryImpl);
+            setStrElemDirect(ELEMENT, lexicalEntryImpl);
             return lexicalEntryImpl;
         } else {
             return defaultAccept(pred, bNode);
@@ -90,6 +92,4 @@ public class ComponentImpl extends LemonElementImpl implements Component {
     public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultMerge(accepter, lingOnto, factory);
     }
-    
-    
 }

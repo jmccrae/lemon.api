@@ -85,7 +85,7 @@ public class HttpResolver implements RemoteResolver {
     }
     
     @Override
-    public List<Object> resolveRemoteList(Object identifier) {
+    public <T> List<T> resolveRemoteList(Object identifier, Class<T> clazz, LemonModelImpl model) {
         return null;
     }
 }

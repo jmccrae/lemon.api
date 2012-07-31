@@ -167,6 +167,30 @@ public class ListAccepter extends AbstractList<Component> implements ReaderAccep
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ListAccepter other = (ListAccepter) obj;
+        if (this.head != other.head && (this.head == null || !this.head.equals(other.head))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + (this.head != null ? this.head.hashCode() : 0);
+        return hash;
+    }
+    
+    
+
+    @Override
     public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
         if(accepter instanceof ListAccepter) {
             final ListAccepter accepter2 = (ListAccepter)accepter;

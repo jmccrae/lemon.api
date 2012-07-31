@@ -30,6 +30,7 @@ import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LinguisticOntology;
 import eu.monnetproject.lemon.impl.io.ReaderAccepter;
 import eu.monnetproject.lemon.impl.io.UnactualizedAccepter;
+import eu.monnetproject.lemon.model.LexicalEntry;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class AccepterFactory {
     final HashMap<Object, ReaderAccepter> accepters;
     final LemonModelImpl model;
     final LinguisticOntology lingOnto;
+    LexicalEntryImpl firstEntry = null;
 
     public AccepterFactory(HashMap<Object, ReaderAccepter> accepters, LinguisticOntology lingOnto, LemonModelImpl model) {
         this.accepters = accepters;
@@ -118,7 +120,11 @@ public class AccepterFactory {
         } else if (clazz.equals(FrameImpl.class)) {
             return (E) new FrameImpl(uri,model);
         } else if (clazz.equals(LexicalEntryImpl.class)) {
-            return (E) new LexicalEntryImpl(uri,model);
+            final LexicalEntryImpl name = new LexicalEntryImpl(uri,model);
+            if(firstEntry == null) {
+                firstEntry = (LexicalEntryImpl)name;
+            }
+            return (E)name;
         } else if (clazz.equals(LexicalSenseImpl.class)) {
             return (E) new LexicalSenseImpl(uri,model);
         } else if (clazz.equals(MorphPatternImpl.class)) {
@@ -389,5 +395,9 @@ public class AccepterFactory {
 
     public LemonModel getModel() {
         return model;
+    }
+
+    public LexicalEntry getEntry() {
+        return firstEntry;
     }
 }

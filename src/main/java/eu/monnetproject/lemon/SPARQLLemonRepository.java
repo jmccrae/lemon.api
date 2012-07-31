@@ -43,6 +43,7 @@ import net.lexinfo.LexInfo;
 public class SPARQLLemonRepository implements LemonRepository {
 
     private final String queryEndpoint, updateEndpoint, updateQueryParam, username, password;
+    private final SPARQL dialect;
 
     public SPARQLLemonRepository(String queryEndpoint, String updateEndpoint, String updateQueryParam) {
         this.queryEndpoint = queryEndpoint;
@@ -50,6 +51,7 @@ public class SPARQLLemonRepository implements LemonRepository {
         this.updateQueryParam = updateQueryParam;
         this.username = null;
         this.password = null;
+        this.dialect = SPARQL.SPARQL10;
     }
     
     public SPARQLLemonRepository(String queryEndpoint, String updateEndpoint, String updateQueryParam, String username, String password) {
@@ -58,6 +60,25 @@ public class SPARQLLemonRepository implements LemonRepository {
         this.updateQueryParam = updateQueryParam;
         this.username = username;
         this.password = password;
+        this.dialect = SPARQL.SPARQL10;
+    }
+   
+    public SPARQLLemonRepository(String queryEndpoint, String updateEndpoint, String updateQueryParam, SPARQL dialect) {
+        this.queryEndpoint = queryEndpoint;
+        this.updateEndpoint = updateEndpoint;
+        this.updateQueryParam = updateQueryParam;
+        this.username = null;
+        this.password = null;
+        this.dialect = dialect;
+    }
+    
+    public SPARQLLemonRepository(String queryEndpoint, String updateEndpoint, String updateQueryParam, String username, String password, SPARQL dialect) {
+        this.queryEndpoint = queryEndpoint;
+        this.updateEndpoint = updateEndpoint;
+        this.updateQueryParam = updateQueryParam;
+        this.username = username;
+        this.password = password;
+        this.dialect = dialect;
     }
 
     @Override
@@ -77,9 +98,14 @@ public class SPARQLLemonRepository implements LemonRepository {
             }
 
             @Override
+            public LexicalEntry readEntry(Reader source) {
+                return serializer.readEntry(source);
+            }
+
+            @Override
             public LemonModel create() {
                 try {
-                    return LemonModels.sparqlUpdateEndpoint(new URL(queryEndpoint), uri, new LexInfo(), updateEndpoint + "?" + updateQueryParam + "=", username, password);
+                    return LemonModels.sparqlUpdateEndpoint(new URL(queryEndpoint), uri, new LexInfo(), updateEndpoint + "?" + updateQueryParam + "=", username, password,dialect);
                 } catch (MalformedURLException x) {
                     throw new RuntimeException(x);
                 }
@@ -92,7 +118,7 @@ public class SPARQLLemonRepository implements LemonRepository {
                     throw new RuntimeException();
                 }
                 try {
-                    return LemonModels.sparqlUpdateEndpoint(new URL(queryEndpoint), uri, new LexInfo(), updateEndpoint + "?" + updateQueryParam + "=", username, password);
+                    return LemonModels.sparqlUpdateEndpoint(new URL(queryEndpoint), uri, new LexInfo(), updateEndpoint + "?" + updateQueryParam + "=", username, password,dialect);
                 } catch (MalformedURLException x) {
                     throw new RuntimeException(x);
                 }

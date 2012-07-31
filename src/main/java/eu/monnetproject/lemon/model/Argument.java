@@ -35,4 +35,8 @@ public interface Argument extends PhraseTerminal {
 	SyntacticRoleMarker getMarker();
 	/** Set the marker that indicates the syntactic role */
 	void setMarker(final SyntacticRoleMarker marker);
+        /** Check if this argument is optional */
+        boolean isOptional();
+        /** Set if this argument is optional */
+        void setOptional(boolean optional);
 }

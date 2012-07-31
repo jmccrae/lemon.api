@@ -37,7 +37,7 @@ public class SPARQLResolverTest {
     @SuppressWarnings("unchecked")
     public void testSPARQLResolver() throws Exception {
         final SPARQLResolver resolver = new SPARQLResolver(new URL("file:src/test/resources/sparql"), Collections.EMPTY_SET, new LexInfo());
-        final LemonModelImpl model = new LemonModelImpl();
+        final LemonModelImpl model = new LemonModelImpl(null);
         final LexicalEntryImpl le = new LexicalEntryImpl("http://www.example.com/", model);
         resolver.resolveRemote(model, le,1);
         Assert.assertFalse(le.getSenses().isEmpty());

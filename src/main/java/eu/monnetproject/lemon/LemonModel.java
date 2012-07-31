@@ -61,7 +61,7 @@ public interface LemonModel {
 	 * Get the factory for making new elements
 	 */
 	LemonFactory getFactory();
-	
+        	
 	/** 
 	 * Add a (new blank) lexicon
 	 */

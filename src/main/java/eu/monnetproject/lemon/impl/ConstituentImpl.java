@@ -32,7 +32,7 @@ import eu.monnetproject.lemon.model.Constituent;
 import java.net.URI;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class ConstituentImpl extends LemonElementImpl implements Constituent {

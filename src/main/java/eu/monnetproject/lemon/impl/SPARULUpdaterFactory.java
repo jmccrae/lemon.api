@@ -27,58 +27,47 @@
 package eu.monnetproject.lemon.impl;
 
 import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
-import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Text;
+import eu.monnetproject.lemon.RemoteUpdater;
+import eu.monnetproject.lemon.RemoteUpdaterFactory;
+import eu.monnetproject.lemon.SPARQL;
 import java.net.URI;
 
 /**
- * Instantiated via {@link LemonFactoryImpl}
+ *
  * @author John McCrae
  */
-public class ExampleImpl extends LemonElementImpl implements Example {
-    private static final long serialVersionUID = 2991255226882942129L;
+public class SPARULUpdaterFactory implements RemoteUpdaterFactory {
 
-    ExampleImpl(URI uri, LemonModelImpl model) {
-        super(uri, "Example",model);
-    }
+    private final String url;
+    private final URI graph;
+    private final String password, username;
+    private final SPARQL dialect;
 
-    ExampleImpl(String id, LemonModelImpl model) {
-        super(id, "Example",model);
-    }
-
-    @Override
-    public Text getValue() {
-        return getStrText("value");
-    }
-
-    @Override
-    public void setValue(final Text value) {
-        setStrText("value", value);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value,lingOnto);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, bNode);
-    }
-
-    @Override
-    public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
-            setStrTextDirect("value",new Text(value, lang));
-        } else {
-            defaultAccept(pred, value, lang);
-        }
+    public SPARULUpdaterFactory(String url, URI graph, SPARQL dialect) {
+        this.url = url;
+        this.graph = graph;
+        this.password = null;
+        this.username = null;
+        this.dialect = dialect;
     }
     
-    @Override
-    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
-        defaultMerge(accepter, lingOnto, factory);
+    public SPARULUpdaterFactory(String url, URI graph, String password, String username, SPARQL dialect) {
+        this.url = url;
+        this.graph = graph;
+        this.password = password;
+        this.username = username;
+        this.dialect = dialect;
     }
+    
+    
+    
+    @Override
+    public RemoteUpdater updaterForModel(LemonModel model) {
+        if(username != null && password != null) {
+            return new SPARULUpdater(url, graph, username, password, dialect);
+        } else {
+            return new SPARULUpdater(url, graph, dialect);
+        }
+    }
+
 }

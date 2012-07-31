@@ -30,7 +30,7 @@ import eu.monnetproject.lemon.model.Part;
 import java.net.URI;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  *
  * @author John McCrae
  */

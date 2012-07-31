@@ -36,7 +36,7 @@ import eu.monnetproject.lemon.model.LexicalTopic;
 import eu.monnetproject.lemon.model.Lexicon;
 
 /**
- * Instantiated via {@link SimpleLemonModel}
+ * Instantiated via {@link LemonModelImpl}
  *
  * @author John McCrae
  */
@@ -65,7 +65,7 @@ public class LexiconImpl extends LemonElementImpl implements Lexicon {
             checkRemoteLang = false;
             model.resolver().resolveRemoteFiltered(model, LANGUAGE, this);
         }
-        return language;
+        return language != null ? language : "und";
     }
 
     @Override
@@ -198,7 +198,9 @@ public class LexiconImpl extends LemonElementImpl implements Lexicon {
     @Override
     public Map<URI, Collection<Object>> getElements() {
         final Map<URI, Collection<Object>> elements = super.getElements();
-        elements.put(LANGUAGE, Collections.singletonList((Object) language));
+        if(language != null) {
+            elements.put(LANGUAGE, Collections.singletonList((Object) language));
+        }
         return elements;
     }
 

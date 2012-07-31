@@ -24,61 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
-package eu.monnetproject.lemon.impl;
-
-import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
-import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Text;
-import java.net.URI;
+package eu.monnetproject.lemon;
 
 /**
- * Instantiated via {@link LemonFactoryImpl}
+ * Constants for dialects of SPARQL Update to use
+ * 
  * @author John McCrae
  */
-public class ExampleImpl extends LemonElementImpl implements Example {
-    private static final long serialVersionUID = 2991255226882942129L;
-
-    ExampleImpl(URI uri, LemonModelImpl model) {
-        super(uri, "Example",model);
-    }
-
-    ExampleImpl(String id, LemonModelImpl model) {
-        super(id, "Example",model);
-    }
-
-    @Override
-    public Text getValue() {
-        return getStrText("value");
-    }
-
-    @Override
-    public void setValue(final Text value) {
-        setStrText("value", value);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value,lingOnto);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, bNode);
-    }
-
-    @Override
-    public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
-            setStrTextDirect("value",new Text(value, lang));
-        } else {
-            defaultAccept(pred, value, lang);
-        }
-    }
-    
-    @Override
-    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
-        defaultMerge(accepter, lingOnto, factory);
-    }
+public enum SPARQL {
+    /**
+     * SPARQL Update as defined here http://www.w3.org/Submission/SPARQL-Update/
+     */
+    SPARUL,
+    /**
+     * Standard SPARQL update, will cause update requests to throw {@code UnsupportedOperationException}
+     */
+    SPARQL10,
+    /**
+     * SPARQL 1.1 with update as defined here http://www.w3.org/TR/sparql11-query/
+     */
+    SPARQL11
 }

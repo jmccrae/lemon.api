@@ -51,17 +51,18 @@ import java.util.Set;
  */
 public class CopyVisitor extends AbstractVisitor {
 
-    private final LemonModel target;
+    private final LemonModelImpl target;
     private final HashMap<LemonElement, LemonElement> copiedMap = new HashMap<LemonElement, LemonElement>();
     private final HashSet<LemonElement> visited = new HashSet<LemonElement>();
 
-    public CopyVisitor(LinguisticOntology lingOnto, LemonModel target) {
+    public CopyVisitor(LinguisticOntology lingOnto, LemonModelImpl target) {
         super(lingOnto);
         this.target = target;
     }
 
     @Override
     public void visit(LemonElement element) {
+        System.err.println("copy @" + element.getURI());
         LemonElement newElement = translate(element);
         final Class[] interfaces = element.getClass().getInterfaces();
         for (Class interfays : interfaces) {
@@ -148,6 +149,9 @@ public class CopyVisitor extends AbstractVisitor {
             newElement = make(element);
             if (newElement == null) {
                 newElement = element;
+                if(newElement.getURI() != null) {
+                    target.register(newElement.getURI(), newElement);
+                }
                 copiedMap.put(element, element);
             } else {
                 copiedMap.put(element, newElement);

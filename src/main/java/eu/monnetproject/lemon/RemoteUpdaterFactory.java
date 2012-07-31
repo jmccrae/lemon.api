@@ -24,61 +24,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
-package eu.monnetproject.lemon.impl;
-
-import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
-import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Text;
-import java.net.URI;
+package eu.monnetproject.lemon;
 
 /**
- * Instantiated via {@link LemonFactoryImpl}
+ * Returns a remote update for the given model. Note all changes should be localized
+ * to a model (e.g., a single repository or graph in that repository). Furthermore 
+ * for a single model the following will evaluate to true:
+ * 
+ * {@code factory.makeEntry(uri) == factory.makeEntry(uri)} (i.e., URIs identify
+ * a unique Java object)
+ * 
  * @author John McCrae
  */
-public class ExampleImpl extends LemonElementImpl implements Example {
-    private static final long serialVersionUID = 2991255226882942129L;
-
-    ExampleImpl(URI uri, LemonModelImpl model) {
-        super(uri, "Example",model);
-    }
-
-    ExampleImpl(String id, LemonModelImpl model) {
-        super(id, "Example",model);
-    }
-
-    @Override
-    public Text getValue() {
-        return getStrText("value");
-    }
-
-    @Override
-    public void setValue(final Text value) {
-        setStrText("value", value);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value,lingOnto);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, bNode);
-    }
-
-    @Override
-    public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
-            setStrTextDirect("value",new Text(value, lang));
-        } else {
-            defaultAccept(pred, value, lang);
-        }
-    }
-    
-    @Override
-    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
-        defaultMerge(accepter, lingOnto, factory);
-    }
+public interface RemoteUpdaterFactory {
+    RemoteUpdater updaterForModel(LemonModel model);
 }

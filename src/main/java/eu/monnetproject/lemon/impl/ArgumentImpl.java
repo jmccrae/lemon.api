@@ -34,15 +34,18 @@ import eu.monnetproject.lemon.impl.io.UnactualizedAccepter;
 import eu.monnetproject.lemon.model.Argument;
 import eu.monnetproject.lemon.model.SyntacticRoleMarker;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
-public class ArgumentImpl extends LemonElementImpl implements Argument {
+public class ArgumentImpl extends LemonElementImpl<ArgumentImpl> implements Argument {
     private static final long serialVersionUID = -7363823973988514256L;
     
+    private boolean optional;
     
     ArgumentImpl(URI uri, LemonModelImpl model) {
         super(uri, "Argument",model);
@@ -62,6 +65,18 @@ public class ArgumentImpl extends LemonElementImpl implements Argument {
         setStrElem("marker", marker);
     }
 
+    @Override
+    public boolean isOptional() {
+        return optional;
+    }
+
+    @Override
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    
+    
     @Override
     public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
         if (pred.toString().equals(LemonModel.LEMON_URI + "marker")) {
@@ -98,12 +113,24 @@ public class ArgumentImpl extends LemonElementImpl implements Argument {
 
     @Override
     public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
+        if(pred.toString().equals(LemonModel.LEMON_URI + "optional")) {
+            optional = Boolean.parseBoolean(value);
+        }
         super.defaultAccept(pred, value, lang);
     }
 
     @Override
     public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
         defaultMerge(accepter, lingOnto, factory);
+    }
+
+    @Override
+    public Map<URI, Collection<Object>> getElements() {
+        final Map<URI, Collection<Object>> elements = super.getElements();
+        if(optional) {
+            elements.put(URI.create(LemonModel.LEMON_URI + "optional"), Collections.singletonList((Object)"true"));
+        }
+        return elements;
     }
     
     

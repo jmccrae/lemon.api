@@ -1,34 +1,35 @@
-/**********************************************************************************
- * Copyright (c) 2011, Monnet Project
- * All rights reserved.
- * 
+/**
+ * ********************************************************************************
+ * Copyright (c) 2011, Monnet Project All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Monnet Project nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE MONNET PROJECT BE LIABLE FOR ANY
+ * modification, are permitted provided that the following conditions are met: *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. * Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. * Neither the name of the Monnet Project nor the names
+ * of its contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE MONNET PROJECT BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************************/
+ * *******************************************************************************
+ */
 package eu.monnetproject.lemon;
 
 import eu.monnetproject.lemon.impl.SPARQLResolver;
 import eu.monnetproject.lemon.impl.LemonModelImpl;
 import eu.monnetproject.lemon.impl.SPARULUpdater;
+import eu.monnetproject.lemon.impl.SPARULUpdaterFactory;
 import eu.monnetproject.lemon.model.PropertyValue;
 import eu.monnetproject.lemon.model.Text;
 import eu.monnetproject.lemon.model.LexicalForm;
@@ -46,6 +47,7 @@ import java.util.*;
 
 /**
  * Set of static task that work on lemon models
+ *
  * @author John McCrae
  */
 public final class LemonModels {
@@ -56,6 +58,7 @@ public final class LemonModels {
 
     /**
      * Select a lexical entry by the form's representation
+     *
      * @param model The model containing the appropriate lexica
      * @param form The representation of the form
      * @param lang The languages of the form
@@ -79,6 +82,7 @@ public final class LemonModels {
 
     /**
      * Select a lexical entry by the form's representation, using regex
+     *
      * @param model The model containing the appropriate lexica
      * @param form The representation of the form
      */
@@ -104,6 +108,7 @@ public final class LemonModels {
 
     /**
      * Select a lexical entry by its form
+     *
      * @param model The model containing the appropriate lexica
      * @param form The form object
      */
@@ -169,29 +174,42 @@ public final class LemonModels {
 
     /**
      * Get the set of lexica containing a given entry
+     *
      * @param model The model containing the appropriate lexica
      * @param entry The entry
      */
     public static List<Lexicon> getLexicaByEntry(LemonModel model, LexicalEntry entry) {
         LinkedList<Lexicon> rval = new LinkedList<Lexicon>();
-        String entrySparql;
-        if (entry.getURI() != null) {
-            entrySparql = "<" + entry.getURI() + ">";
-        } else {
-            entrySparql = "_:" + entry.getID();
+        try {
+            
+            String entrySparql;
+            if (entry.getURI() != null) {
+                entrySparql = "<" + entry.getURI() + ">";
+            } else {
+                entrySparql = "_:" + entry.getID();
+            }
+            String query = "PREFIX lemon: <" + LemonModel.LEMON_URI + ">  "
+                    + "SELECT DISTINCT ?lexicon { "
+                    + "?lexicon lemon:entry " + entrySparql + " }";
+            Iterator<Lexicon> iter = model.query(Lexicon.class, query);
+            while (iter.hasNext()) {
+                rval.add(iter.next());
+            }
+            return rval;
+        } catch (Exception x) {
+            x.printStackTrace();
+            for(Lexicon lexicon : model.getLexica()) {
+                if(lexicon.hasEntry(entry)) {
+                    rval.add(lexicon);
+                }
+            }
+            return rval;
         }
-        String query = "PREFIX lemon: <" + LemonModel.LEMON_URI + ">  "
-                + "SELECT DISTINCT ?lexicon { "
-                + "?lexicon lemon:entry " + entrySparql + " }";
-        Iterator<Lexicon> iter = model.query(Lexicon.class, query);
-        while (iter.hasNext()) {
-            rval.add(iter.next());
-        }
-        return rval;
     }
 
     /**
      * Get the set of entries that refer to a given reference
+     *
      * @param model The model containing the appropriate lexica
      * @param reference The uri reference
      */
@@ -251,12 +269,13 @@ public final class LemonModels {
 
     /**
      * Get the set of entries that refer to a given sense
+     *
      * @param model The model containing the appropriate lexica
      * @param sense The sense object
      */
     @SuppressWarnings("unchecked")
     public static LexicalEntry getEntryBySense(LemonModel model, LexicalSense sense) {
-        if(sense.getIsSenseOf() != null) {
+        if (sense.getIsSenseOf() != null) {
             return sense.getIsSenseOf();
         } else {
             String senseSparql;
@@ -282,20 +301,35 @@ public final class LemonModels {
 
     /**
      * Get all the entries in a lexicon as an alphabetic sorted list
+     *
      * @param model The model containing the lexica
      * @param lexicon The lexicon to list
      * @param offset The first entry to show
      * @param limit The maximum number of entries to return, 0 for no limit
      */
-    public static List<LexicalEntry> getEntriesAlphabetic(LemonModel model, Lexicon lexicon, int offset, int limit) {
+    @SuppressWarnings("unchecked")
+    public static Collection<LexicalEntry> getEntriesAlphabetic(LemonModel model, Lexicon lexicon, int offset, int limit) {
+        final Comparator<LexicalEntry> entryIDComp = new Comparator<LexicalEntry>() {
+
+            @Override
+            public int compare(LexicalEntry o1, LexicalEntry o2) {
+                if (o1.getURI() != null && o2.getURI() != null) {
+                    return o1.getURI().toString().compareTo(o2.getURI().toString());
+                } else if (o1.getURI() == null && o2.getURI() == null) {
+                    return o1.getID().compareTo(o2.getID());
+                } else if (o1.getURI() == null) {
+                    return +1;
+                } else {
+                    return -1;
+                }
+            }
+        };
         try {
-            LinkedList<LexicalEntry> rval = new LinkedList<LexicalEntry>();
+            TreeSet<LexicalEntry> rval = new TreeSet<LexicalEntry>(entryIDComp);
             final String query = "PREFIX lemon: <" + LemonModel.LEMON_URI + "> "
                     + "SELECT DISTINCT ?entry {"
-                    + "<" + lexicon.getURI() + "> lemon:entry ?entry . "
-                    + "OPTIONAL { ?entry lemon:canonicalForm ?form . "
-                    + "?form lemon:writtenRep ?rep } } "
-                    + "ORDER BY ?rep "
+                    + "<" + lexicon.getURI() + "> lemon:entry ?entry . } "
+                    + "ORDER BY ?entry "
                     + (limit > 0 ? "LIMIT " + limit : "")
                     + (offset > 0 ? "OFFSET " + offset : "");
             Iterator<LexicalEntry> iter = model.query(LexicalEntry.class, query);
@@ -307,6 +341,7 @@ public final class LemonModels {
             x.printStackTrace();
             TreeSet<LexicalEntry> entries = new TreeSet<LexicalEntry>(new Comparator<LexicalEntry>() {
 
+                @Override
                 public int compare(LexicalEntry e1, LexicalEntry e2) {
                     if (e1.getCanonicalForm() != null && e1.getCanonicalForm().getWrittenRep() != null) {
                         if (e2.getCanonicalForm() != null && e2.getCanonicalForm().getWrittenRep() != null) {
@@ -326,25 +361,21 @@ public final class LemonModels {
                         return e1.getURI().compareTo(e2.getURI());
                     }
                 }
-
-                public boolean equals(Object o) {
-                    return this == o;
-                }
             });
             for (LexicalEntry le : lexicon.getEntrys()) {
                 entries.add(le);
             }
             if (limit > 0) {
                 if (offset > 0) {
-                    return new ArrayList(entries).subList(offset, Math.min(entries.size(), offset + limit));
+                    return new ArrayList<LexicalEntry>(entries).subList(offset, Math.min(entries.size(), offset + limit));
                 } else {
-                    return new ArrayList(entries).subList(0, Math.min(entries.size(), 0 + limit));
+                    return new ArrayList<LexicalEntry>(entries).subList(0, Math.min(entries.size(), 0 + limit));
                 }
             } else {
                 if (offset > 0) {
-                    return new ArrayList(entries).subList(offset, entries.size());
+                    return new ArrayList<LexicalEntry>(entries).subList(offset, entries.size());
                 } else {
-                    return new ArrayList(entries);
+                    return new ArrayList<LexicalEntry>(entries);
                 }
             }
         }
@@ -352,6 +383,7 @@ public final class LemonModels {
 
     /**
      * Get entries in a lexicon mapped by the references they have
+     *
      * @param model The model containing all the lexica
      * @param lexicon The lexicon containg all entries
      * @param offset The first entry to return
@@ -362,6 +394,7 @@ public final class LemonModels {
         try {
             TreeMap<URI, List<LexicalEntry>> rval = new TreeMap<URI, List<LexicalEntry>>(new Comparator<URI>() {
 
+                @Override
                 public int compare(URI uri1, URI uri2) {
                     if (uri1.toString().equals("special:none")) {
                         if (uri2.toString().equals("special:none")) {
@@ -377,13 +410,19 @@ public final class LemonModels {
                 }
 
                 @Override
-                public boolean equals(Object o) {
-                    return super.equals(o);
+                public int hashCode() {
+                    return super.hashCode();
                 }
 
                 @Override
-                public int hashCode() {
-                    return super.hashCode();
+                public boolean equals(Object obj) {
+                    if (obj == null) {
+                        return false;
+                    }
+                    if (getClass() != obj.getClass()) {
+                        return false;
+                    }
+                    return this == obj;
                 }
             });
             Iterator<LexicalEntry> iter = model.query(LexicalEntry.class,
@@ -461,6 +500,7 @@ public final class LemonModels {
 
     /**
      * Get entries by their written representation and properties
+     *
      * @param model The model containing all lexica
      * @param form The written representation of the form
      * @param lang The language of the form
@@ -529,6 +569,7 @@ public final class LemonModels {
 
     /**
      * Quickly add a lexical entry to a lexicon
+     *
      * @param Lexicon The lexicon
      * @param entryURI The identifier for the entry
      * @param canForm The canonical form
@@ -537,9 +578,9 @@ public final class LemonModels {
     public static LexicalEntry addEntryToLexicon(Lexicon lexicon, URI entryURI, String canForm, URI senseRef) {
         LemonFactory factory = lexicon.getModel().getFactory();
         LexicalEntry entry = factory.makeLexicalEntry(entryURI);
-        LexicalForm form = factory.makeForm();
+        LexicalForm form = factory.makeForm(URI.create(entryURI + "/canonicalForm"));
         if (senseRef != null) {
-            LexicalSense sense = factory.makeSense();
+            LexicalSense sense = factory.makeSense(URI.create(entryURI + "/sense"));
             sense.setReference(senseRef);
             entry.addSense(sense);
         }
@@ -572,43 +613,56 @@ public final class LemonModels {
         }
         return null;
     }
-    
+
     /**
      * Connect to a lemon model contained in a SPARQL endpoint
+     *
      * @param endpoint The URL of the SPARQL endpoint
      * @param graphs The graphs in the endpoint to use
      * @param lingOnto The linguistic ontology to use (may be null)
      * @return A model which resolves based on the endpoint
      */
     public static LemonModel sparqlEndpoint(URL endpoint, Set<URI> graphs, LinguisticOntology lingOnto) {
-        return new LemonModelImpl(null, new SPARQLResolver(endpoint, graphs, lingOnto));
+        return new LemonModelImpl(null, new SPARQLResolver(endpoint, graphs, lingOnto),null);
     }
-    
+
     /**
-     * Connect to a lemon model in a repository supporting SPARQL and SPARQL update
-     * @param sparqlEndpoint The URL of the endpoint for querying, e.g., "http://localhost:8080/sparql"
+     * Connect to a lemon model in a repository supporting SPARQL and SPARQL
+     * update
+     *
+     * @param sparqlEndpoint The URL of the endpoint for querying, e.g.,
+     * "http://localhost:8080/sparql"
      * @param graph The graph to use in the endpoint
      * @param lingOnto The linguistic ontology to use (may be null)
-     * @param updateEndpoint The URL pattern for the endpoint with query, e.g., "http://localhost:8080/sparql-auth?query="
+     * @param updateEndpoint The URL pattern for the endpoint with query, e.g.,
+     * "http://localhost:8080/sparql-auth?query="
+     * @param dialect Which dialect of SPARQL to use, e.g., SPARUL for Virtuoso,
+     * SPARQL11 for 4store
      * @return A model which resolves and updates based on the endpoint
      */
     public static LemonModel sparqlUpdateEndpoint(URL sparqlEndpoint, URI graph, LinguisticOntology lingOnto,
-            String updateEndpoint) {
-        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdater(updateEndpoint, graph));
+            String updateEndpoint, SPARQL dialect) {
+        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdaterFactory(updateEndpoint, graph, dialect));
     }
-    
+
     /**
-     * Connect to a lemon model in a repository supporting SPARQL and SPARQL update
-     * @param sparqlEndpoint The URL of the endpoint for querying, e.g., "http://localhost:8080/sparql"
+     * Connect to a lemon model in a repository supporting SPARQL and SPARQL
+     * update
+     *
+     * @param sparqlEndpoint The URL of the endpoint for querying, e.g.,
+     * "http://localhost:8080/sparql"
      * @param graph The graph to use in the endpoint
      * @param lingOnto The linguistic ontology to use (may be null)
-     * @param updateEndpoint The URL pattern for the endpoint with query, e.g., "http://localhost:8080/sparql-auth?query="
+     * @param updateEndpoint The URL pattern for the endpoint with query, e.g.,
+     * "http://localhost:8080/sparql-auth?query="
      * @param username The user name to use to authenticate
      * @param password The password to use to authenticate
+     * @param dialect Which dialect of SPARQL to use, e.g., SPARUL for Virtuoso,
+     * SPARQL11 for 4store
      * @return A model which resolves and updates based on the endpoint
      */
     public static LemonModel sparqlUpdateEndpoint(URL sparqlEndpoint, URI graph, LinguisticOntology lingOnto,
-            String updateEndpoint, String username, String password) {
-        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdater(updateEndpoint, graph,username,password));
+            String updateEndpoint, String username, String password, SPARQL dialect) {
+        return new LemonModelImpl(null, new SPARQLResolver(sparqlEndpoint, Collections.singleton(graph), lingOnto), new SPARULUpdaterFactory(updateEndpoint, graph, username, password, dialect));
     }
 }

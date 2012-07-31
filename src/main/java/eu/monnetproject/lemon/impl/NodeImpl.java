@@ -39,7 +39,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class NodeImpl extends LemonElementImpl implements Node {
@@ -136,7 +136,9 @@ public class NodeImpl extends LemonElementImpl implements Node {
 
                 @Override
                 public Map<Object, ReaderAccepter> actualizedAs(ReaderAccepter actual, LinguisticOntology lingOnto, AccepterFactory factory) {
-                    setStrElemDirect("leaf",(PhraseTerminal)actual);
+                    if(actual instanceof PhraseTerminal) {
+                        setStrElemDirect("leaf",(PhraseTerminal)actual);
+                    }
                     return super.actualizedAs(actual, lingOnto, factory);
                 }
                 
@@ -164,7 +166,11 @@ public class NodeImpl extends LemonElementImpl implements Node {
 
                 @Override
                 public Map<Object, ReaderAccepter> actualizedAs(ReaderAccepter actual, LinguisticOntology lingOnto, AccepterFactory factory) {
-                    setStrElemDirect("leaf",(PhraseTerminal)actual);
+                    if(actual instanceof PhraseTerminal) {
+                        setStrElemDirect("leaf",(PhraseTerminal)actual);
+                    }  else {
+                        System.err.println("leaf object was not a node but " + actual.getClass());
+                    }
                     return super.actualizedAs(actual, lingOnto, factory);
                 }
                 

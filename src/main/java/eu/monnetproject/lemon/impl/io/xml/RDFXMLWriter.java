@@ -1,29 +1,29 @@
-/**********************************************************************************
- * Copyright (c) 2011, Monnet Project
- * All rights reserved.
- * 
+/**
+ * ********************************************************************************
+ * Copyright (c) 2011, Monnet Project All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Monnet Project nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE MONNET PROJECT BE LIABLE FOR ANY
+ * modification, are permitted provided that the following conditions are met: *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. * Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. * Neither the name of the Monnet Project nor the names
+ * of its contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE MONNET PROJECT BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************************/
+ ********************************************************************************
+ */
 package eu.monnetproject.lemon.impl.io.xml;
 
 import eu.monnetproject.lemon.LemonModel;
@@ -32,7 +32,6 @@ import eu.monnetproject.lemon.AbstractVisitor;
 import eu.monnetproject.lemon.impl.LemonElementImpl;
 import eu.monnetproject.lemon.model.LemonElement;
 import eu.monnetproject.lemon.model.LemonElementOrPredicate;
-import eu.monnetproject.lemon.model.Lexicon;
 import eu.monnetproject.lemon.model.Text;
 import java.io.StringWriter;
 import java.net.URI;
@@ -67,11 +66,13 @@ public class RDFXMLWriter extends AbstractVisitor {
     private final Document document;
     private final Element root;
     private final Map<Object, Node> nodes = new HashMap<Object, Node>();
-    private final HashSet<LemonElementImpl> visited = new HashSet<LemonElementImpl>();
+    private final HashSet<LemonElementImpl<?>> visited = new HashSet<LemonElementImpl<?>>();
     private final static String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    private final Class<?> rootClass;
 
-    public RDFXMLWriter(LinguisticOntology lo) throws ParserConfigurationException {
+    public RDFXMLWriter(LinguisticOntology lo, Class<?> rootClass) throws ParserConfigurationException {
         super(lo);
+        this.rootClass = rootClass;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -85,23 +86,25 @@ public class RDFXMLWriter extends AbstractVisitor {
 
     @Override
     public void visit(LemonElement _element) {
-        if(!(_element instanceof LemonElementImpl)) {
+        if (!(_element instanceof LemonElementImpl)) {
             throw new IllegalArgumentException();
         }
-        final LemonElementImpl<?> element = (LemonElementImpl)_element;
+        final LemonElementImpl<?> element = (LemonElementImpl) _element;
         if (!nodes.containsKey(element)) {
             final Element node = document.createElementNS(LemonModel.LEMON_URI, element.getModelName());
             node.setPrefix("lemon");
             nodes.put(element, node);
-            if (element instanceof Lexicon) {
+            if (rootClass.isAssignableFrom(element.getClass())) {
                 root.appendChild(node);
             }
         }
         final Node node = nodes.get(element);
         for (Object entry : element.getElements().entrySet()) {
+            @SuppressWarnings("unchecked")
             URI uri = ((Map.Entry<URI, Object>) entry).getKey();
+            @SuppressWarnings("unchecked")
             Collection<Object> objs = ((Map.Entry<URI, Collection<Object>>) entry).getValue();
-            String prefix = null, suffix = null;
+            String prefix, suffix;
             if (uri.toString().startsWith(LemonModel.LEMON_URI)) {
                 prefix = LemonModel.LEMON_URI;
                 suffix = uri.toString().substring(LemonModel.LEMON_URI.length());
@@ -129,8 +132,8 @@ public class RDFXMLWriter extends AbstractVisitor {
                 }
                 node.appendChild(predNode);
                 if (obj instanceof LemonElementImpl) {
-                    LemonElementImpl element2 = (LemonElementImpl) obj;
-                    Node childNode = null;
+                    LemonElementImpl<?> element2 = (LemonElementImpl) obj;
+                    Node childNode;
                     if (!nodes.containsKey(element2)) {
                         childNode = document.createElementNS(LemonModel.LEMON_URI, element2.getModelName());
                         childNode.setPrefix("lemon");
@@ -163,12 +166,13 @@ public class RDFXMLWriter extends AbstractVisitor {
                     final org.w3c.dom.Text textNode = document.createTextNode(str);
                     predNode.appendChild(textNode);
                 } else if (obj instanceof List) {
-                    List<LemonElementImpl> elems = (List<LemonElementImpl>) obj;
+                    @SuppressWarnings("unchecked")
+                    List<LemonElementImpl<?>> elems = (List<LemonElementImpl<?>>) obj;
                     final Attr parseType = document.createAttributeNS(RDF, "parseType");
                     parseType.setTextContent("Collection");
                     predNode.getAttributes().setNamedItemNS(parseType);
-                    for (LemonElementImpl element2 : elems) {
-                        Node childNode = null;
+                    for (LemonElementImpl<?> element2 : elems) {
+                        Node childNode;
                         if (!nodes.containsKey(element2)) {
                             childNode = document.createElementNS(LemonModel.LEMON_URI, element2.getModelName());
                             childNode.setPrefix("lemon");
@@ -205,12 +209,12 @@ public class RDFXMLWriter extends AbstractVisitor {
                     resource.setTextContent(((LemonElementOrPredicate) obj).getURI().toString());
                     predNode.getAttributes().setNamedItemNS(resource);
                 } else {
-                    throw new RuntimeException("Unexpected lemon element member " + obj.getClass().toString());
+                    throw new RuntimeException("Unexpected lemon element member " + (obj == null ? (uri + " had null object") : obj.getClass().toString()));
                 }
             }
         }
 
-        if (element.isMultiReferenced() && element.getURI() == null) {
+        if (element.getURI() == null) {
             final Attr nodeID = document.createAttributeNS(RDF, "nodeID");
             nodeID.setPrefix("rdf");
             nodeID.setTextContent(element.getID());
@@ -228,10 +232,14 @@ public class RDFXMLWriter extends AbstractVisitor {
     public boolean visitFirst() {
         return true;
     }
-    
+
     @Override
     public boolean hasVisited(LemonElement element) {
-        return visited.contains(element);
+        if (element instanceof LemonElementImpl) {
+            return visited.contains((LemonElementImpl<?>) element);
+        } else {
+            return false;
+        }
     }
     private Transformer transformer;
 
@@ -247,6 +255,7 @@ public class RDFXMLWriter extends AbstractVisitor {
     public String getDocument() throws TransformerException {
         Transformer trans = getTransformer();
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
+        trans.setOutputProperty(OutputKeys.ENCODING, "ascii");
         StreamResult result = new StreamResult(new StringWriter());
         DOMSource source = new DOMSource(document);
         trans.transform(source, result);

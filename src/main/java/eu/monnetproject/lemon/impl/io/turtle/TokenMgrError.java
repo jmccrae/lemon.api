@@ -49,7 +49,7 @@
 package eu.monnetproject.lemon.impl.io.turtle;
 
 /** Token Manager Error. */
-public class TokenMgrError extends Error
+public class TokenMgrError extends RuntimeException
 {
 
   /**

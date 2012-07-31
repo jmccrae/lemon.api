@@ -55,7 +55,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.AbstractList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -100,6 +99,8 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
     }
 
     private void insertTriples(final Map<URI, Map<Object,Object>> result, ReaderAccepter element, final AccepterFactory accepterFactory) throws RuntimeException {
+        if(accepterFactory == null)
+            throw new RuntimeException("null accepter factory");
         for (Map.Entry<URI, Map<Object,Object>> entry : result.entrySet()) {
             for (Object o : entry.getValue().keySet()) {
                 if (o instanceof URI) {
@@ -117,7 +118,9 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                     } else {
                         accepter = element.accept(entry.getKey(), (String)node.resource, lingOnto, accepterFactory);
                     }
-                    insertTriples(node.triples, accepter, accepterFactory);
+                    if(accepter != null) {
+                        insertTriples(node.triples, accepter, accepterFactory);
+                    }
                 } else {
                     throw new RuntimeException(o.toString());
                 }
@@ -133,8 +136,8 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
     }
 
     @Override
-    public List<Object> resolveRemoteList(Object identifier) {
-        return new SPARQLList(identifier);
+    public <T> List<T> resolveRemoteList(Object identifier, Class<T> clazz, LemonModelImpl model) {
+        return new SPARQLList<T>(identifier,clazz,model);
     }
 
     @Override
@@ -202,7 +205,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
             if (uri != null) {
                 query.append("<").append(uri.toString()).append(">");
             } else {
-                query.append("_:").append(bNodeId);
+                query.append("filter(str(?x) = \"_:").append(bNodeId).append("\"). ?x");
             }
             query.append(" ?p0 ?o0 ");
             buildDeepQuery(query, 1, depth);
@@ -229,7 +232,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                         final Element resultElem = (Element) resultTags.item(j);
                         final String varName = resultElem.getAttribute("name");
                         final Matcher matcher = POEXTRACTOR.matcher(varName);
-                        if (varName == null || !matcher.matches()) {
+                        if (varName == null || (!matcher.matches() && !varName.equals("x"))) {
                             throw new RuntimeException("SPARQL results had <binding> without name attribute " + varName + " " + query);
                         } else if (varName.matches("p\\d+")) {
                             final int idx = Integer.parseInt(matcher.group(1));
@@ -242,6 +245,8 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                         } else if (varName.matches("o\\d+")) {
                             final int idx = Integer.parseInt(matcher.group(1));
                             value[idx] = readResult(resultElem);
+                        } else if(varName.equals("x")) {
+                            // no op
                         } else {
                             throw new RuntimeException("Unexpected variable name " + varName);
                         }
@@ -257,6 +262,9 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                         if (d + 1 == depth || pred[d + 1] == null) {
                             map.get(pred[d]).put(value[d], value[d]);
                         } else {
+                            if(value[d] == null) {
+                                throw new RuntimeException("Pred without value!");
+                            }
                             TripleNode tripleNode = new TripleNode(value[d]);
                             if (map.get(pred[d]).containsKey(tripleNode)) {
                                 tripleNode = (TripleNode) map.get(pred[d]).get(tripleNode);
@@ -265,7 +273,6 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                             }
                             map = tripleNode.triples;
                         }
-
                     }
                 }
             }
@@ -285,7 +292,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
             if (uri != null) {
                 query.append("<").append(uri.toString()).append(">");
             } else {
-                query.append("_:").append(bNodeId);
+                query.append("filter(str(?x) = \"_:").append(bNodeId).append("\"). ?x");
             }
             query.append(" <").append(property).append("> ?o }");
             final URL queryURL = new URL(endpoint + "?query=" + URLEncoder.encode(query.toString(), "UTF-8"));
@@ -312,6 +319,8 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                             throw new RuntimeException("SPARQL results had <binding> without name attribute");
                         } else if (varName.equals("o")) {
                             value = readResult(resultElem);
+                        } else if (varName.equals("x")) {
+                            // no op
                         } else {
                             throw new RuntimeException("Unexpected variable name " + varName);
                         }
@@ -338,7 +347,11 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
             if (child instanceof Element) {
                 final Element c = (Element) child;
                 if (c.getTagName().equals("uri")) {
-                    return URI.create(c.getTextContent());
+                    if(c.getTextContent().startsWith("_:")) {
+                        return c.getTextContent().substring(2);
+                    } else {
+                        return URI.create(c.getTextContent());
+                    }
                 } else if (c.getTagName().equals("literal")) {
                     if (c.getAttribute("xml:lang") != null) {
                         return new StringLang(c.getTextContent(), c.getAttribute("xml:lang"));
@@ -347,8 +360,9 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                     }
                 } else if (c.getTagName().equals("bnode")) {
                     if (c.getTextContent() != null && c.getTextContent().startsWith("nodeID://")) {
-                        // Virtuoso does this for some reason
-                        return c.getTextContent().substring(9, c.getTextContent().length());
+                        // Virtuoso does this... for various reasons it is now better to treat this like
+                        // it was the URI all along
+                        return URI.create(c.getTextContent().substring(9, c.getTextContent().length()));
                     } else {
                         return c.getTextContent();
                     }
@@ -362,7 +376,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
 
     @SuppressWarnings("unchecked")
     public <Elem extends LemonElementOrPredicate> Iterator<Elem> query(Class<Elem> target, String query, LemonModelImpl model) throws IOException, ParserConfigurationException, SAXException {
-
+        System.err.println(query);
         final URL queryURL = new URL(endpoint + "?query=" + URLEncoder.encode(query.toString(), "UTF-8"));
         final URLConnection connection = queryURL.openConnection();
         connection.setRequestProperty("Accept", "application/sparql-results+xml");
@@ -378,7 +392,6 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
             if (node instanceof Element) {
                 final Element element = (Element) node;
                 final NodeList resultTags = element.getElementsByTagName("binding");
-                Object value = null;
                 for (int j = 0; j < resultTags.getLength(); j++) {
                     final Element resultElem = (Element) resultTags.item(j);
                     final Object result = readResult(resultElem);
@@ -394,7 +407,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private static <E extends LemonElementOrPredicate> E make(Class<E> clazz, URI uri, LemonModelImpl model) {
+    private static <E> E make(Class<E> clazz, URI uri, LemonModelImpl model) {
         if (clazz.equals(Argument.class)) {
             return (E) new ArgumentImpl(uri, model);
         } else if (clazz.equals(Component.class)) {
@@ -442,7 +455,7 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private static <E extends LemonElementOrPredicate> E make(Class<E> clazz, String bNode, LemonModelImpl model) {
+    private static <E> E make(Class<E> clazz, String bNode, LemonModelImpl model) {
         if (clazz.equals(Argument.class)) {
             return (E) new ArgumentImpl(bNode, model);
         } else if (clazz.equals(Component.class)) {
@@ -557,18 +570,22 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
         }
     }
 
-    private class SPARQLList extends AbstractList<Object> {
+    private class SPARQLList<T> extends AbstractList<T> {
 
-        private final LinkedList<Object> resolved = new LinkedList<Object>();
+        private final LinkedList<T> resolved = new LinkedList<T>();
+        private final Class<T> clazz;
+        private final LemonModelImpl model;
         private boolean isComplete = false;
         private Object head;
 
-        public SPARQLList(Object head) {
+        public SPARQLList(Object head, Class<T> clazz, LemonModelImpl model) {
             this.head = head;
+            this.clazz = clazz;
+            this.model = model;
         }
 
         @Override
-        public Object get(int index) {
+        public T get(int index) {
             if (index < resolved.size()) {
                 return resolved.get(index);
             } else {
@@ -588,8 +605,8 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
         }
 
         @Override
-        public Iterator<Object> iterator() {
-            return new Iterator<Object>() {
+        public Iterator<T> iterator() {
+            return new Iterator<T>() {
 
                 int i = 0;
 
@@ -599,11 +616,11 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                 }
 
                 @Override
-                public Object next() {
+                public T next() {
                     while (!isComplete && i >= resolved.size()) {
                         advance();
                     }
-                    return resolved.get(i);
+                    return resolved.get(i++);
                 }
 
                 @Override
@@ -622,13 +639,15 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                 for (URI graph : graphs) {
                     query.append(" FROM <").append(graph.toString()).append(">");
                 }
-                query.append(" WHERE { ");
+                query.append(" WHERE {  ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?value ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> ?next ."
+                        + " filter(str(?x) = \"");
                 if (head instanceof URI) {
-                    query.append("<").append(head).append(">");
+                    query.append(head);
                 } else {
                     query.append("_:").append(head);
                 }
-                query.append(" <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?value ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> ?next . }");
+                query.append("\") }");
+                System.err.println(query);
                 final URL queryURL = new URL(endpoint + "?query=" + URLEncoder.encode(query.toString(), "UTF-8"));
                 final URLConnection connection = queryURL.openConnection();
                 connection.setRequestProperty("Accept", "application/sparql-results+xml");
@@ -637,7 +656,6 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                 final InputStream in = connection.getInputStream();
                 final Document document = db.parse(in);
                 in.close();
-                final Map<URI, Collection<Object>> result = new HashMap<URI, Collection<Object>>();
                 final NodeList resultsTags = document.getElementsByTagName("result");
                 Object next = null;
                 Object value = null;
@@ -655,10 +673,15 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                                 next = readResult(resultElem);
                             } else if (varName.equals("value")) {
                                 value = readResult(resultElem);
+                            } else if (varName.equals("x")) {
+                                // noop
                             } else {
                                 throw new RuntimeException("Unexpected variable name " + varName);
                             }
                         }
+                    }
+                    if(next != null && value != null) {
+                        break;
                     }
                 }
 
@@ -670,7 +693,11 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
                         isComplete = true;
                         return false;
                     } else {
-                        resolved.add(value);
+                        if(value instanceof URI) {
+                            resolved.add(make(clazz, (URI)value, model));
+                        } else {
+                            resolved.add(make(clazz, (String)value, model));
+                        }
                         head = next;
                         return true;
                     }

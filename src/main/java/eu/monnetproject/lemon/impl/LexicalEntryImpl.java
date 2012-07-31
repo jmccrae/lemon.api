@@ -48,7 +48,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class LexicalEntryImpl extends LemonElementImpl<LexicalEntryImpl> implements LexicalEntry {
@@ -177,21 +177,25 @@ public class LexicalEntryImpl extends LemonElementImpl<LexicalEntryImpl> impleme
         return removeStrElem(SYN_BEHAVIOR, synBehavior);
     }
 
+    boolean resolveRemoteList = model.allowRemote();
+    
     @Override
-    @SuppressWarnings("unchecked")
     public Collection<List<Component>> getDecompositions() {
-        if(checkRemote) {
-            resolveRemote();
+        if(resolveRemoteList) {
+            if(checkRemote) {
+                resolveRemote();
+            }
             final ArrayList<List<Component>> compCopy = new ArrayList<List<Component>>(components);
             for(List<Component> comps : compCopy) {
                 if(comps instanceof ListAccepter) {
-                    final List<Component> list = (List)model.resolver().resolveRemoteList(((ListAccepter)comps).head());
+                    final List<Component> list = model.resolver().resolveRemoteList(((ListAccepter)comps).head(),Component.class,model);
                     if(list != null) {
                         components.remove(comps);
                         components.add(list);
-                    }
+                    } 
                 } 
             }
+            resolveRemoteList = false;
         }
         return Collections.unmodifiableSet(components);
     }
@@ -311,18 +315,19 @@ public class LexicalEntryImpl extends LemonElementImpl<LexicalEntryImpl> impleme
     @Override
     protected void mergeIn(LexicalEntryImpl elem) {
         super.mergeIn(elem);
-        components.addAll(elem.components);
+        getDecompositions();
+        components.addAll(elem.getDecompositions());
     }
 
     @Override
     protected boolean refers() {
-        return super.refers() || !components.isEmpty();
+        return super.refers() || !getDecompositions().isEmpty();
     }
 
     @Override
     protected void printAsBlankNode(java.io.PrintWriter stream, SerializationState state, boolean first) {
         boolean first2 = true;
-        for (List<Component> componentList : components) {
+        for (List<Component> componentList : getDecompositions()) {
             if (!first) {
                 stream.println(" ;");
                 stream.print(" lemon:decomposition (");
@@ -359,10 +364,11 @@ public class LexicalEntryImpl extends LemonElementImpl<LexicalEntryImpl> impleme
     public Map<URI, Collection<Object>> getElements() {
         final Map<URI, Collection<Object>> elements = super.getElements();
         final URI decomposition = URI.create(LemonModel.LEMON_URI+DECOMPOSITION);
-        if(!components.isEmpty()) {
+        final Collection<List<Component>> decomps = getDecompositions();
+        if(!decomps.isEmpty()) {
             elements.put(decomposition,new LinkedList<Object>());
         }
-        for(List<Component> compList : components) {
+        for(List<Component> compList : decomps) {
             elements.get(decomposition).add(compList);
         }
         return elements;

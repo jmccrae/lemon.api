@@ -32,7 +32,7 @@ import eu.monnetproject.lemon.model.LexicalTopic;
 import java.net.URI;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class TopicImpl extends LemonElementImpl implements LexicalTopic {

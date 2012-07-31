@@ -37,5 +37,5 @@ import java.util.List;
 public interface RemoteResolver {
     void resolveRemote(LemonModelImpl model, LemonElementImpl<?> element, int depth);
     void resolveRemoteFiltered(LemonModelImpl model, URI property, LemonElementImpl<?> element);
-    List<Object> resolveRemoteList(Object identifier);
+    <T> List<T> resolveRemoteList(Object identifier, Class<T> clazz, LemonModelImpl model);
 }

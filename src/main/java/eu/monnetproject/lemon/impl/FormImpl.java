@@ -38,7 +38,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  *
  * @author John McCrae
  */

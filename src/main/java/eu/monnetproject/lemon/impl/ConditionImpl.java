@@ -32,7 +32,7 @@ import eu.monnetproject.lemon.model.SenseCondition;
 import java.net.URI;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class ConditionImpl extends LemonElementImpl implements SenseCondition {

@@ -45,7 +45,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonFactory}
+ * Instantiated via {@link LemonFactoryImpl}
  * @author John McCrae
  */
 public class LexicalSenseImpl extends LemonElementImpl<LexicalSense> implements LexicalSense {
@@ -486,7 +486,9 @@ public class LexicalSenseImpl extends LemonElementImpl<LexicalSense> implements 
     @Override
     public Map<URI,Collection<Object>> getElements() {
         Map<URI,Collection<Object>> rval = super.getElements();
-        rval.put(URI.create(LemonModel.LEMON_URI+"reference"), Collections.singletonList((Object)reference));
+        if(reference != null) {
+            rval.put(URI.create(LemonModel.LEMON_URI+"reference"), Collections.singletonList((Object)reference));
+        }
         return rval;
     }
     

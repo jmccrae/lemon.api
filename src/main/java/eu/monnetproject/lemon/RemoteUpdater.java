@@ -24,61 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
-package eu.monnetproject.lemon.impl;
+package eu.monnetproject.lemon;
 
-import eu.monnetproject.lemon.LemonModel;
-import eu.monnetproject.lemon.LinguisticOntology;
-import eu.monnetproject.lemon.impl.io.ReaderAccepter;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Text;
 import java.net.URI;
+import java.util.List;
 
 /**
- * Instantiated via {@link LemonFactoryImpl}
+ *
  * @author John McCrae
  */
-public class ExampleImpl extends LemonElementImpl implements Example {
-    private static final long serialVersionUID = 2991255226882942129L;
-
-    ExampleImpl(URI uri, LemonModelImpl model) {
-        super(uri, "Example",model);
-    }
-
-    ExampleImpl(String id, LemonModelImpl model) {
-        super(id, "Example",model);
-    }
-
-    @Override
-    public Text getValue() {
-        return getStrText("value");
-    }
-
-    @Override
-    public void setValue(final Text value) {
-        setStrText("value", value);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, URI value, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, value,lingOnto);
-    }
-
-    @Override
-    public ReaderAccepter accept(URI pred, String bNode, LinguisticOntology lingOnto, AccepterFactory factory) {
-        return defaultAccept(pred, bNode);
-    }
-
-    @Override
-    public void accept(URI pred, String value, String lang, LinguisticOntology lingOnto, AccepterFactory factory) {
-        if(pred.toString().equals(LemonModel.LEMON_URI+"value")) {
-            setStrTextDirect("value",new Text(value, lang));
-        } else {
-            defaultAccept(pred, value, lang);
-        }
-    }
+public interface RemoteUpdater {
+    void add(URI subject, URI predicate, URI object);
+    void add(String subject, URI predicate, URI object);
+    void add(URI subject, URI predicate, String bNode);
+    void add(String subject, URI predicate, String bNode);
+    void add(URI subject, URI predicate, String literal, String language);
+    void add(String subject, URI predicate, String literal, String language);
+    void add(URI subject, URI predicate, String literal, URI datatype);
+    void add(String subject, URI predicate, String literal, URI datatype);
     
-    @Override
-    public void merge(ReaderAccepter accepter, LinguisticOntology lingOnto, AccepterFactory factory) {
-        defaultMerge(accepter, lingOnto, factory);
-    }
+    void remove(URI subject, URI predicate, URI object);
+    void remove(String subject, URI predicate, URI object);
+    void remove(URI subject, URI predicate, String bNode);
+    void remove(String subject, URI predicate, String bNode);
+    void remove(URI subject, URI predicate, String literal, String language);
+    void remove(String subject, URI predicate, String literal, String language);
+    void remove(URI subject, URI predicate, String literal, URI datatype);
+    void remove(String subject, URI predicate, String literal, URI datatype);
+    
+    void addList(URI subject, URI predicate, List<Object> list);
+    void addList(String subject, URI predicate, List<Object> list);
+    void removeList(URI subject, URI predicate, List<Object> list);
+    void removeList(String subject, URI predicate, List<Object> list);
 }

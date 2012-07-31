@@ -50,7 +50,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Instantiated via {@link SimpleLemonModel}
+ * Instantiated via {@link LemonModelImpl}
  * @author John McCrae
  */
 public class LemonFactoryImpl implements LemonFactory {

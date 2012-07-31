@@ -22,7 +22,7 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- ********************************************************************************
+ * *******************************************************************************
  */
 package eu.monnetproject.lemon;
 
@@ -30,14 +30,22 @@ import eu.monnetproject.lemon.impl.HttpResolver;
 import eu.monnetproject.lemon.impl.LemonModelImpl;
 import eu.monnetproject.lemon.impl.LemonSerializerImpl;
 import eu.monnetproject.lemon.model.LexicalEntry;
+import eu.monnetproject.lemon.model.LexicalTopic;
 import eu.monnetproject.lemon.model.Lexicon;
+import eu.monnetproject.lemon.model.MorphPattern;
+import eu.monnetproject.lemon.model.Property;
+import eu.monnetproject.lemon.model.PropertyValue;
+import eu.monnetproject.lemon.model.Text;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Collection;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Interface for I/O on lemon models
@@ -57,6 +65,11 @@ public abstract class LemonSerializer {
     public abstract void read(LemonModel model, Reader source);
 
     /**
+     * Read a single entry
+     */
+    public abstract LexicalEntry readEntry(Reader source);
+
+    /**
      * Create a blank model.
      */
     public abstract LemonModel create();
@@ -65,8 +78,8 @@ public abstract class LemonSerializer {
      * Create a blank model
      *
      * @param graph The context of the model or null for no context
-     * @deprecated Deprecated, use either {@code create()} if the context is irrelevant
-     * or methods of particular implementations such as {@code LemonModels.sparqlEndpoint()} 
+     * @deprecated Deprecated, use either {@code create()} if the context is
+     * irrelevant or methods of particular implementations such as {@code LemonModels.sparqlEndpoint()}
      * to define a context.
      */
     @Deprecated
@@ -103,6 +116,112 @@ public abstract class LemonSerializer {
      */
     public abstract void writeLexicon(LemonModel model, Lexicon lexicon, LinguisticOntology lingOnto,
             Writer target);
+    private final String XMLnameStartChar = ":A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD";
+    private final String XMLnameChar = "\\-.0-9\u00B7\u0300-\u036F\u0203F-\u2040";
+    private final Pattern extractXMLName = Pattern.compile("^(.*[^" + XMLnameStartChar + "])([" + XMLnameStartChar + "][" + XMLnameChar + "]*)$");
+
+    private String escapeXMLLiteral(String s) {
+        final StringBuilder sb = new StringBuilder(s);
+        for (int i = 0; i < sb.length(); i++) {
+            final char c = sb.charAt(i);
+            if (c == '&') {
+                sb.replace(i, i + 1, "&amp;");
+            } else if (c == '<') {
+                sb.replace(i, i + 1, "&lt;");
+            } else if (c == '>') {
+                sb.replace(i, i + 1, "&gt;");
+            } else if (c > 127) {
+                sb.replace(i, i + 1, "&#x" + Integer.toHexString(c) + ";");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Write the description of a lexicon, i.e., only links to entries not the
+     * entries' descriptions
+     *
+     * @param model The model
+     * @param lexicon The lexicon
+     * @param target The target to write to
+     */
+    public void writeLexiconDescription(LemonModel model, Lexicon lexicon, Writer target) {
+        try {
+            target.append("<?xml version=\"1.0\" encoding=\"ASCII\"?>\n"
+                    + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+                    + "  <lemon:Lexicon rdf:about=\"" + lexicon.getURI() + "\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">\n");
+            if(lexicon.getLanguage() != null) {
+                target.append("    <lemon:language>" + lexicon.getLanguage()+"</lemon:language>\n");
+            } 
+            for (LexicalEntry entry : lexicon.getEntrys()) {
+                if (entry.getURI() != null) {
+                    target.append("    <lemon:entry rdf:resource=\"" + entry.getURI() + "\"/>\n");
+                } else {
+                    target.append("    <lemon:entry rdf:nodeID=\"" + entry.getID() + "\"/>\n");
+                }
+            }
+            for (Map.Entry<URI, Collection<Object>> annoEntrys : lexicon.getAnnotations().entrySet()) {
+                final Matcher matcher = extractXMLName.matcher(annoEntrys.getKey().toString());
+                for (Object annoVal : annoEntrys.getValue()) {
+                    if (matcher.matches()) {
+                        target.append("    <p1:" + matcher.group(1) + " xmlns:p1=\"" + matcher.group(2) + "\"");
+                    } else {
+                        target.append("    <" + annoEntrys.getKey().toString());
+                    }
+                    if (annoVal instanceof URI) {
+                        target.append(" rdf:resource=\"" + annoVal.toString() + "\"/>\n");
+                    } else if (annoVal instanceof String) {
+                        target.append(">" + escapeXMLLiteral(annoVal.toString()) + "</" + (matcher.matches() ? ("p1:" + matcher.group(1)) : (annoEntrys.getKey().toString())) + ">\n");
+                    } else if (annoVal instanceof Text) {
+                        final Text value = (Text) annoVal;
+                        target.append(" xml:lang=\"" + value.language + "\">" + escapeXMLLiteral(value.value) + "</" + (matcher.matches() ? ("p1:" + matcher.group(1)) : (annoEntrys.getKey().toString())) + ">\n");
+                    } else {
+                        throw new RuntimeException("Unexpected annotation type " + annoVal.getClass().getName());
+                    }
+                }
+            }
+            for (Map.Entry<Property, Collection<PropertyValue>> propEntrys : lexicon.getPropertys().entrySet()) {
+                final Matcher matcher = extractXMLName.matcher(propEntrys.getKey().toString());
+                for (Object propVal : propEntrys.getValue()) {
+                    if (matcher.matches()) {
+                        target.append("    <p1:" + matcher.group(1) + " xmlns:p1=\"" + matcher.group(2) + "\"");
+                    } else {
+                        target.append("    <" + propEntrys.getKey().toString());
+                    }
+                    if (propVal instanceof URI) {
+                        target.append(" rdf:resource=\"" + propVal.toString() + "\"/>\n");
+                    } else if (propVal instanceof String) {
+                        target.append(">" + escapeXMLLiteral(propVal.toString()) + "</" + (matcher.matches() ? ("p1:" + matcher.group(1)) : (propEntrys.getKey().toString())) + ">\n");
+                    } else if (propVal instanceof Text) {
+                        final Text value = (Text) propVal;
+                        target.append(" xml:lang=\"" + value.language + "\">" + escapeXMLLiteral(value.value) + "</" + (matcher.matches() ? ("p1:" + matcher.group(1)) : (propEntrys.getKey().toString())) + ">\n");
+                    } else {
+                        throw new RuntimeException("Unexpected annotation type " + propVal.getClass().getName());
+                    }
+                }
+            }
+            
+            for(MorphPattern pattern : lexicon.getPatterns()) {
+                if(pattern.getURI() != null) {
+                    target.append("    <lemon:pattern rdf:resource=\"" + pattern.getURI() + "\"/>\n");
+                } else {
+                    target.append("    <lemon:pattern rdf:nodeID=\"" + pattern.getID() + "\"/>\n");
+                }
+            }
+            
+            for(LexicalTopic topic : lexicon.getTopics()) {
+                if(topic.getURI() != null) {
+                    target.append("    <lemon:topic rdf:resource=\"" + topic.getURI() + "\"/>\n");
+                } else {
+                    target.append("    <lemon:topic rdf:nodeID=\"" + topic.getID() + "\"/>\n");
+                }
+                
+            }
+            target.append("  </lemon:Lexicon>\n</rdf:RDF>");
+        } catch (IOException x) {
+            throw new RuntimeException(x);
+        }
+    }
 
     /**
      * Write a lemon model to a given data source
@@ -171,12 +290,13 @@ public abstract class LemonSerializer {
 
     /**
      * Get a model from the web starting from a given URL.
+     *
      * @param url The URL of the lemon data
      * @return The lemon model
      * @throws IOException If an error occurred accessing the URL
      */
-    public final static LemonModel modelFromURL(URL url) throws IOException {
-        final LemonModelImpl model = new LemonModelImpl(url.toString(), new HttpResolver());
+    public static LemonModel modelFromURL(URL url) throws IOException {
+        final LemonModelImpl model = new LemonModelImpl(url.toString(), new HttpResolver(), null);
         new LemonSerializerImpl(null).read(model, new InputStreamReader(url.openConnection().getInputStream()));
         return model;
     }
@@ -186,4 +306,15 @@ public abstract class LemonSerializer {
      *
      */
     public abstract void close();
+    protected RemoteUpdaterFactory remoteUpdateFactory;
+
+    /**
+     * Set the value of the remote updater factory used to copy changes to a
+     * remote repository
+     *
+     * @param remoteUpdateFactory
+     */
+    public void setRemoteUpdateFactory(RemoteUpdaterFactory remoteUpdateFactory) {
+        this.remoteUpdateFactory = remoteUpdateFactory;
+    }
 }
