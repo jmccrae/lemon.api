@@ -332,7 +332,7 @@ public class LexicalSenseImpl extends LemonElementImpl<LexicalSense> implements 
             } else {
                 stream.print("_:" + getID());
             }
-            stream.println(" .\n");
+            stream.println(" ."+System.getProperty("line.separator"));
         }
     }
 

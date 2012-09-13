@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
         <groupId>eu.monnetproject</groupId>
-        <version>1.12.1-SNAPSHOT</version>
+        <version>1.12.7</version>
     <artifactId>lemon.api</artifactId>
     <packaging>bundle</packaging>
 
@@ -24,8 +24,6 @@
     </dependencies>
 
     <build>
-        <directory>generated</directory>
-        <finalName>${project.groupId}.${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

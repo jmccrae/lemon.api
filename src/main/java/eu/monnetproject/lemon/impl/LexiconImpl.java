@@ -97,7 +97,11 @@ public class LexiconImpl extends LemonElementImpl implements Lexicon {
 
     @Override
     public int countEntrys() {
-        return getStrElems("entry").size();
+        if(model.resolver() != null) {
+            return model.resolver().resolveRemoteEntryCount(model, this);
+        } else {
+            return getStrElems("entry").size();
+        }
     }
 
     @Override

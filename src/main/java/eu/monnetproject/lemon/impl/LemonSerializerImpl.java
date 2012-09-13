@@ -299,9 +299,7 @@ public class LemonSerializerImpl extends LemonSerializer {
         } else {
 
             try {
-                System.err.println(">>>>>>>Writing lexicon");
                 for (LexicalEntry entry : lxcn.getEntrys()) {
-                    System.err.println(entry.getURI().toString());
                     entry.getCanonicalForm(); // force remote resolve
                 }
                 final TurtleWriter turtleWriter = new TurtleWriter(lingOnto);

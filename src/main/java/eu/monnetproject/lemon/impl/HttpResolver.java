@@ -88,4 +88,9 @@ public class HttpResolver implements RemoteResolver {
     public <T> List<T> resolveRemoteList(Object identifier, Class<T> clazz, LemonModelImpl model) {
         return null;
     }
+
+    @Override
+    public int resolveRemoteEntryCount(LemonModelImpl model, LexiconImpl lexicon) {
+        throw new UnsupportedOperationException("TODO");
+    }
 }

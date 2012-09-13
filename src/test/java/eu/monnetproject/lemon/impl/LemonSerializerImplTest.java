@@ -4,18 +4,22 @@
  */
 package eu.monnetproject.lemon.impl;
 
+import eu.monnetproject.lemon.LemonFactory;
 import eu.monnetproject.lemon.model.Text;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LemonModels;
 import eu.monnetproject.lemon.LemonSerializer;
 import eu.monnetproject.lemon.LinguisticOntology;
+import eu.monnetproject.lemon.URIElement;
 import eu.monnetproject.lemon.model.Argument;
 import eu.monnetproject.lemon.model.Condition;
+import eu.monnetproject.lemon.model.Constituent;
 import eu.monnetproject.lemon.model.Frame;
 import eu.monnetproject.lemon.model.LexicalEntry;
 import eu.monnetproject.lemon.model.LexicalForm;
 import eu.monnetproject.lemon.model.LexicalSense;
 import eu.monnetproject.lemon.model.Lexicon;
+import eu.monnetproject.lemon.model.Node;
 import eu.monnetproject.lemon.model.Property;
 import eu.monnetproject.lemon.model.PropertyValue;
 import eu.monnetproject.lemon.model.SynArg;
@@ -95,25 +99,25 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWrite_LemonModel_Writer() {
-        String expResult = "<?xml version=\"1.0\" encoding=\"ASCII\"?>\n"
-                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
-                + "  <lemon:Lexicon rdf:about=\"file:test#lexicon\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">\n"
-                + "    <lemon:language>en</lemon:language>\n"
-                + "    <lemon:entry>\n"
-                + "      <lemon:LexicalEntry rdf:about=\"file:test#Cat\">\n"
-                + "        <lemon:sense>\n"
-                + "          <lemon:LexicalSense rdf:about=\"file:test#Cat/sense\">\n"
-                + "            <lemon:reference rdf:resource=\"http://dbpedia.org/resource/Cat\"/>\n"
-                + "          </lemon:LexicalSense>\n"
-                + "        </lemon:sense>\n"
-                + "        <lemon:canonicalForm>\n"
-                + "          <lemon:Form rdf:about=\"file:test#Cat/canonicalForm\">\n"
-                + "            <lemon:writtenRep xml:lang=\"en\">cat</lemon:writtenRep>\n"
-                + "          </lemon:Form>\n"
-                + "        </lemon:canonicalForm>\n"
-                + "      </lemon:LexicalEntry>\n"
-                + "    </lemon:entry>\n"
-                + "  </lemon:Lexicon>\n"
+        String expResult = "<?xml version=\"1.0\" encoding=\"ASCII\"?>" + ls
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" + ls
+                + "  <lemon:Lexicon rdf:about=\"file:test#lexicon\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">" + ls
+                + "    <lemon:language>en</lemon:language>" + ls
+                + "    <lemon:entry>" + ls
+                + "      <lemon:LexicalEntry rdf:about=\"file:test#Cat\">" + ls
+                + "        <lemon:sense>" + ls
+                + "          <lemon:LexicalSense rdf:about=\"file:test#Cat/sense\">" + ls
+                + "            <lemon:reference rdf:resource=\"http://dbpedia.org/resource/Cat\"/>" + ls
+                + "          </lemon:LexicalSense>" + ls
+                + "        </lemon:sense>" + ls
+                + "        <lemon:canonicalForm>" + ls
+                + "          <lemon:Form rdf:about=\"file:test#Cat/canonicalForm\">" + ls
+                + "            <lemon:writtenRep xml:lang=\"en\">cat</lemon:writtenRep>" + ls
+                + "          </lemon:Form>" + ls
+                + "        </lemon:canonicalForm>" + ls
+                + "      </lemon:LexicalEntry>" + ls
+                + "    </lemon:entry>" + ls
+                + "  </lemon:Lexicon>" + ls
                 + "</rdf:RDF>";
         System.out.println("write");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
@@ -207,16 +211,16 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWrite_3args() {
-        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
-                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . \n"
-                + "\n"
-                + "<file:test#Cat> lemon:sense [  a lemon:LexicalSense ;\n"
-                + " lemon:reference <http://dbpedia.org/resource/Cat> ] ;\n"
-                + " lemon:canonicalForm [  lemon:writtenRep \"cat\"@en ;\n"
-                + " a lemon:Form ] ;\n"
-                + " a lemon:LexicalEntry .\n"
-                + "\n"
-                + "<file:test#lexicon> lemon:entry <file:test#Cat> ;\n"
+        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " + ls
+                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . " + ls
+                + "" + ls
+                + "<file:test#Cat> lemon:sense [  a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ] ;" + ls
+                + " lemon:canonicalForm [  lemon:writtenRep \"cat\"@en ;" + ls
+                + " a lemon:Form ] ;" + ls
+                + " a lemon:LexicalEntry ." + ls
+                + "" + ls
+                + "<file:test#lexicon> lemon:entry <file:test#Cat> ;" + ls
                 + " a lemon:Lexicon .";
         System.out.println("write");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
@@ -232,17 +236,17 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWriteEntry_5args() {
-        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
-                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . \n"
-                + "\n"
-                + "<file:test#Cat/sense> a lemon:LexicalSense ;\n"
-                + " lemon:reference <http://dbpedia.org/resource/Cat> .\n"
-                + "\n"
-                + "<file:test#Cat/canonicalForm> lemon:writtenRep \"cat\"@en ;\n"
-                + " a lemon:Form .\n"
-                + "\n"
-                + "<file:test#Cat> lemon:sense <file:test#Cat/sense> ;\n"
-                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;\n"
+        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " + ls
+                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . " + ls
+                + "" + ls
+                + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ." + ls
+                + "" + ls
+                + "<file:test#Cat/canonicalForm> lemon:writtenRep \"cat\"@en ;" + ls
+                + " a lemon:Form ." + ls
+                + "" + ls
+                + "<file:test#Cat> lemon:sense <file:test#Cat/sense> ;" + ls
+                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;" + ls
                 + " a lemon:LexicalEntry .";
         System.out.println("writeEntry");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
@@ -260,20 +264,20 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWriteLexicon_5args() {
-        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
-                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . \n"
-                + "\n"
-                + "<file:test#Cat/sense> a lemon:LexicalSense ;\n"
-                + " lemon:reference <http://dbpedia.org/resource/Cat> .\n"
-                + "\n"
-                + "<file:test#Cat/canonicalForm> lemon:writtenRep \"cat\"@en ;\n"
-                + " a lemon:Form .\n"
-                + "\n"
-                + "<file:test#Cat> lemon:sense <file:test#Cat/sense> ;\n"
-                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;\n"
-                + " a lemon:LexicalEntry .\n"
-                + "\n"
-                + "<file:test#lexicon> lemon:entry <file:test#Cat> ;\n"
+        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " + ls
+                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . " + ls
+                + "" + ls
+                + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ." + ls
+                + "" + ls
+                + "<file:test#Cat/canonicalForm> lemon:writtenRep \"cat\"@en ;" + ls
+                + " a lemon:Form ." + ls
+                + "" + ls
+                + "<file:test#Cat> lemon:sense <file:test#Cat/sense> ;" + ls
+                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;" + ls
+                + " a lemon:LexicalEntry ." + ls
+                + "" + ls
+                + "<file:test#lexicon> lemon:entry <file:test#Cat> ;" + ls
                 + " a lemon:Lexicon .";
         System.out.println("writeLexicon");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
@@ -285,28 +289,28 @@ public class LemonSerializerImplTest {
         instance.writeLexicon(lm, lxcn, lo, dt, xml);
         assertEquals(expResult, dt.toString().trim());
     }
-    private final String input = "@prefix MusicBrainzLexicon: <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>.\n"
-            + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n"
-            + "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.\n"
-            + "@prefix lemon: <http://www.monnet-project.eu/lemon#>.\n"
+    private final String input = "@prefix MusicBrainzLexicon: <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>." + ls
+            + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>." + ls
+            + "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>." + ls
+            + "@prefix lemon: <http://www.monnet-project.eu/lemon#>." + ls
             + "@prefix lexinfo: <http://www.lexinfo.net/ontology/2.0/lexinfo#>."
-            + "@prefix : <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>.\n\n"
-            + "MusicBrainzLexicon:lexicon a lemon:Lexicon ; lemon:entry MusicBrainzLexicon:collaborationOf.\n"
-            + "MusicBrainzLexicon:collaborationOf lemon:sense [ lemon:reference <http://purl.org/vocab/relationship/collaboratesWith> ;\n"
-            + "                                    lemon:subjOfProp :arg1collaboration ;\n"
-            + "                                   lemon:objOfProp  :arg2collaboration ;\n"
-            + "                                   lemon:propertyDomain :example ] ;\n"
-            + " lexinfo:partOfSpeech lexinfo:noun ;\n"
-            + "lemon:synBehavior [ rdf:type lexinfo:NounPPFrame ;\n"
-            + " 	              lexinfo:subject :arg2collaboration ;\n"
-            + "                    lexinfo:prepositionalObject :arg1collaboration ] ;\n"
-            + "lexinfo:partOfSpeech lexinfo:noun ;\n"
-            + "lemon:canonicalForm [ lemon:writtenRep \"collaboration\"@en ;\n"
-            + "                      lexinfo:number lexinfo:singular ] ;\n"
-            + "lemon:otherForm [ lemon:writtenRep \"collaborations\"@en ;\n"
-            + "                  lexinfo:number lexinfo:plural ] .\n"
+            + "@prefix : <http://monnetproject.deri.ie/lemonsource/user/httpswwwgooglecomaccountso8ididAItOawnRWNkyXGW_lk5kD1JgLCzU9MCwC_R8TY/MusicBrainzLexicon#>.\n" + ls
+            + "MusicBrainzLexicon:lexicon a lemon:Lexicon ; lemon:entry MusicBrainzLexicon:collaborationOf." + ls
+            + "MusicBrainzLexicon:collaborationOf lemon:sense [ lemon:reference <http://purl.org/vocab/relationship/collaboratesWith> ;" + ls
+            + "                                    lemon:subjOfProp :arg1collaboration ;" + ls
+            + "                                   lemon:objOfProp  :arg2collaboration ;" + ls
+            + "                                   lemon:propertyDomain :example ] ;" + ls
+            + " lexinfo:partOfSpeech lexinfo:noun ;" + ls
+            + "lemon:synBehavior [ rdf:type lexinfo:NounPPFrame ;" + ls
+            + " 	              lexinfo:subject :arg2collaboration ;" + ls
+            + "                    lexinfo:prepositionalObject :arg1collaboration ] ;" + ls
+            + "lexinfo:partOfSpeech lexinfo:noun ;" + ls
+            + "lemon:canonicalForm [ lemon:writtenRep \"collaboration\"@en ;" + ls
+            + "                      lexinfo:number lexinfo:singular ] ;" + ls
+            + "lemon:otherForm [ lemon:writtenRep \"collaborations\"@en ;" + ls
+            + "                  lexinfo:number lexinfo:plural ] ." + ls
             + ""
-            + ":arg2collaboration lemon:marker :Of.\n";
+            + ":arg2collaboration lemon:marker :Of." + ls;
 
     @Test
     public void testSynArgRead() {
@@ -387,7 +391,7 @@ public class LemonSerializerImplTest {
         final Lexicon lexicon = model.addLexicon(URI.create("file:test#lexicon__de"), "de");
         LemonModels.addEntryToLexicon(lexicon, URI.create("file:test#lexicon__de/baer"), "b\u00e4", null);
     }
-    
+
     @Test
     public void testReadEntry() {
         System.out.println("testReadEntry");
@@ -400,14 +404,14 @@ public class LemonSerializerImplTest {
                 + "   </lemon:canonicalForm>"
                 + " </lemon:LexicalEntry>"
                 + "</rdf:RDF>";
-        
+
         Reader source = new StringReader(xmlDoc);
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         final LexicalEntry entry = instance.readEntry(source);
         final String test = entry.getCanonicalForm().getWrittenRep().value;
         assertEquals("test", test);
     }
-    
+
     @Test
     public void testWriteLexiconDescription() {
         System.out.println("testWriteLexiconDescription");
@@ -416,14 +420,70 @@ public class LemonSerializerImplTest {
         final LemonModel model = instance.create();
         final Lexicon lexicon = model.addLexicon(URI.create("http://www.example.com/lexicon/"), "en");
         LemonModels.addEntryToLexicon(lexicon, URI.create("http://www.example.com/lexicon/example"), "example", null);
-        instance.writeLexiconDescription(model,lexicon,out);
-        final String xmlDoc = "<?xml version=\"1.0\" encoding=\"ASCII\"?>\n"
-                    + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
-                    + "  <lemon:Lexicon rdf:about=\"http://www.example.com/lexicon/\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">\n"
-                + "    <lemon:language>en</lemon:language>\n"
-                + "    <lemon:entry rdf:resource=\"http://www.example.com/lexicon/example\"/>\n"
-                + "  </lemon:Lexicon>\n"
+        instance.writeLexiconDescription(model, lexicon, out);
+        final String xmlDoc = "<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" + ls
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" + ls
+                + "  <lemon:Lexicon rdf:about=\"http://www.example.com/lexicon/\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">" + ls
+                + "    <lemon:language>en</lemon:language>" + ls
+                + "    <lemon:entry rdf:resource=\"http://www.example.com/lexicon/example\"/>" + ls
+                + "  </lemon:Lexicon>" + ls
                 + "</rdf:RDF>";
         assertEquals(xmlDoc, out.toString());
+    }
+    static final String ls = System.getProperty("line.separator");
+
+    @Test
+    public void testConstituent() {
+        System.out.println("testConstituent");
+        String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " + ls
+                + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . " + ls
+                + "" + ls
+                + "<file:test#Cat/node> lemon:constituent  <file:test#NP>  ;" + ls
+                + " a lemon:Node ." + ls
+                + "" + ls
+                + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ." + ls
+                + "" + ls
+                + "<file:test#Cat/canonicalForm> lemon:writtenRep \"cat\"@en ;" + ls
+                + " a lemon:Form ." + ls
+                + "" + ls
+                + "<file:test#Cat> lemon:phraseRoot <file:test#Cat/node> ;" + ls
+                + " lemon:sense <file:test#Cat/sense> ;" + ls
+                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;" + ls
+                + " a lemon:LexicalEntry ." + ls
+                + "" + ls
+                + "<file:test#lexicon> lemon:entry <file:test#Cat> ;" + ls
+                + " a lemon:Lexicon ." + ls
+                + "" + ls
+                + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ." + ls
+                + "" + ls
+                + "<file:test#Cat> lemon:phraseRoot <file:test#Cat/node> ;" + ls
+                + " lemon:sense <file:test#Cat/sense> ;" + ls
+                + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;" + ls
+                + " a lemon:LexicalEntry ." + ls
+                + "" + ls
+                + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
+                + " lemon:reference <http://dbpedia.org/resource/Cat> ."+ls+ls;
+        System.out.println("write");
+        LemonSerializerImpl instance = new LemonSerializerImpl(null);
+        LemonModel lm = makeModel(instance);
+        final Lexicon lexicon = lm.addLexicon(URI.create("file:test#lexicon"), "en");
+        final LemonFactory factory = lm.getFactory();
+        final LexicalEntry lexEntry = LemonModels.addEntryToLexicon(lexicon, URI.create("file:test#Cat"), "cat", URI.create("http://dbpedia.org/resource/Cat"));
+        final Node node = factory.makeNode(URI.create("file:test#Cat/node"));
+        class ConstituentImpl extends URIElement implements Constituent {
+
+            public ConstituentImpl(URI uri) {
+                super(uri);
+            }
+        }
+        node.setConstituent(new ConstituentImpl(URI.create("file:test#NP")));
+        lexEntry.addPhraseRoot(node);
+        Writer dt = new StringWriter();
+        boolean xml = false;
+        instance.write(lm, dt, xml);
+        System.out.println(dt.toString());
+        assertEquals(expResult, dt.toString());
     }
 }

@@ -101,16 +101,18 @@ public class TurtleWriter extends AbstractVisitor {
         return visited.contains(element);
     }
 
+    private final String LS = System.getProperty("line.separator");
+    
     private StringBuilder getHeaders() {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, String> head : header.entrySet()) {
             if (head.getKey().equals("")) {
-                builder.append("@base <").append(head.getValue()).append("> . \n");
+                builder.append("@base <").append(head.getValue()).append("> . "+LS);
             } else {
-                builder.append("@prefix ").append(head.getKey()).append(": <").append(head.getValue()).append("> . \n");
+                builder.append("@prefix ").append(head.getKey()).append(": <").append(head.getValue()).append("> . "+LS);
             }
         }
-        return builder.append("\n");
+        return builder.append(LS);
     }
 
     public String getDocument() {

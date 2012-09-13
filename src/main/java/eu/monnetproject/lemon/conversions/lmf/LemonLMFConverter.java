@@ -38,24 +38,7 @@ import eu.monnetproject.lemon.URIValue;
 import static eu.monnetproject.lemon.conversions.lmf.CollectionFunctions.*;
 import eu.monnetproject.lemon.impl.LexiconImpl;
 import eu.monnetproject.lemon.impl.LemonModelImpl;
-import eu.monnetproject.lemon.model.Argument;
-import eu.monnetproject.lemon.model.Component;
-import eu.monnetproject.lemon.model.Edge;
-import eu.monnetproject.lemon.model.Example;
-import eu.monnetproject.lemon.model.Frame;
-import eu.monnetproject.lemon.model.LemonElement;
-import eu.monnetproject.lemon.model.LemonElementOrPredicate;
-import eu.monnetproject.lemon.model.LemonPredicate;
-import eu.monnetproject.lemon.model.LexicalEntry;
-import eu.monnetproject.lemon.model.LexicalForm;
-import eu.monnetproject.lemon.model.LexicalSense;
-import eu.monnetproject.lemon.model.Lexicon;
-import eu.monnetproject.lemon.model.Property;
-import eu.monnetproject.lemon.model.PropertyValue;
-import eu.monnetproject.lemon.model.Representation;
-import eu.monnetproject.lemon.model.SenseDefinition;
-import eu.monnetproject.lemon.model.SynArg;
-import eu.monnetproject.lemon.model.Text;
+import eu.monnetproject.lemon.model.*;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -71,6 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import net.lexinfo.LexInfo;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -80,12 +64,36 @@ import org.w3c.dom.NodeList;
 public class LemonLMFConverter {
 
     private static final String ISOCAT = "http://www.isocat.org/datcat/null#";
-    private List<String> ignoredFeats = Arrays.asList(new String[]{"writtenForm", "lexEntryType", "syntacticFunction", "syntacticConstituent", "marker", "separator"});
+    public static final String GEOGRAPHICAL_VARIANT = "geographicalVariant";
+    public static final String ORTHOGRAPHY_NAME = "orthographyName";
+    public static final String SCRIPT = "script";
+    public static final String WRITTEN_FORM = "writtenForm";
+    private List<String> ignoredFeats = Arrays.asList(new String[]{WRITTEN_FORM, "lexEntryType", "syntacticFunction", "syntacticConstituent", "marker", "separator"});
 
+    public static Document lemon2lmf(LemonModel model) {
+        try {
+            return new toLMF().lemon2lmf(model);
+        } catch (Exception x) {
+            throw new RuntimeException(x);
+        }
+    }
+
+    public static LemonModel lmf2lemon(Document lmfDoc) {
+        try {
+            final LemonModelImpl model = new LemonModelImpl(null);
+            new ToLemon().lmf2lemon(lmfDoc, model, new LexInfo());
+            return model;
+        } catch (LMFFormatException x) {
+            throw x;
+        } catch (Exception x) {
+            throw new RuntimeException(x);
+        }
+    }
     //def lemon2lmf(model:LemonModel) : XMLNode = ToLMF.lemon2lmf(model)
     //def lmf2lemon(lmfDoc:XMLNode) : List[Lexicon] = ToLemon.lmf2lemon(lmfDoc)
     ////////////////////////////////////////////////////////////////////////////////////
     // Lemon to LMF
+
     private static class toLMF {
 
         private final Document document;
@@ -167,7 +175,7 @@ public class LemonLMFConverter {
 
         private Element canForm2lmf(LexicalForm form, LemonModel model) {
             final Element lemmaTag = document.createElement("Lemma");
-            append(lemmaTag, getFeat("writtenForm", form.getWrittenRep().value));
+            append(lemmaTag, getFeat(WRITTEN_FORM, form.getWrittenRep().value));
             return lemmaTag;
         }
 
@@ -182,7 +190,7 @@ public class LemonLMFConverter {
 
         private Node form2lmf(LexicalForm form, LemonModel model) {
             final Element formTag = document.createElement("WordForm");
-            append(formTag, getFeat("writtenForm", form.getWrittenRep().value));
+            append(formTag, getFeat(WRITTEN_FORM, form.getWrittenRep().value));
             append(formTag, getFeats(form.getPropertys(), model));
             append(formTag, reps2formRep(form.getRepresentations(), model));
             return formTag;
@@ -192,7 +200,7 @@ public class LemonLMFConverter {
             List<Node> nodes = new LinkedList<Node>();
             for (LexicalForm form : lexEntry.getAbstractForms()) {
                 final Element stemTag = document.createElement("Stem");
-                append(stemTag, getFeat("writtenForm", form.getWrittenRep().value));
+                append(stemTag, getFeat(WRITTEN_FORM, form.getWrittenRep().value));
                 append(stemTag, getFeats(form.getPropertys(), model));
                 append(stemTag, reps2formRep(form.getRepresentations(), model));
                 nodes.add(stemTag);
@@ -207,7 +215,7 @@ public class LemonLMFConverter {
             for (Representation rep : repMap.keySet()) {
                 for (Text value : repMap.get(rep)) {
                     final Element formRepTag = document.createElement("FormRepresentation");
-                    append(formRepTag, getFeat("writtenForm", value.value));
+                    append(formRepTag, getFeat(WRITTEN_FORM, value.value));
                     append(formRepTag, decodeLangTag(value.language));
                     nodes.add(formRepTag);
                 }
@@ -229,17 +237,17 @@ public class LemonLMFConverter {
             final List<Node> langTags = new LinkedList<Node>();
 
             if (script != null) {
-                langTags.add(getFeat("script", script.substring(1)));
+                langTags.add(getFeat(SCRIPT, script.substring(1)));
             }
 
             if (region != null) {
-                langTags.add(getFeat("geographicalVariant", region.substring(1)));
+                langTags.add(getFeat(GEOGRAPHICAL_VARIANT, region.substring(1)));
             }
             if (variant != null) {
                 langTags.add(getFeat("variant", variant.substring(1)));
             }
             if (extension != null) {
-                langTags.add(getFeat("orthographyName", extension.substring(3)));
+                langTags.add(getFeat(ORTHOGRAPHY_NAME, extension.substring(3)));
             }
             return langTags;
         }
@@ -340,7 +348,7 @@ public class LemonLMFConverter {
 
         private Element texts2textRep(Text rep) throws DOMException {
             final Element repTag = document.createElement("TextRepresentation");
-            append(repTag, getFeat("writtenForm", rep.value));
+            append(repTag, getFeat(WRITTEN_FORM, rep.value));
             append(repTag, decodeLangTag(rep.language));
             return repTag;
         }
@@ -537,30 +545,6 @@ public class LemonLMFConverter {
 
     private static class ToLemon {
 
-        private List<eu.monnetproject.lemon.model.Node> readMWEPattern(Element e, LMFAugments augment, List<List<Component>> decomposition) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private void readSubcatFrameSet(Frame frame, Element get, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private void readDefinition(LexicalSense sense, Element defNode, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private void readSenseRelation(LexicalSense sense, Element relNode, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private void readAxes(LexicalSense sense, Element senseNode, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
-        private String readSemArg(Element semPredNode, Element mapNode, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-
         private static class StringPair {
 
             private final String s1, s2;
@@ -621,6 +605,7 @@ public class LemonLMFConverter {
                 this.lingOnto = lingOnto;
             }
             private final Map<String, LemonElement> idMap = new HashMap<String, LemonElement>();
+            public final Map<String, LexicalSense> senseMap = new HashMap<String, LexicalSense>();
             private String language = "und";
             private final Map<String, Argument> argMap = new HashMap<String, Argument>();
 
@@ -646,7 +631,8 @@ public class LemonLMFConverter {
         }
 
         private String att(Element n, String p) {
-            return n.getAttributes().getNamedItem(p).getTextContent();
+            final Node namedItem = n.getAttributes().getNamedItem(p);
+            return namedItem != null ? namedItem.getTextContent() : null;
         }
 
         private List<Element> c(Node n, String tag) {
@@ -762,17 +748,18 @@ public class LemonLMFConverter {
             if (lemmaNode == null) {
                 throw new RuntimeException();
             }
-            String canRep = getWrittenRep(lemmaNode, augment);
+            Text canRep = getWrittenRep(lemmaNode, augment);
             LexicalEntry entry = getFeat(lexEntryNode, "lexEntryType") == null
-                    ? augment.factory.makeLexicalEntry(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep).toString())))
+                    ? augment.factory.makeLexicalEntry(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep.value).toString())))
                     : (getFeat(lexEntryNode, "lexEntryType").equals("Word")
-                    ? augment.factory.makeWord(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep).toString())))
+                    ? augment.factory.makeWord(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep.value).toString())))
                     : (getFeat(lexEntryNode, "lexEntryType").equals("Phrase")
-                    ? augment.factory.makePhrase(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep).toString())))
-                    : augment.factory.makePart(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep).toString())))));
+                    ? augment.factory.makePhrase(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep.value).toString())))
+                    : augment.factory.makePart(URI.create(getFeatOrElse(lexEntryNode, "uri", uri("unknown:lexicon#", canRep.value).toString())))));
+            final List<Element> wordFormNodes = c(lexEntryNode, "WordForm");
+            wordFormNodes.add(lemmaNode);
 
-
-            final List<LexicalForm> canOtherForm = filterCanonical(readForm(c(lexEntryNode, "WordForm"), augment), canRep);
+            final List<LexicalForm> canOtherForm = filterCanonical(readForm(wordFormNodes, augment), canRep.value);
             final LexicalForm canForm = canOtherForm.get(0);
             final List<LexicalForm> otherForms = canOtherForm.subList(1, canOtherForm.size());
 
@@ -824,14 +811,16 @@ public class LemonLMFConverter {
                 entry.addSense(s);
             }
 
-            addProperties(entry, lexEntryNode);
+            addProperties(entry, lexEntryNode, augment);
 
             for (Frame frame : frames) {
                 entry.addSynBehavior(frame);
             }
 
-            for (eu.monnetproject.lemon.model.Node node : phraseRoots) {
-                entry.addPhraseRoot(node);
+            if (phraseRoots != null) {
+                for (eu.monnetproject.lemon.model.Node node : phraseRoots) {
+                    entry.addPhraseRoot(node);
+                }
             }
 
             return entry;
@@ -860,8 +849,8 @@ public class LemonLMFConverter {
                 @Override
                 public LexicalForm f(Element e) {
                     final LexicalForm f = augment.factory.makeForm();
-                    f.setWrittenRep(new Text(getWrittenRep(e, augment), augment.language));
-                    addProperties(f, e);
+                    f.setWrittenRep(getWrittenRep(e, augment));
+                    addProperties(f, e, augment);
                     for (Element repNode : c(e, "FormRepresentation")) {
                         f.addRepresentation(Representation.representation, getTextFromRep(repNode, augment));
                     }
@@ -892,14 +881,18 @@ public class LemonLMFConverter {
             final String frameNode = getFeat(synBehNode, "subcategorizationFrameSets");
             if (frameNode != null) {
                 for (String entryID : frameNode.split("\\s+")) {
-                    readSubcatFrameSet(frame, augment.nodeMap.get(new StringPair("SubcategorizationFrameSet", entryID)), augment);
+                    final Element subcatFrameSetNode = augment.nodeMap.get(new StringPair("SubcategorizationFrameSet", entryID));
+                    if (subcatFrameSetNode == null) {
+                        throw new LMFFormatException("Could not locate SubcategoratizationFrameSet id=" + entryID);
+                    }
+                    readSubcatFrameSet(frame, subcatFrameSetNode, augment);
                 }
             }
 
             final String frameNode2 = getFeat(synBehNode, "subcategorizationFrames");
             if (frameNode2 != null) {
                 for (String entryID : frameNode2.split("\\s+")) {
-                    readSubcatFrameSet(frame, augment.nodeMap.get(new StringPair("SubcategorizationFrame", entryID)), augment);
+                    readSubcatFrame(frame, augment.nodeMap.get(new StringPair("SubcategorizationFrame", entryID)), augment);
                 }
             }
             return frame;
@@ -909,7 +902,11 @@ public class LemonLMFConverter {
             if (getByID(senseNode, augment) != null) {
                 return (LexicalSense) getByID(senseNode, augment);
             } else {
+                final String id = getFeat(senseNode,"id");
                 final LexicalSense sense = augment.factory.makeSense();
+                if(id != null) {
+                    augment.senseMap.put(id, sense);
+                }
 
                 for (Element senseNode2 : c(senseNode, "Sense")) {
                     System.err.println("Recursive sense ignored!");
@@ -926,10 +923,12 @@ public class LemonLMFConverter {
                 for (Element exampleNode : c(senseNode, "SenseExample")) {
                     readExample(sense, exampleNode, augment);
                 }
+                final Element prNode = c1(senseNode, "PredicativeRepresentation");
 
                 // TODO: Subject Field
 
-                readPredicativeRepresentation(sense, c1(senseNode, "PredicativeRepresentation"), augment);
+                if(prNode != null)
+                    readPredicativeRepresentation(sense, prNode, augment);
 
                 for (Element defNode : c(senseNode, "Definition")) {
                     readDefinition(sense, defNode, augment);
@@ -949,7 +948,12 @@ public class LemonLMFConverter {
                 readAxes(sense, senseNode, augment);
 
                 if (!c(senseNode, "MonolingualExternalRef").isEmpty()) {
-                    sense.setReference(URI.create(getFeat(c1(senseNode, "MonolingualExternalRef"), "externalReference")));
+                    try {
+                        final URI uri = URI.create(getFeat(c1(senseNode, "MonolingualExternalRef"), "externalReference"));
+                        sense.setReference(uri);
+                    } catch(Exception x) {
+                        System.err.println("Unrecognized external ref: " + c(senseNode, "MonolingualExternalRef"));
+                    }
                 }
 
                 if (getFeat(senseNode, "refPref") != null) {
@@ -1001,11 +1005,11 @@ public class LemonLMFConverter {
                         }
                     }
                     for (StringArgument sa : buffer) {
-                        if(sa.s.equals("subjOfProp")) {
+                        if (sa.s.equals("subjOfProp")) {
                             sense.addObjOfProp(sa.arg);
-                        } else if(sa.s.equals("objOfProp")) {
+                        } else if (sa.s.equals("objOfProp")) {
                             sense.addSubjOfProp(sa.arg);
-                        } else if(sa.s.equals("isA")) {
+                        } else if (sa.s.equals("isA")) {
                             sense.addIsA(sa.arg);
                         } else {
                             System.err.println("Bad syn arg type: " + sa.s);
@@ -1015,48 +1019,321 @@ public class LemonLMFConverter {
             }
         }
 
-        //        def readSynArgLink(argNode : XMLNode, augment : LMFAugments) : SynArg = {
+        private String readSemArg(Element semPredNode, Element mapNode, LMFAugments augment) {
+            String targID = mapNode.getAttribute("semArg");
+            if (targID == null) {
+                return "subjOfProp";
+            }
+
+            final NodeList semArgNodes = semPredNode.getElementsByTagName("SemanticArgument");
+            for (int i = 0; i < semArgNodes.getLength(); i++) {
+                final Element semArgNode = (Element) semArgNodes.item(i);
+                if (semArgNode.getAttribute("id") != null && semArgNode.getAttribute("id").equals(targID)) {
+                    final String label = getFeat(semArgNode, "label");
+                    if (label == null) {
+                        return "subjOfProp";
+                    } else {
+                        return label;
+                    }
+                }
+            }
+            return "subjOfProp";
+        }
+
+        private void readDefinition(LexicalSense sense, Element defNode, LMFAugments augment) {
+            final NodeList textReps = defNode.getElementsByTagName("TextRepresentation");
+            for (int i = 0; i < textReps.getLength(); i++) {
+                final Element textNode = (Element) textReps.item(i);
+                final Text textFromRep = getTextFromRep(textNode, augment);
+                final SenseDefinition definition = augment.factory.makeDefinition();
+                definition.setValue(textFromRep);
+                addProperties(definition, textNode, augment);
+                sense.addDefinition(Definition.definition, definition);
+            }
+        }
+
+        private void readSenseRelation(LexicalSense sense, Element relNode, LMFAugments augment) {
+            final String target;
+            final String[] targs = relNode.getAttribute("targets") == null ? new String[0] : relNode.getAttribute("targets").split(" ");
+            
+            if (targs.length == 2) {
+                target = targs[1];
+            } else {
+                target = getFeat(relNode,"target");
+            }
+            
+            if(target == null) {
+                throw new LMFFormatException("No target for sense relation");
+            }
+            
+            final LexicalSense otherSem = augment.senseMap.containsKey(target) ?
+                    augment.senseMap.get(target) :
+                    readSense(augment.nodeMap.get(new StringPair("Sense", target)), augment);
+            if (otherSem == null) {
+                throw new LMFFormatException("Sense Relation link not found");
+            }
+            final String label = getFeat(relNode, "label");
+            if (label == null) {
+                sense.addSenseRelation(SenseRelation.senseRelation, otherSem);
+            } else if (label.equals("equivalent")) {
+                sense.addSenseRelation(SenseRelation.equivalent, otherSem);
+            } else if (label.equals("broader")) {
+                sense.addSenseRelation(SenseRelation.broader, otherSem);
+            } else if (label.equals("narrower")) {
+                sense.addSenseRelation(SenseRelation.narrower, otherSem);
+            } else if (label.equals("incompatible")) {
+                sense.addSenseRelation(SenseRelation.incompatible, otherSem);
+            } else {
+                sense.addSenseRelation(new SenseRelationImpl(label), otherSem);
+            }
+        }
+
+        private void readAxes(LexicalSense sense, Element senseNode, LMFAugments augment) {
+            final String id = senseNode.getAttribute("id");
+            if (id != null && augment.axisMap.containsKey(id)) {
+                for (Node senseAxis : augment.axisMap.get(id)) {
+                    final NodeList relNodes = ((Element) senseAxis).getElementsByTagName("SenseAxisRelation");
+                    for (int i = 0; i < relNodes.getLength(); i++) {
+                        final Element relNode = (Element) relNodes.item(i);
+                        if (relNode.getAttribute("targets") != null) {
+                            final String[] targets2 = relNode.getAttribute("targets").split(" ");
+                            String target = null;
+                            for (int j = 0; j < targets2.length; j++) {
+                                if (!targets2[j].equals(id)) {
+                                    target = targets2[j];
+                                    break;
+                                }
+                            }
+
+                            if (target == null) {
+                                continue;
+                            }
+
+                            // UNSAFE: other target is second
+                            final LexicalSense otherSem = readSense(augment.nodeMap.get(new StringPair("Sense", target)), augment);
+                            if (otherSem == null) {
+                                throw new LMFFormatException("Sense Relation link not found");
+                            }
+                            final String label = getFeat(relNode, "label");
+                            if (label == null) {
+                                sense.addSenseRelation(SenseRelation.senseRelation, otherSem);
+                            } else if (label.equals("equivalent")) {
+                                sense.addSenseRelation(SenseRelation.equivalent, otherSem);
+                            } else if (label.equals("broader")) {
+                                sense.addSenseRelation(SenseRelation.broader, otherSem);
+                            } else if (label.equals("narrower")) {
+                                sense.addSenseRelation(SenseRelation.narrower, otherSem);
+                            } else if (label.equals("incompatible")) {
+                                sense.addSenseRelation(SenseRelation.incompatible, otherSem);
+                            } else {
+                                sense.addSenseRelation(new SenseRelationImpl(label), otherSem);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<eu.monnetproject.lemon.model.Node> readMWEPattern(Element patternNode, LMFAugments augment, List<List<Component>> decomposition) {
+            final NodeList nodeNodes = patternNode.getElementsByTagName("MWENode");
+            final LinkedList<eu.monnetproject.lemon.model.Node> nodes = new LinkedList<eu.monnetproject.lemon.model.Node>();
+            for (int i = 0; i < nodeNodes.getLength(); i++) {
+                nodes.add(readMWENode((Element) nodeNodes.item(i), augment, decomposition));
+            }
+            return nodes;
+        }
+
+        private eu.monnetproject.lemon.model.Node readMWENode(Element nodeNode, LMFAugments augment, List<List<Component>> decomposition) {
+            final eu.monnetproject.lemon.model.Node node = augment.factory.makeNode();
+            readMWEEdge(node, nodeNode, augment, decomposition);
+
+            final String constituent = getFeat(nodeNode, "syntacticConstituent");
+            if (constituent != null) {
+                node.setConstituent(new ConstituentImpl(constituent));
+            }
+
+            final String separator = getFeat(nodeNode, "separator");
+            if (separator != null) {
+                node.setSeparator(new Text(separator, augment.language));
+            }
+            final NodeList lex = nodeNode.getElementsByTagName("MWELex");
+
+            for (int i = 0; i < lex.getLength(); i++) {
+                readMWELex(node, (Element) lex.item(i), augment, decomposition);
+            }
+            return node;
+        }
+
+        private Map<Edge, List<eu.monnetproject.lemon.model.Node>> readMWEEdge(eu.monnetproject.lemon.model.Node node, Element nodeNode, LMFAugments augment, List<List<Component>> decomposition) {
+            final HashMap<Edge, List<eu.monnetproject.lemon.model.Node>> map = new HashMap<Edge, List<eu.monnetproject.lemon.model.Node>>();
+
+            final NodeList mweEdges = nodeNode.getElementsByTagName("MWEEdge");
+            for (int i = 0; i < mweEdges.getLength(); i++) {
+                final Element edgeNode = (Element) mweEdges.item(i);
+                final Edge _edge;
+                if (getFeat(edgeNode, "function") != null) {
+                    _edge = new EdgeImpl(getFeat(edgeNode, "function"));
+                } else {
+                    _edge = Edge.edge;
+                }
+
+                final NodeList nodeNode2s = edgeNode.getElementsByTagName("MWENode");
+                if (nodeNode2s.getLength() == 0) {
+                    throw new LMFFormatException("MWEEdge had no MWENode");
+                }
+                final Element nodeNode2 = (Element) nodeNode2s.item(0);
+
+                if (!map.containsKey(_edge)) {
+                    map.put(_edge, new LinkedList<eu.monnetproject.lemon.model.Node>());
+                }
+                map.get(_edge).add(readMWENode(nodeNode2, augment, decomposition));
+            }
+            return map;
+        }
+
+        private PhraseTerminal readMWELex(eu.monnetproject.lemon.model.Node node, Element lexNode, LMFAugments augment, List<List<Component>> decomposition) {
+            final String rank = getFeat(lexNode, "rank");
+            if (rank != null) {
+                return decomposition.get(0).get(Integer.parseInt(rank));
+            } else {
+                final String rank2 = getFeat(lexNode, "componentRank");
+                if (rank2 != null) {
+                    return decomposition.get(0).get(Integer.parseInt(rank2));
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        private Text getWrittenRep(Element lemmaNode, LMFAugments augment) {
+            final String writtenForm = getFeat(lemmaNode, WRITTEN_FORM);
+            if (writtenForm != null) {
+                return new Text(writtenForm, augment.language);
+            } else {
+                final NodeList formReps = lemmaNode.getElementsByTagName("FormRepresentation");
+                if (formReps.getLength() == 0) {
+                    throw new LMFFormatException("No writtenForm or FormRepresentation");
+                }
+                return getTextFromRep((Element) formReps.item(0), augment);
+            }
+        }
+
+        public Text getTextFromRep(Element repNode, final LMFAugments augment) {
+            final StringBuilder langTag = new StringBuilder();
+            langTag.append(augment.language);
+
+            if (getFeat(repNode, SCRIPT) != null) {
+                langTag.append("-").append(getFeat(repNode, SCRIPT));
+            }
+
+            if (getFeat(repNode, GEOGRAPHICAL_VARIANT) != null) {
+                langTag.append("-").append(getFeat(repNode, GEOGRAPHICAL_VARIANT));
+            }
+
+            if (getFeat(repNode, ORTHOGRAPHY_NAME) != null) {
+                langTag.append("-x-").append(getFeat(repNode, ORTHOGRAPHY_NAME));
+            }
+
+            String writtenForm = getFeat(repNode, WRITTEN_FORM);
+
+            if (writtenForm == null) {
+                writtenForm = getFeat(repNode, "writtenText");
+                if (writtenForm == null) {
+                    throw new LMFFormatException("FormRepresentation without Written form");
+                }
+            }
+
+            return new Text(writtenForm, langTag.toString());
+        }
+
+        private void readSubcatFrameSet(Frame frame, Element frameSetNode, LMFAugments augment) {
+            final NodeList synArgMaps = frameSetNode.getElementsByTagName("SynArgMap");
+            for (int i = 0; i < synArgMaps.getLength(); i++) {
+                final Element argMap = (Element) synArgMaps.item(i);
+                final String arg1ID = argMap.getAttribute("arg1");
+                final String arg2ID = argMap.getAttribute("arg2");
+
+                if (arg1ID == null || arg2ID == null) {
+                    return;
+                }
+
+                if (augment.argMap.containsKey(arg1ID)) {
+                    if (!augment.argMap.containsKey(arg2ID)) {
+                        augment.argMap.put(arg2ID, augment.argMap.get(arg1ID));
+                    } else {
+                        // Already processed
+                    }
+                } else {
+                    if (!augment.argMap.containsKey(arg1ID)) {
+                        augment.argMap.put(arg1ID, augment.argMap.get(arg2ID));
+                    } else {
+                        final Argument arg = readSyntacticArgument(augment.nodeMap.get(new StringPair("Argument", arg1ID)), augment);
+                        augment.argMap.put(arg1ID, arg);
+                        augment.argMap.put(arg2ID, arg);
+                    }
+                }
+            }
+        }
+
+        private Frame readSubcatFrame(Frame frame, Element frameNode, LMFAugments augment) {
+            final LemonElement element = getByID(frameNode, augment);
+            if (element != null) {
+                return (Frame) element;
+            } else {
+                final NodeList synArgNodes = frameNode.getElementsByTagName("SyntacticArgument");
+                for (int i = 0; i < synArgNodes.getLength(); i++) {
+                    final Element argNode = (Element) synArgNodes.item(i);
+                    final SynArg synArg = readSynArgLink(argNode, augment);
+                    final Argument arg = readSyntacticArgument(argNode, augment);
+                    frame.addSynArg(synArg, arg);
+                }
+
+                augment.add(frameNode, frame);
+                return frame;
+            }
+        }
+
+        private SynArg readSynArgLink(Element argNode, LMFAugments augments) {
+            final String synFunc = getFeat(argNode, "syntacticFunction");
+            if (synFunc != null) {
+                return new SynArgImpl(synFunc);
+            } else {
+                return SynArg.synArg;
+            }
+        }
+//    def readSynArgLink(argNode : XMLNode, augment : LMFAugments) : SynArg = {
 //      getFeat(argNode,"syntacticFunction") match {
 //        case Some(label) => ISOcatSynArg(label)
 //        case None => synArg
 //      }
 //    }
 //    
-//    def readSyntacticArgument(argNode : XMLNode, augment : LMFAugments) : Argument = {
-//      val id = (argNode \ "@id") match {
-//        case Seq(x,_*) => Some(x.text)
-//        case Seq() => None
-//      }
-//      
-//      if(id != None && augment.argMap.contains(id.get)) {
-//        augment.argMap(id.get)
-//      } else {
-//        val marker = getFeat(argNode,"marker") match {
-//          case Some(markerID) => {
-//            augment.nodeMap.get(("LexicalEntry",markerID)) match {
-//              case Some(node) => Some(readLexicalEntry(node,augment))
-//              case None => Some(ISOcatPropertyValue(markerID))
-//            }
-//          }
-//          case None => None
-//        }
-//        
-//        val arg = Argument(marker = marker, property = getFeats(argNode))
-//        
-//        if(id != None) {
-//          augment.argMap.put(id.get,arg)
-//        }
-//        
-//        arg
-//      }
-//    }
-//    
-        public Text getTextFromRep(Element repNode, final LMFAugments augment) {
-            throw new UnsupportedOperationException();
-        }
 
-        private String getWrittenRep(Element lemmaNode, LMFAugments augment) {
-            throw new UnsupportedOperationException("Not yet implemented");
+        private Argument readSyntacticArgument(Element argNode, LMFAugments augment) {
+            final String id = argNode.getAttribute("id");
+
+            if (id != null && augment.argMap.containsKey(id)) {
+                return augment.argMap.get(id);
+            } else {
+                LexicalEntry marker = null;
+                final String markerID = getFeat(argNode, "marker");
+                if (markerID != null) {
+                    if (augment.nodeMap.containsKey(new StringPair("LexicalEntry", markerID))) {
+                        marker = readLexicalEntry(augment.nodeMap.get(new StringPair("LexicalEntry", markerID)), augment);
+                    }
+                }
+                final Argument arg = augment.factory.makeArgument();
+
+                if (marker != null) {
+                    arg.setMarker(marker);
+                }
+
+                if (id != null) {
+                    augment.argMap.put(id, arg);
+                }
+
+                return arg;
+            }
         }
 
         private String getFeatOrElse(Element lexiconNode, String att, String def) {
@@ -1068,15 +1345,27 @@ public class LemonLMFConverter {
             }
         }
 
-        private String getFeat(Element lexiconNode, String att) {
-            return lexiconNode.getAttribute(att);
+        private String getFeat(Element node, String att) {
+            final String byAtt = node.getAttribute(att);
+            if (byAtt != null && !byAtt.equals("")) {
+                return byAtt;
+            }
+            final NodeList feats = node.getElementsByTagName("feat");
+            for (int i = 0; i < feats.getLength(); i++) {
+                final Element feat = (Element) feats.item(i);
+                if (feat.getAttribute("att") != null && feat.getAttribute("att").equals(att)) {
+                    return feat.getAttribute("val");
+                }
+            }
+            return null;
         }
 
         private List<StringPair> getFeats(Element node) {
             final ArrayList<StringPair> feats = new ArrayList<StringPair>(node.getAttributes().getLength());
-            for (int i = 0; i < node.getAttributes().getLength(); i++) {
-                System.err.println("TEST this: " + node.getAttributes().item(i).getNodeName() + " " + node.getAttributes().item(i).getNodeValue());
-                feats.add(new StringPair(node.getAttributes().item(i).getNodeName(), node.getAttributes().item(i).getNodeValue()));
+            final NodeList featNodes = node.getElementsByTagName("feat");
+            for (int i = 0; i < featNodes.getLength(); i++) {
+                final Element feat = (Element) featNodes.item(i);
+                feats.add(new StringPair(feat.getAttribute("att"), feat.getAttribute("val")));
             }
             return feats;
         }
@@ -1099,8 +1388,10 @@ public class LemonLMFConverter {
             }
         }
 
-        private void addProperties(LemonElement element, Element xml) {
-            throw new UnsupportedOperationException();
+        private void addProperties(LemonElement element, Element xml, LMFAugments augment) {
+            for (StringPair feat : getFeats(xml)) {
+                element.addProperty(toProperty(feat.s1, augment.lingOnto), toPropertyValue(feat.s2, augment.lingOnto));
+            }
         }
 
         private static class PropertyImpl extends URIValue implements Property {
@@ -1113,6 +1404,34 @@ public class LemonLMFConverter {
         private static class PropertyValueImpl extends URIElement implements PropertyValue {
 
             public PropertyValueImpl(String n) {
+                super(URI.create(ISOCAT + n));
+            }
+        }
+
+        private static class SenseRelationImpl extends URIElement implements SenseRelation {
+
+            public SenseRelationImpl(String n) {
+                super(URI.create(ISOCAT + n));
+            }
+        }
+
+        private static class ConstituentImpl extends URIElement implements Constituent {
+
+            public ConstituentImpl(String n) {
+                super(URI.create(ISOCAT + n));
+            }
+        }
+
+        private static class EdgeImpl extends URIElement implements Edge {
+
+            public EdgeImpl(String n) {
+                super(URI.create(ISOCAT + n));
+            }
+        }
+
+        private static class SynArgImpl extends URIElement implements SynArg {
+
+            public SynArgImpl(String n) {
                 super(URI.create(ISOCAT + n));
             }
         }

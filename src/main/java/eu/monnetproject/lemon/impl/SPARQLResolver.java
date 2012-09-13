@@ -141,6 +141,31 @@ public class SPARQLResolver implements RemoteResolver, LexiconResolver {
     }
 
     @Override
+    public int resolveRemoteEntryCount(LemonModelImpl model, LexiconImpl lexicon) {
+        try {
+            final StringBuilder query = new StringBuilder("SELECT DISTINCT ?entry");
+            for (URI graph : graphs) {
+                query.append(" FROM <").append(graph.toString()).append(">");
+            }
+            query.append(" WHERE { <").append(lexicon.getURI().toString()).append("> <http://www.monnet-project.eu/lemon#entry> ?entry }");
+            final URL queryURL = new URL(endpoint + "?query=" + URLEncoder.encode(query.toString(), "UTF-8"));
+            final URLConnection connection = queryURL.openConnection();
+            connection.setRequestProperty("Accept", "application/sparql-results+xml");
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            final InputStream in = connection.getInputStream();
+            final Document document = db.parse(in);
+            in.close();
+            final NodeList resultsTags = document.getElementsByTagName("result");
+            return resultsTags.getLength();
+        } catch (Exception x) {
+            throw new RuntimeException(x);
+        }
+    }
+    
+    
+
+    @Override
     public Set<URI> getLexica() {
         try {
             final StringBuilder query = new StringBuilder("SELECT *");

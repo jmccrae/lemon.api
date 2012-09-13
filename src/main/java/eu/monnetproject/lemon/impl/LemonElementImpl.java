@@ -534,6 +534,8 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             }
         }
     }
+    
+    private static String LS = System.getProperty("line.separator");
 
     protected void printAsBlankNode(java.io.PrintWriter stream, SerializationState state) {
         state.serialized.add(this);
@@ -600,6 +602,12 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
                 if (((LemonElementImpl) elem).isMultiReferenced() && elem.getURI() != null) {
                     state.postponed.add(elem);
                 }
+            } else {
+                if(elem.getURI() != null) {
+                    stream.print(" <" + elem.getURI().toString() + "> ");
+                } else {
+                    stream.print(" _:" + elem.getID() + " ");
+                }
             }
             first = false;
         }
@@ -623,7 +631,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             if (first) {
                 stream.print(" a ");
             } else if (first2) {
-                stream.print(" ;\n a ");
+                stream.print(" ;"+LS+" a ");
             } else {
                 stream.println(" ,");
             }
@@ -656,7 +664,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             stream.print("_:" + getID() + " ");
         }
         printAsBlankNode(stream, state);
-        stream.println(" .\n");
+        stream.println(" ."+LS);
     }
 
     protected boolean follow(LemonPredicate predicate) {
@@ -757,18 +765,18 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
             }
         }
         if (!acceptProperties(pred, value, lingOnto)) {
-            System.err.println("Skipped triple: " + pred + " " + value);
+            addAnnotation(pred, value);
         }
         return null;
     }
 
     protected ReaderAccepter defaultAccept(URI pred, String value) {
-        System.err.println("Skipped triple: " + pred + " " + value);
+        addAnnotation(pred, value);
         return null;
     }
 
     protected void defaultAccept(URI pred, String val, String lang) {
-        System.err.println("Skipped triple: " + pred + " " + val + "@" + lang);
+        addAnnotation(pred, new Text(val, lang));
     }
 
     protected <X, Y> void merge(Map<X, Collection<Y>> map1, Map<X, Collection<Y>> map2) {
@@ -861,6 +869,7 @@ public abstract class LemonElementImpl<Elem extends LemonElement> extends URIEle
         for (URI type : types) {
             rval.get(RDF_TYPE).add(type);
         }
+        rval.putAll(annotations);
         return rval;
     }
 

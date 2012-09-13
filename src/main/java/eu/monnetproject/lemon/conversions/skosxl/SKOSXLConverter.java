@@ -40,8 +40,11 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -55,6 +58,8 @@ public class SKOSXLConverter {
 
     private final static String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String SKOSXL = "http://www.w3.org/2008/05/skos-xl#";
+    
+    private final static Pattern splitRegex = Pattern.compile("(.*?)(\\w*)");
 
     public static LemonModel convert(Reader document) {
         final fromSKOSXL fromSKOSXL = new fromSKOSXL();
@@ -127,6 +132,19 @@ public class SKOSXLConverter {
                             literalForm.setTextContent(form.getWrittenRep().value);
                             literalForm.setAttribute("xml:lang", form.getWrittenRep().language);
                             desc2.appendChild(literalForm);
+                            
+                            for (Entry<URI, Collection<Object>> anno : entry.getAnnotations().entrySet()) {
+                                final Matcher splitter = splitRegex.matcher(anno.getKey().toString());
+                                splitter.matches();
+                                for(Object annoVal : anno.getValue()) {
+                                    if(annoVal instanceof String) {
+                                        final Element annoElem = doc.createElementNS(splitter.group(1), splitter.group(2));
+                                        annoElem.setTextContent(annoVal.toString());
+                                        desc2.appendChild(annoElem);
+                                    }
+                                }
+                            }
+                            
                             root.appendChild(desc);
                         }
                     }

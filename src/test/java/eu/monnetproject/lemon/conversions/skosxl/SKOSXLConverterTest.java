@@ -7,6 +7,7 @@ package eu.monnetproject.lemon.conversions.skosxl;
 import eu.monnetproject.lemon.LemonModel;
 import eu.monnetproject.lemon.LemonModels;
 import eu.monnetproject.lemon.LemonSerializer;
+import eu.monnetproject.lemon.model.LexicalEntry;
 import eu.monnetproject.lemon.model.Lexicon;
 import java.io.Reader;
 import java.io.StringReader;
@@ -88,6 +89,36 @@ public class SKOSXLConverterTest {
                 + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">\n"
                 + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">\n"
                 + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>\n"
+                + "      </skosxl:Label>\n"
+                + "    </skosxl:prefLabel>\n"
+                + "  </rdf:Description>\n"
+                + "</rdf:RDF>";
+        assertEquals(expected, streamResult.getWriter().toString().trim());
+    }
+    
+    @Test
+    public void testConvert_LemonModelWithAnno() throws Exception {
+        System.out.println("convert");
+        LemonModel model = LemonSerializer.newInstance().create(null);
+        final Lexicon lexicon = model.addLexicon(URI.create("file:test#lexicon"), "en");
+        final LexicalEntry entry = LemonModels.addEntryToLexicon(lexicon, URI.create("file:test#lexicon/Cat"), "cat", URI.create("http://test.com/Cat"));
+        entry.addAnnotation(URI.create("http://www.example.com/test#test"), "testValue");
+        Document result = SKOSXLConverter.convert(model);
+        final TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setAttribute("indent-number", 2);
+        Transformer trans = factory.newTransformer();
+        trans.setOutputProperty(OutputKeys.INDENT, "yes");
+        StreamResult streamResult = new StreamResult(new StringWriter());
+        DOMSource source = new DOMSource(result);
+        trans.transform(source, streamResult);
+        System.out.println(streamResult.getWriter().toString());
+        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+                + "  <rdf:Description rdf:about=\"http://test.com/Cat\">\n"
+                + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">\n"
+                + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">\n"
+                + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>\n"
+                + "        <test xmlns=\"http://www.example.com/test#\">testValue</test>\n"
                 + "      </skosxl:Label>\n"
                 + "    </skosxl:prefLabel>\n"
                 + "  </rdf:Description>\n"
