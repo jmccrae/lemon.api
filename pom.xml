@@ -9,6 +9,20 @@
 
     <name>eu.monnetproject.lemon.api OSGi Bundle</name>
 
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>Monnet01 Repository</name>
+            <url>file:///var/www/mvn/</url>
+        </repository>
+        <snapshotRepository>
+            <id>internal.repo</id>
+            <name>Monnet01 Repository</name>
+            <url>file:///var/www/mvn/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
