@@ -84,14 +84,14 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testRead_Reader() {
-        System.out.println("read");
+        //System.out.println("read");
         Reader source = new StringReader(testXMLDoc);
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         instance.read(source);
-        System.out.println("XML read OK");
+        //System.out.println("XML read OK");
         source = new StringReader(testTurtleDoc);
         instance.read(source);
-        System.out.println("Turtle read OK");
+        //System.out.println("Turtle read OK");
     }
 
     /**
@@ -99,7 +99,7 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWrite_LemonModel_Writer() {
-        String expResult = "<?xml version=\"1.0\" encoding=\"ASCII\"?>" + ls
+        String expResult = "<?xml version=\"1.0\" encoding=\"US-ASCII\"?>" + ls
                 + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" + ls
                 + "  <lemon:Lexicon rdf:about=\"file:test#lexicon\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">" + ls
                 + "    <lemon:language>en</lemon:language>" + ls
@@ -119,13 +119,13 @@ public class LemonSerializerImplTest {
                 + "    </lemon:entry>" + ls
                 + "  </lemon:Lexicon>" + ls
                 + "</rdf:RDF>";
-        System.out.println("write");
+        //System.out.println("write");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel model = makeModel(instance);
         Writer target = new StringWriter();
         instance.write(model, target);
-        System.out.println(target.toString());
-        assertEquals(expResult, target.toString().trim());
+        //System.out.println(target.toString());
+        assertEquals(expResult.replaceAll("\\s","").toLowerCase(), target.toString().replaceAll("\\s","").toLowerCase());
     }
     private LemonModel lazyModel;
 
@@ -139,12 +139,23 @@ public class LemonSerializerImplTest {
         return lazyModel = model;
     }
 
+    private LemonModel makeModelUTF8(LemonSerializerImpl instance) {
+        if (lazyModel != null) {
+            return lazyModel;
+        }
+        LemonModel model = instance.create(URI.create("file:test"));
+        final Lexicon lexicon = model.addLexicon(URI.create("file:test#lexicon"), "ga");
+        LemonModels.addEntryToLexicon(lexicon, URI.create("file:test#Sa\u00edocht"), "Sa\u00edocht", URI.create("http://ga.dbpedia.org/resource/Sa\u00edocht"));
+        return lazyModel = model;
+    }
+
+
     /**
      * Test of create method, of class LemonSerializerImpl.
      */
     @Test
     public void testCreate() {
-        System.out.println("create");
+        //System.out.println("create");
         URI context = URI.create("file:test");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         instance.create(context);
@@ -155,14 +166,14 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testWriteEntry_4args() {
-        System.out.println("writeEntry");
+        //System.out.println("writeEntry");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel model = makeModel(instance);
         LexicalEntry entry = model.getLexica().iterator().next().getEntrys().iterator().next();
         LinguisticOntology lingOnto = new LexInfo();
         Writer target = new StringWriter();
         instance.writeEntry(model, entry, lingOnto, target);
-        System.out.println(target.toString());
+        //System.out.println(target.toString());
     }
 
     /**
@@ -171,14 +182,14 @@ public class LemonSerializerImplTest {
     @Test
     public void testWriteLexicon_4args() {
         //String expResult = 
-        System.out.println("writeLexicon");
+        //System.out.println("writeLexicon");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel model = makeModel(instance);
         Lexicon lexicon = model.getLexica().iterator().next();
         LinguisticOntology lingOnto = new LexInfo();
         Writer target = new StringWriter();
         instance.writeLexicon(model, lexicon, lingOnto, target);
-        System.out.println(target.toString());
+        //System.out.println(target.toString());
     }
 
     /**
@@ -186,7 +197,7 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testMoveLexicon() {
-        System.out.println("moveLexicon");
+        //System.out.println("moveLexicon");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel from = makeModel(instance);
         Lexicon lexicon = from.getLexica().iterator().next();
@@ -199,7 +210,7 @@ public class LemonSerializerImplTest {
      */
     @Test
     public void testRead_LemonModel_Reader() {
-        System.out.println("read");
+        //System.out.println("read");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel lm = instance.create(URI.create("file:test"));
         Reader ds = new StringReader(testXMLDoc);
@@ -222,13 +233,13 @@ public class LemonSerializerImplTest {
                 + "" + ls
                 + "<file:test#lexicon> lemon:entry <file:test#Cat> ;" + ls
                 + " a lemon:Lexicon .";
-        System.out.println("write");
+        //System.out.println("write");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel lm = makeModel(instance);
         Writer dt = new StringWriter();
         boolean xml = false;
         instance.write(lm, dt, xml);
-        System.out.println(dt.toString());
+        //System.out.println(dt.toString());
     }
 
     /**
@@ -248,7 +259,7 @@ public class LemonSerializerImplTest {
                 + "<file:test#Cat> lemon:sense <file:test#Cat/sense> ;" + ls
                 + " lemon:canonicalForm <file:test#Cat/canonicalForm> ;" + ls
                 + " a lemon:LexicalEntry .";
-        System.out.println("writeEntry");
+        //System.out.println("writeEntry");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel lm = makeModel(instance);
         LexicalEntry le = lm.getLexica().iterator().next().getEntrys().iterator().next();
@@ -279,7 +290,7 @@ public class LemonSerializerImplTest {
                 + "" + ls
                 + "<file:test#lexicon> lemon:entry <file:test#Cat> ;" + ls
                 + " a lemon:Lexicon .";
-        System.out.println("writeLexicon");
+        //System.out.println("writeLexicon");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel lm = makeModel(instance);
         Lexicon lxcn = lm.getLexica().iterator().next();
@@ -360,7 +371,7 @@ public class LemonSerializerImplTest {
 
     @Test
     public void testLoadUnicode() {
-        System.out.println("testloadUnicode");
+        //System.out.println("testloadUnicode");
         final String xmlDoc = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">"
                 + " <lemon:Lexicon rdf:about=\"file:test#lexicon\">"
                 + "  <lemon:entry> "
@@ -386,7 +397,7 @@ public class LemonSerializerImplTest {
 
     @Test
     public void testWriteUnicode() {
-        System.out.println("testWriteUnicode");
+        //System.out.println("testWriteUnicode");
         final LemonModel model = LemonSerializer.newInstance().create();
         final Lexicon lexicon = model.addLexicon(URI.create("file:test#lexicon__de"), "de");
         LemonModels.addEntryToLexicon(lexicon, URI.create("file:test#lexicon__de/baer"), "b\u00e4", null);
@@ -394,7 +405,7 @@ public class LemonSerializerImplTest {
 
     @Test
     public void testReadEntry() {
-        System.out.println("testReadEntry");
+        //System.out.println("testReadEntry");
         final String xmlDoc = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">"
                 + " <lemon:LexicalEntry rdf:about=\"http://www.example.com/test\">"
                 + "   <lemon:canonicalForm>"
@@ -414,7 +425,7 @@ public class LemonSerializerImplTest {
 
     @Test
     public void testWriteLexiconDescription() {
-        System.out.println("testWriteLexiconDescription");
+        //System.out.println("testWriteLexiconDescription");
         final StringWriter out = new StringWriter();
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         final LemonModel model = instance.create();
@@ -434,7 +445,7 @@ public class LemonSerializerImplTest {
 
     @Test
     public void testConstituent() {
-        System.out.println("testConstituent");
+        //System.out.println("testConstituent");
         String expResult = "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " + ls
                 + "@prefix lemon: <http://www.monnet-project.eu/lemon#> . " + ls
                 + "" + ls
@@ -465,7 +476,7 @@ public class LemonSerializerImplTest {
                 + "" + ls
                 + "<file:test#Cat/sense> a lemon:LexicalSense ;" + ls
                 + " lemon:reference <http://dbpedia.org/resource/Cat> ."+ls+ls;
-        System.out.println("write");
+        //System.out.println("write");
         LemonSerializerImpl instance = new LemonSerializerImpl(null);
         LemonModel lm = makeModel(instance);
         final Lexicon lexicon = lm.addLexicon(URI.create("file:test#lexicon"), "en");
@@ -483,7 +494,40 @@ public class LemonSerializerImplTest {
         Writer dt = new StringWriter();
         boolean xml = false;
         instance.write(lm, dt, xml);
-        System.out.println(dt.toString());
+        //System.out.println(dt.toString());
         assertEquals(expResult, dt.toString());
+    }
+
+    /**
+     * Test of writeEntry method, of class LemonSerializerImpl.
+     */
+    @Test
+    public void testWriteEntry_utf8() {
+        String expResult = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + ls 
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" + ls
+                + "  <lemon:LexicalEntry rdf:about=\"file:test#Sa\u00edocht\" xmlns:lemon=\"http://www.monnet-project.eu/lemon#\">" + ls
+                + "    <lemon:sense>" + ls
+                + "      <lemon:LexicalSense rdf:about=\"file:test#Sa\u00edocht/sense\">" + ls
+                + "        <lemon:reference rdf:resource=\"http://ga.dbpedia.org/resource/Sa\u00edocht\"/>" +ls
+                + "      </lemon:LexicalSense>" + ls
+                + "    </lemon:sense>" + ls
+                + "    <lemon:canonicalForm>" + ls
+                + "      <lemon:Form rdf:about=\"file:test#Sa\u00edocht/canonicalForm\">" + ls
+                + "        <lemon:writtenRep xml:lang=\"ga\">Sa\u00edocht</lemon:writtenRep>" + ls
+                + "      </lemon:Form>" + ls
+                + "    </lemon:canonicalForm>" + ls
+                + "  </lemon:LexicalEntry>" + ls
+                + "</rdf:RDF>";
+        System.setProperty("lemon.api.xml.encoding","UTF-8");
+        LemonSerializerImpl instance = new LemonSerializerImpl(null);
+        LemonModel lm = makeModelUTF8(instance);
+        LexicalEntry le = lm.getLexica().iterator().next().getEntrys().iterator().next();
+        LinguisticOntology lo = new LexInfo();
+        Writer dt = new StringWriter();
+        boolean xml = true;
+        instance.writeEntry(lm, le, lo, dt, xml);
+        assertEquals(expResult.replaceAll("\\s",""), dt.toString().replaceAll("\\s",""));
+        System.setProperty("lemon.api.xml.encoding","US-ASCII");
+        //assertEquals("","");
     }
 }

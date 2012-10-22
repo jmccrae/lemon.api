@@ -255,7 +255,8 @@ public class RDFXMLWriter extends AbstractVisitor {
     public String getDocument() throws TransformerException {
         Transformer trans = getTransformer();
         trans.setOutputProperty(OutputKeys.INDENT, "yes");
-        trans.setOutputProperty(OutputKeys.ENCODING, "ascii");
+        //trans.setOutputProperty(OutputKeys.ENCODING, "ascii");
+        trans.setOutputProperty(OutputKeys.ENCODING,System.getProperty("lemon.api.xml.encoding","us-ascii"));
         StreamResult result = new StreamResult(new StringWriter());
         DOMSource source = new DOMSource(document);
         trans.transform(source, result);

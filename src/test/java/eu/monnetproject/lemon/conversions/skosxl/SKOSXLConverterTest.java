@@ -83,17 +83,18 @@ public class SKOSXLConverterTest {
         DOMSource source = new DOMSource(result);
         trans.transform(source, streamResult);
         System.out.println(streamResult.getWriter().toString());
-        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
-                + "  <rdf:Description rdf:about=\"http://test.com/Cat\">\n"
-                + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">\n"
-                + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">\n"
-                + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>\n"
-                + "      </skosxl:Label>\n"
-                + "    </skosxl:prefLabel>\n"
-                + "  </rdf:Description>\n"
+        final String ls = System.getProperty("line.separator");
+        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ls
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+ls
+                + " <rdf:Description rdf:about=\"http://test.com/Cat\">"+ls
+                + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">"+ls
+                + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">"+ls
+                + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>"+ls
+                + "      </skosxl:Label>"+ls
+                + "    </skosxl:prefLabel>"+ls
+                + "  </rdf:Description>"+ls
                 + "</rdf:RDF>";
-        assertEquals(expected, streamResult.getWriter().toString().trim());
+        assertEquals(expected.replaceAll("\\s",""), streamResult.getWriter().toString().replaceAll("\\s",""));
     }
     
     @Test
@@ -112,17 +113,18 @@ public class SKOSXLConverterTest {
         DOMSource source = new DOMSource(result);
         trans.transform(source, streamResult);
         System.out.println(streamResult.getWriter().toString());
-        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
-                + "  <rdf:Description rdf:about=\"http://test.com/Cat\">\n"
-                + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">\n"
-                + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">\n"
-                + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>\n"
-                + "        <test xmlns=\"http://www.example.com/test#\">testValue</test>\n"
-                + "      </skosxl:Label>\n"
-                + "    </skosxl:prefLabel>\n"
-                + "  </rdf:Description>\n"
+        final String ls = System.getProperty("line.separator");
+        String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ls
+                + "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+ls
+                + "  <rdf:Description rdf:about=\"http://test.com/Cat\">"+ls
+                + "    <skosxl:prefLabel xmlns:skosxl=\"http://www.w3.org/2008/05/skos-xl#\">"+ls
+                + "      <skosxl:Label rdf:about=\"file:test#lexicon/Cat\">"+ls
+                + "        <skosxl:literalForm xml:lang=\"en\">cat</skosxl:literalForm>"+ls
+                + "        <test xmlns=\"http://www.example.com/test#\">testValue</test>"+ls
+                + "      </skosxl:Label>"+ls
+                + "    </skosxl:prefLabel>"+ls
+                + "  </rdf:Description>"+ls
                 + "</rdf:RDF>";
-        assertEquals(expected, streamResult.getWriter().toString().trim());
+        assertEquals(expected.replaceAll("\\s",""), streamResult.getWriter().toString().replaceAll("\\s",""));
     }
 }
