@@ -253,6 +253,7 @@
         <!--<xsl:apply-templates select="Synset"/>-->
         <xsl:apply-templates select="SynSemCorrespondence"/>
         <xsl:apply-templates select="ConstraintSet"/>
+        <xsl:apply-templates select="SemanticPredicate"/>
     </xsl:template>
     
     <xsl:template match="LexicalEntry">
@@ -717,26 +718,39 @@
     <!-- synargmap -->
         
     <xsl:template match="PredicativeRepresentation">
-        <xsl:variable name="pr" select="@predicate"/>
-        <xsl:apply-templates select="//SemanticPredicate[@id=$pr]"/>
+        <lemon:broader>
+            <xsl:attribute name="rdf:resource">
+                <xsl:value-of select="concat('#',@predicate)"/>
+            </xsl:attribute>
+        </lemon:broader>
     </xsl:template>
             
     <xsl:template match="SemanticPredicate">
-        <xsl:if test="@lexicalized">
-            <uby:lexicalized>
-                <xsl:value-of select="@lexicalized"/>
-            </uby:lexicalized>
-        </xsl:if>
-        <xsl:if test="@perspectivalized">
-            <uby:perspectivalized>
-                <xsl:value-of select="@perspectivalized"/>
-            </uby:perspectivalized>
-        </xsl:if>
-        <xsl:apply-templates select="Definition"/>
-        <xsl:apply-templates select="SemanticArgument"/>
-        <xsl:apply-templates select="PredicateRelation"/>
-        <xsl:apply-templates select="Frequency"/>
-        <xsl:apply-templates select="SemanticLabel"/>
+        <lemon:LexicalSense>
+            <xsl:attribute name="rdf:ID" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                <xsl:value-of select="@id"/>
+            </xsl:attribute>
+            <xsl:if test="@label">
+                <uby:label>
+                    <xsl:value-of select="@label"/>
+                </uby:label>
+            </xsl:if>
+            <xsl:if test="@lexicalized">
+                <uby:lexicalized>
+                    <xsl:value-of select="@lexicalized"/>
+                </uby:lexicalized>
+            </xsl:if>
+            <xsl:if test="@perspectivalized">
+                <uby:perspectivalized>
+                    <xsl:value-of select="@perspectivalized"/>
+                </uby:perspectivalized>
+            </xsl:if>
+            <xsl:apply-templates select="Definition"/>
+            <xsl:apply-templates select="SemanticArgument"/>
+            <xsl:apply-templates select="PredicateRelation"/>
+            <xsl:apply-templates select="Frequency"/>
+            <xsl:apply-templates select="SemanticLabel"/>
+        </lemon:LexicalSense>
     </xsl:template>
     
     <xsl:template match="SemanticArgument">
