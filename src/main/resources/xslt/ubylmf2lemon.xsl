@@ -505,7 +505,9 @@
                 </xsl:if>
             </xsl:element>
             <xsl:if test="@targetSense">
-                <xsl:comment>Linked to sense <xsl:value-of select="@targetSense"/></xsl:comment>
+                <xsl:comment>Linked to sense 
+                    <xsl:value-of select="@targetSense"/>
+                </xsl:comment>
             </xsl:if>
         </xsl:if>
     </xsl:template>
@@ -712,7 +714,7 @@
     </xsl:template>
     
     
-        <!-- synargmap -->
+    <!-- synargmap -->
         
     <xsl:template match="PredicativeRepresentation">
         <xsl:variable name="pr" select="@predicate"/>
@@ -970,21 +972,25 @@
     </xsl:template>
     
     <xsl:template match="SemanticLabel">
-        <xsl:if test="@label">
-            <uby:semanticLabel>
-                <xsl:value-of select="@label"/>
-            </uby:semanticLabel>
-        </xsl:if>
-        <xsl:if test="@type">
-            <uby:semanticLabelType>
-                <xsl:value-of select="@type"/>
-            </uby:semanticLabelType>
-        </xsl:if>
-        <xsl:if test="@quantification">
-            <uby:semanticLabelQuantification>
-                <xsl:value-of select="@quantification"/>
-            </uby:semanticLabelQuantification>
-        </xsl:if>
-        <xsl:apply-templates select="MonolingualExternalRef"/>
+        <uby:semanticLabel>
+            <uby:SemanticLabel>
+                <xsl:if test="@label">
+                    <uby:label>
+                        <xsl:value-of select="@label"/>
+                    </uby:label>
+                </xsl:if>
+                <xsl:if test="@type">
+                    <uby:type>
+                        <xsl:value-of select="@type"/>
+                    </uby:type>
+                </xsl:if>
+                <xsl:if test="@quantification">
+                    <uby:quantification>
+                        <xsl:value-of select="@quantification"/>
+                    </uby:quantification>
+                </xsl:if>
+                <xsl:apply-templates select="MonolingualExternalRef"/>
+            </uby:SemanticLabel>
+        </uby:semanticLabel>
     </xsl:template>
 </xsl:stylesheet>
