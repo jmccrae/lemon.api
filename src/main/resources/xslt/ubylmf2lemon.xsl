@@ -199,7 +199,7 @@
     <xsl:template match="LexicalResource">
         <xsl:apply-templates select="GlobalInformation"/>
         <xsl:apply-templates select="Lexicon"/>
-        <xsl:apply-templates select="SenseAxis"/>
+        <!--<xsl:apply-templates select="SenseAxis"/>-->
     </xsl:template>
     
     <xsl:template match="GlobalInformation">
@@ -238,7 +238,7 @@
         </lemon:Lexicon>
         <xsl:apply-templates select="SubcategorizationFrame"/>
         <xsl:apply-templates select="Synset"/>
-        <xsl:apply-templates select="SynSemCorrespondence"/>
+        <!--<xsl:apply-templates select="SynSemCorrespondence"/>-->
         <xsl:apply-templates select="ConstraintSet"/>
         <xsl:apply-templates select="SemanticPredicate"/>
     </xsl:template>
@@ -303,6 +303,7 @@
                         </xsl:attribute>
                     </lemon:narrower>
                 </xsl:for-each>
+                <xsl:variable name="senseId" select="@id"/>
                 <xsl:apply-templates select="Context"/>
                 <xsl:apply-templates select="PredicativeRepresentation"/>
                 <xsl:apply-templates select="SenseExample"/>
@@ -311,6 +312,13 @@
                 <xsl:apply-templates select="MonolingualExternalRef"/>
                 <xsl:apply-templates select="Frequency"/>
                 <xsl:apply-templates select="SemanticLabel"/>
+                <xsl:apply-templates select="Equivalent"/>
+                <xsl:for-each select="//SenseAxis[@senseOne=$senseId]">
+                    <xsl:call-template name="senseAxis1"/>
+                </xsl:for-each>
+                <xsl:for-each select="//SenseAxis[@senseTwo=$senseId]">
+                    <xsl:call-template name="senseAxis2"/>
+                </xsl:for-each>
             </lemon:LexicalSense>
         </lemon:sense>
         <xsl:apply-templates select="Sense"/>
@@ -371,8 +379,8 @@
                 <xsl:attribute name="xml:lang">
                     <xsl:value-of select="@xml:lang"/>
                 </xsl:attribute>
+                <xsl:value-of select="@writtenText"/>
             </xsl:if>
-            <xsl:value-of select="@writtenText"/>
         </lemon:value>
     </xsl:template>
     
@@ -455,14 +463,14 @@
                         <xsl:value-of select="@geographicalVariant"/>
                     </xsl:if>
                 </xsl:attribute>
-                <xsl:value-of select="@writtenText"/>
+                <xsl:value-of select="@writtenForm"/>
             </xsl:if>
             <xsl:if test="@xml:lang">
                 <xsl:attribute name="xml:lang">
                     <xsl:value-of select="@xml:lang"/>
                 </xsl:attribute>
+                <xsl:value-of select="@writtenForm"/>
             </xsl:if>
-            <xsl:value-of select="@writtenForm"/>
         </lemon:writtenRep>
         <xsl:if test="@phoneticForm">
             <uby:phoneticForm>
@@ -761,6 +769,8 @@
                         </xsl:attribute>
                     </uby:coreType>
                 </xsl:if>
+                <xsl:variable name="argId" select="@id"/>
+                <xsl:apply-templates select="//SynSemArgMap[@semanticArgument=$argId]"/>
                 <xsl:apply-templates select="ArgumentRelation"/>
                 <xsl:apply-templates select="Frequency"/>
                 <xsl:apply-templates select="SemanticLabel"/>
@@ -773,7 +783,7 @@
         <xsl:comment>Argument relations not supported in lemon.</xsl:comment>
     </xsl:template>
     
-    <xsl:template match="SynSemCorrespondence">
+    <!--<xsl:template match="SynSemCorrespondence">
         <xsl:for-each select="SynSemArgMap">
             <rdf:Description>
                 <xsl:attribute name="rdf:ID">
@@ -786,6 +796,13 @@
                 </owl:sameAs>
             </rdf:Description>
         </xsl:for-each>
+    </xsl:template>-->
+    <xsl:template match="SynSemArgMap">
+        <owl:sameAs>
+            <xsl:attribute name="rdf:resource">
+                <xsl:value-of select="@syntacticArgument"/>
+            </xsl:attribute>
+        </owl:sameAs>
     </xsl:template>
     
     <xsl:template match="PredicateRelation">
@@ -818,6 +835,13 @@
             <xsl:apply-templates select="Definition"/>
             <xsl:apply-templates select="SynsetRelation"/>
             <xsl:apply-templates select="MonolingualExternalRef"/>
+            <xsl:variable name="synsetId" select="@id"/>
+            <xsl:for-each select="//SenseAxis[@synsetOne=$synsetId]">
+                <xsl:call-template name="senseAxis1"/>
+            </xsl:for-each>
+            <xsl:for-each select="//SenseAxis[@synsetTwo=$synsetId]">
+                <xsl:call-template name="senseAxis2"/>
+            </xsl:for-each>
         </lemon:LexicalSense>
     </xsl:template>
     
@@ -881,8 +905,8 @@
                                                         <xsl:attribute name="xml:lang">
                                                             <xsl:value-of select="@xml:lang"/>
                                                         </xsl:attribute>
+                                                        <xsl:value-of select="FormRepresentation/@writtenForm"/>
                                                     </xsl:if>
-                                                    <xsl:value-of select="FormRepresentation/@writtenForm"/>
                                                 </lemon:writtenRep>
                                             </lemon:Form>
                                         </lemon:canonicalForm>
@@ -903,50 +927,70 @@
         </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="SenseAxis">
-        <rdf:Description>
-            <xsl:attribute name="rdf:ID">
-                <xsl:choose>
-                    <xsl:when test="@senseOne">
-                        <xsl:value-of select="@senseOne"/>
-                    </xsl:when>
-                    <xsl:when test="@synsetOne">
-                        <xsl:value-of select="@synsetOne"/>
-                    </xsl:when>
-                </xsl:choose>
-                
-            </xsl:attribute>
-            <xsl:choose>
-                <xsl:when test="@senseAxisType">
-                    <xsl:element name="{concat('uby:',@senseAxisType)}">
-                        <xsl:attribute name="rdf:resource">
-                            <xsl:choose>
-                                <xsl:when test="@senseTwo">
-                                    <xsl:value-of select="concat('#',@senseTwo)"/>
-                                </xsl:when>
-                                <xsl:when test="@synsetTwo">
-                                    <xsl:value-of select="concat('#',@synsetTwo)"/>
-                                </xsl:when>
-                            </xsl:choose>
-                        </xsl:attribute>
-                    </xsl:element>
-                </xsl:when>
-                <xsl:otherwise>
-                    <lemon:senseRelation>
-                        <xsl:attribute name="rdf:resource">
-                            <xsl:choose>
-                                <xsl:when test="@senseTwo">
-                                    <xsl:value-of select="concat('#',@senseTwo)"/>
-                                </xsl:when>
-                                <xsl:when test="@synsetTwo">
-                                    <xsl:value-of select="concat('#',@synsetTwo)"/>
-                                </xsl:when>
-                            </xsl:choose>
-                        </xsl:attribute>
-                    </lemon:senseRelation>
-                </xsl:otherwise>
-            </xsl:choose>
-        </rdf:Description>
+    <xsl:template name="senseAxis1">
+        <xsl:choose>
+            <xsl:when test="@senseAxisType">
+                <xsl:element name="{concat('uby:',@senseAxisType)}">
+                    <xsl:attribute name="rdf:resource">
+                        <xsl:choose>
+                            <xsl:when test="@senseTwo">
+                                <xsl:value-of select="concat('#',@senseTwo)"/>
+                            </xsl:when>
+                            <xsl:when test="@synsetTwo">
+                                <xsl:value-of select="concat('#',@synsetTwo)"/>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:attribute>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <lemon:senseRelation>
+                    <xsl:attribute name="rdf:resource">
+                        <xsl:choose>
+                            <xsl:when test="@senseTwo">
+                                <xsl:value-of select="concat('#',@senseTwo)"/>
+                            </xsl:when>
+                            <xsl:when test="@synsetTwo">
+                                <xsl:value-of select="concat('#',@synsetTwo)"/>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:attribute>
+                </lemon:senseRelation>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="senseAxis2">
+        <xsl:choose>
+            <xsl:when test="@senseAxisType">
+                <xsl:element name="{concat('uby:',@senseAxisType)}">
+                    <xsl:attribute name="rdf:resource">
+                        <xsl:choose>
+                            <xsl:when test="@senseOne">
+                                <xsl:value-of select="concat('#',@senseTwo)"/>
+                            </xsl:when>
+                            <xsl:when test="@synsetOne">
+                                <xsl:value-of select="concat('#',@synsetTwo)"/>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:attribute>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <lemon:senseRelation>
+                    <xsl:attribute name="rdf:resource">
+                        <xsl:choose>
+                            <xsl:when test="@senseOne">
+                                <xsl:value-of select="concat('#',@senseTwo)"/>
+                            </xsl:when>
+                            <xsl:when test="@synsetOne">
+                                <xsl:value-of select="concat('#',@synsetTwo)"/>
+                            </xsl:when>
+                        </xsl:choose>
+                    </xsl:attribute>
+                </lemon:senseRelation>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     
     <xsl:template match="SenseAxisRelation">
