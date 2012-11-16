@@ -183,28 +183,15 @@
                 <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
                 <dcr:datcat rdf:resource="http://www.isocat.org/datcat/DC-83"/>
             </rdf:Property>
-            
-            <rdf:Property rdf:about="http://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/uby/ubyLmfDTD_1_0.dtd#translation">
-                <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
-                <dcr:datcat rdf:resource="http://www.isocat.org/datcat/DC-4020"/>
-            </rdf:Property>
-            
+                        
             <rdf:Property rdf:about="http://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/uby/ubyLmfDTD_1_0.dtd#label">
                 <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
                 <dcr:datcat rdf:resource="http://www.isocat.org/datcat/DC-1857"/>
             </rdf:Property>
             
-            <rdf:Property rdf:about="http://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/uby/ubyLmfDTD_1_0.dtd#labelOmegaWiki">
-                <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
-            </rdf:Property>
-            
             <rdf:Property rdf:about="http://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/uby/ubyLmfDTD_1_0.dtd#predicative">
                 <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
                 <dcr:datcat rdf:resource="http://www.isocat.org/datcat/DC-3415"/>
-            </rdf:Property>
-            
-            <rdf:Property rdf:about="http://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/uby/ubyLmfDTD_1_0.dtd#predicativeOmegaWiki">
-                <rdfs:subPropertyOf rdf:resource="http://www.monnet-project.eu/lemon#senseRelation"/>
             </rdf:Property>
         </rdf:RDF>
     </xsl:template>
@@ -250,7 +237,7 @@
             <xsl:apply-templates select="LexicalEntry"/>
         </lemon:Lexicon>
         <xsl:apply-templates select="SubcategorizationFrame"/>
-        <!--<xsl:apply-templates select="Synset"/>-->
+        <xsl:apply-templates select="Synset"/>
         <xsl:apply-templates select="SynSemCorrespondence"/>
         <xsl:apply-templates select="ConstraintSet"/>
         <xsl:apply-templates select="SemanticPredicate"/>
@@ -295,13 +282,11 @@
                     </uby:index>
                 </xsl:if>
                 <xsl:if test="@synset">
-                    <xsl:variable name="ssid" select="@synset"/>
-                    <xsl:apply-templates select="//Synset[@id=$ssid]"/>
-                    <!--<lemon:equivalent>
+                    <lemon:equivalent>
                         <xsl:attribute name="rdf:resource">
                             <xsl:value-of select="concat('#',@synset)"/>
                         </xsl:attribute>
-                    </lemon:equivalent>-->
+                    </lemon:equivalent>
                 </xsl:if>
                 <xsl:if test="@incorporatedSemArg">
                     <!-- No I have no clue what this means -->
@@ -826,9 +811,14 @@
     </xsl:template>
     
     <xsl:template match="Synset">
-        <xsl:apply-templates select="Definition"/>
-        <xsl:apply-templates select="SynsetRelation"/>
-        <xsl:apply-templates select="MonolingualExternalRef"/>
+        <lemon:LexicalSense>
+            <xsl:attribute name="rdf:ID" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                <xsl:value-of select="@id"/>
+            </xsl:attribute>
+            <xsl:apply-templates select="Definition"/>
+            <xsl:apply-templates select="SynsetRelation"/>
+            <xsl:apply-templates select="MonolingualExternalRef"/>
+        </lemon:LexicalSense>
     </xsl:template>
     
     <xsl:template match="SynSetRelation">
@@ -968,21 +958,25 @@
     </xsl:template>
     
     <xsl:template match="Frequency">
-        <xsl:if test="@corpus">
-            <uby:corpus>
-                <xsl:value-of select="@corpus"/>
-            </uby:corpus>
-        </xsl:if>
-        <xsl:if test="@frequency">
-            <uby:frequency>
-                <xsl:value-of select="@frequency"/>
-            </uby:frequency>
-        </xsl:if>
-        <xsl:if test="@generator">
-            <uby:generator>
-                <xsl:value-of select="@generator"/>
-            </uby:generator>
-        </xsl:if>
+        <uby:frequency>
+            <uby:Frequency>
+                <xsl:if test="@corpus">
+                    <uby:corpus>
+                        <xsl:value-of select="@corpus"/>
+                    </uby:corpus>
+                </xsl:if>
+                <xsl:if test="@frequency">
+                    <uby:frequency>
+                        <xsl:value-of select="@frequency"/>
+                    </uby:frequency>
+                </xsl:if>
+                <xsl:if test="@generator">
+                    <uby:generator>
+                        <xsl:value-of select="@generator"/>
+                    </uby:generator>
+                </xsl:if>
+            </uby:Frequency>
+        </uby:frequency>
     </xsl:template>
     
     <xsl:template match="SemanticLabel">
@@ -1007,4 +1001,46 @@
             </uby:SemanticLabel>
         </uby:semanticLabel>
     </xsl:template>
+
+    <xsl:template match="Equivalent">
+        <lemon:equivalent>
+            <lemon:LexicalSense>
+                <xsl:if test="@usage">
+                    <uby:usage>
+                        <xsl:value-of select="@usage"/>
+                    </uby:usage>
+                </xsl:if>
+                <xsl:if test="@writtenForm or @transliteration">
+                    <lemon:isSenseOf>
+                        <lemon:LexicalEntry>
+                            <lemon:canonicalForm>
+                                <lemon:Form>
+                                    <xsl:if test="@writtenForm">
+                                        <lemon:writtenRep>
+                                            <xsl:if test="@languageIdentifier">
+                                                <xsl:attribute name="xml:lang">
+                                                    <xsl:value-of select="@languageIdentifier"/>
+                                                </xsl:attribute>
+                                            </xsl:if>
+                                            <xsl:value-of select="@writtenForm"/>
+                                        </lemon:writtenRep>
+                                    </xsl:if>
+                                    <xsl:if test="@transliteration">
+                                        <uby:transliteration>
+                                            <xsl:if test="@languageIdentifier">
+                                                <xsl:attribute name="xml:lang">
+                                                    <xsl:value-of select="@languageIdentifier"/>
+                                                </xsl:attribute>
+                                            </xsl:if>
+                                            <xsl:value-of select="@transliteration"/>
+                                        </uby:transliteration>
+                                    </xsl:if>
+                                </lemon:Form>
+                            </lemon:canonicalForm>
+                        </lemon:LexicalEntry>
+                    </lemon:isSenseOf>
+                </xsl:if>
+            </lemon:LexicalSense>
+        </lemon:equivalent>
+    </xsl:template>    
 </xsl:stylesheet>
