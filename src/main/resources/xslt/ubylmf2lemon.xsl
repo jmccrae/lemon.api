@@ -845,7 +845,7 @@
         </lemon:LexicalSense>
     </xsl:template>
     
-    <xsl:template match="SynSetRelation">
+    <xsl:template match="SynsetRelation">
         <xsl:choose>
             <xsl:when test="@relType">
                 <xsl:element name="{concat('uby:',@relType)}">
