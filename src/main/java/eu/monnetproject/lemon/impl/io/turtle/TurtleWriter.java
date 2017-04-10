@@ -36,9 +36,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
@@ -48,7 +48,7 @@ public class TurtleWriter extends AbstractVisitor {
 
     private final SerializationState state = new SerializationState();
     private final HashSet<LemonElementImpl> visited = new HashSet<LemonElementImpl>();
-    private final HashMap<String, String> header = new HashMap<String, String>();
+    private final TreeMap<String, String> header = new TreeMap<String, String>();
     private final StringWriter sw = new StringWriter();
     private final PrintWriter writer = new PrintWriter(sw);
 
