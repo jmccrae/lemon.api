@@ -6,3 +6,4 @@ incompatible	http://www.monnet-project.eu/lemon#incompatible
 exact	http://www.lexinfo.net/ontology/2.0/lexinfo#exact
 narrower	http://www.monnet-project.eu/lemon#narrower
 translation	http://www.lexinfo.net/ontology/2.0/lexinfo#translation
+collocation	http://www.lexinfo.net/ontology/2.0/lexinfo#collocation
